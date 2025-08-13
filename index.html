@@ -2257,7 +2257,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.DRIVERS,
                     modalTitle === 'Add Driver' ? 'Add driver' : 'Update driver',
@@ -2344,7 +2344,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.CARS,
                     modalTitle === 'Add Car' ? 'Add car' : 'Update car',
@@ -2414,7 +2414,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.CARDS,
                     modalTitle === 'Add Card' ? 'Add card' : 'Update card',
@@ -2513,7 +2513,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.TENDERS,
                     modalTitle === 'Add Tender' ? 'Add tender' : 'Update tender',
@@ -2590,7 +2590,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.INVOICES,
                     modalTitle === 'Add Invoice' ? 'Add invoice' : 'Update invoice',
@@ -2673,7 +2673,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.USERS,
                     modalTitle === 'Add User' ? 'Add user' : 'Update user',
@@ -2734,7 +2734,7 @@
                     });
                 }
 
-                // Save to GitHub - FIXED HERE
+                // Save to GitHub
                 await updateFile(
                     FILE_PATHS.STATUSES,
                     modalTitle === 'Add Status' ? 'Add status' : 'Update status',
@@ -3447,11 +3447,11 @@
             const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
             new Chart(revenueCtx, {
                 type: 'line',
-                 {
+                data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -3471,7 +3471,7 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                 {
+                data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
@@ -3494,10 +3494,10 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                 {
+                data: {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
-                         [45, 30, 15, 10],
+                        data: [45, 30, 15, 10],
                         backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
                     }]
                 },

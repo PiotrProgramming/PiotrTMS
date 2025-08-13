@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TransForward Manager</title>
-    <script src="https://cdn.jsdelivr.net/npm/@octokit/rest@18"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -1669,7 +1668,6 @@
             currentUser: null,
             githubToken: '',
             repoName: '',
-            octokit: null,
             currentView: 'dashboard',
             notifications: [],
             unreadNotifications: 0,
@@ -1705,7 +1703,6 @@
                     state.currentUser = user;
                     state.githubToken = user.token;
                     state.repoName = user.repo;
-                    initGitHub();
                     showApp();
                 } catch (e) {
                     console.log('No saved user found');
@@ -1856,13 +1853,6 @@
             });
         }
 
-        // Initialize GitHub client
-        function initGitHub() {
-            state.octokit = new Octokit({
-                auth: state.githubToken
-            });
-        }
-
         // Authentication handlers
         async function handleLogin() {
             const email = document.getElementById('login-email').value;
@@ -1876,30 +1866,49 @@
             }
 
             try {
-                // Test GitHub connection
-                state.githubToken = token;
-                state.repoName = repo;
-                initGitHub();
-                
-                const { data: repoData } = await state.octokit.repos.get({
-                    owner: await getCurrentUserLogin(),
-                    repo: repo
+                // Test GitHub connection by getting user info
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
+
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+
+                const userData = await response.json();
+                const login = userData.login;
+
+                // Check if repository exists
+                const repoResponse = await fetch(`https://api.github.com/repos/${login}/${repo}`);
+                if (!repoResponse.ok) {
+                    throw new Error('Repository not found');
+                }
 
                 // Check if users file exists and user exists
                 try {
-                    const { data: userData } = await state.octokit.repos.getContent({
-                        owner: await getCurrentUserLogin(),
-                        repo: repo,
-                        path: FILE_PATHS.USERS
+                    const contentResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/${FILE_PATHS.USERS}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
                     });
 
-                    const content = atob(userData.content);
+                    if (!contentResponse.ok) {
+                        throw new Error('Users database not found');
+                    }
+
+                    const contentData = await contentResponse.json();
+                    const content = atob(contentData.content);
                     const users = JSON.parse(content);
                     const user = users.find(u => u.email === email && u.password === password);
 
                     if (user) {
                         state.currentUser = user;
+                        state.githubToken = token;
+                        state.repoName = repo;
                         localStorage.setItem('transforward_user', JSON.stringify(user));
                         showApp();
                         loadAllData();
@@ -1911,7 +1920,7 @@
                     addNotification('Users database not found', 'error');
                 }
             } catch (error) {
-                addNotification('Invalid repository or token', 'error');
+                addNotification('Invalid repository or token: ' + error.message, 'error');
                 console.error('Login error:', error);
             }
         }
@@ -1928,20 +1937,62 @@
             }
 
             try {
-                // Test GitHub connection and create repo
-                state.githubToken = token;
-                initGitHub();
-                
-                const login = await getCurrentUserLogin();
-                
-                await state.octokit.repos.createForAuthenticatedUser({
-                    name: repo,
-                    description: 'TransForward Manager Database',
-                    private: true,
-                    auto_init: true
+                // Test GitHub connection
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
 
-                // Create data directory and files
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+
+                const userData = await response.json();
+                const login = userData.login;
+
+                // Create repository
+                const createRepoResponse = await fetch('https://api.github.com/user/repos', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: repo,
+                        description: 'TransForward Manager Database',
+                        private: true,
+                        auto_init: true
+                    })
+                });
+
+                if (!createRepoResponse.ok) {
+                    const errorData = await createRepoResponse.json();
+                    throw new Error(errorData.message || 'Failed to create repository');
+                }
+
+                // Create data directory
+                const createDirResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/data/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Create data directory',
+                        content: ''
+                    })
+                });
+
+                if (!createDirResponse.ok && createDirResponse.status !== 422) { // 422 means already exists
+                    const errorData = await createDirResponse.json();
+                    throw new Error(errorData.message || 'Failed to create data directory');
+                }
+
+                // Create initial data files
                 const initialData = {
                     drivers: [],
                     cars: [],
@@ -1986,19 +2037,33 @@
                     chat: []
                 };
 
-                // Create data directory
-                await createFile(repo, 'data/', 'Initial commit', '');
-
                 // Create all data files
                 for (const [key, path] of Object.entries(FILE_PATHS)) {
-                    await createFile(repo, path, 'Initial data', btoa(JSON.stringify(initialData[key.toLowerCase()], null, 2)));
+                    const createFileResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/${path}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Initial data',
+                            content: btoa(JSON.stringify(initialData[key.toLowerCase()], null, 2))
+                        })
+                    });
+
+                    if (!createFileResponse.ok) {
+                        const errorData = await createFileResponse.json();
+                        throw new Error(`Failed to create ${path}: ${errorData.message}`);
+                    }
                 }
 
                 // Set current user
-                state.repoName = repo;
                 state.currentUser = initialData.users[0];
                 state.currentUser.token = token;
                 state.currentUser.repo = repo;
+                state.githubToken = token;
+                state.repoName = repo;
                 
                 localStorage.setItem('transforward_user', JSON.stringify(state.currentUser));
                 
@@ -2011,133 +2076,107 @@
             }
         }
 
-        async function getCurrentUserLogin() {
-            const { data: user } = await state.octokit.users.getAuthenticated();
-            return user.login;
-        }
-
-        // Navigation
-        function navigateTo(view) {
-            state.currentView = view;
-            
-            // Update active nav item
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.getAttribute('data-view') === view) {
-                    item.classList.add('active');
-                }
-            });
-            
-            // Hide all views
-            document.querySelectorAll('#app > .main-content > div[id$="-view"]').forEach(view => {
-                view.classList.add('hidden');
-            });
-            
-            // Show current view
-            document.getElementById(`${view}-view`).classList.remove('hidden');
-            
-            // Update page title
-            document.getElementById('page-title').textContent = 
-                view.charAt(0).toUpperCase() + view.slice(1);
-                
-            // Special handling for admin view
-            if (view === 'admin') {
-                if (state.currentUser.status !== 'admin') {
-                    addNotification('Access denied', 'error');
-                    navigateTo('dashboard');
-                    return;
-                }
-            }
-            
-            // Load data for the view
-            loadDataForView(view);
-        }
-
-        function loadDataForView(view) {
-            switch (view) {
-                case 'drivers':
-                    renderDrivers();
-                    break;
-                case 'cars':
-                    renderCars();
-                    break;
-                case 'cards':
-                    renderCards();
-                    break;
-                case 'tenders':
-                    renderTenders();
-                    break;
-                case 'invoices':
-                    renderInvoices();
-                    break;
-                case 'reports':
-                    renderReports();
-                    break;
-                case 'admin':
-                    renderAdmin();
-                    break;
-                case 'chat':
-                    renderChat();
-                    break;
-                default:
-                    renderDashboard();
-            }
-        }
-
-        // Data operations
-        async function createFile(repo, path, message, content) {
+        // GitHub API functions
+        async function createFile(path, message, content) {
             const login = await getCurrentUserLogin();
-            await state.octokit.repos.createOrUpdateFileContents({
-                owner: login,
-                repo: repo,
-                path: path,
+            const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${state.githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    content: content
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create file');
+            }
+        }
+
+        async function updateFile(path, message, content, sha = null) {
+            const login = await getCurrentUserLogin();
+            const data = {
                 message: message,
                 content: content
+            };
+            
+            if (sha) {
+                data.sha = sha;
+            }
+
+            const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${state.githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update file');
+            }
         }
 
-        async function updateFile(repo, path, message, content, sha) {
-            const login = await getCurrentUserLogin();
-            await state.octokit.repos.createOrUpdateFileContents({
-                owner: login,
-                repo: repo,
-                path: path,
-                message: message,
-                content: content,
-                sha: sha
-            });
-        }
-
-        async function readFile(repo, path) {
+        async function readFile(path) {
             const login = await getCurrentUserLogin();
             try {
-                const { data } = await state.octokit.repos.getContent({
-                    owner: login,
-                    repo: repo,
-                    path: path
+                const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${path}`, {
+                    headers: {
+                        'Authorization': `token ${state.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
                 });
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        return null;
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
                 
                 if (data.content) {
                     return JSON.parse(atob(data.content));
                 }
                 return null;
             } catch (error) {
-                if (error.status === 404) {
+                if (error.message.includes('404')) {
                     return null;
                 }
                 throw error;
             }
         }
 
+        async function getCurrentUserLogin() {
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `token ${state.githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            const userData = await response.json();
+            return userData.login;
+        }
+
         async function loadAllData() {
             try {
-                state.drivers = await readFile(state.repoName, FILE_PATHS.DRIVERS) || [];
-                state.cars = await readFile(state.repoName, FILE_PATHS.CARS) || [];
-                state.cards = await readFile(state.repoName, FILE_PATHS.CARDS) || [];
-                state.tenders = await readFile(state.repoName, FILE_PATHS.TENDERS) || [];
-                state.invoices = await readFile(state.repoName, FILE_PATHS.INVOICES) || [];
-                state.users = await readFile(state.repoName, FILE_PATHS.USERS) || [];
-                state.statuses = await readFile(state.repoName, FILE_PATHS.STATUSES) || [];
+                state.drivers = await readFile(FILE_PATHS.DRIVERS) || [];
+                state.cars = await readFile(FILE_PATHS.CARS) || [];
+                state.cards = await readFile(FILE_PATHS.CARDS) || [];
+                state.tenders = await readFile(FILE_PATHS.TENDERS) || [];
+                state.invoices = await readFile(FILE_PATHS.INVOICES) || [];
+                state.users = await readFile(FILE_PATHS.USERS) || [];
+                state.statuses = await readFile(FILE_PATHS.STATUSES) || [];
 
                 // Update UI
                 updateDashboardStats();
@@ -2167,7 +2206,7 @@
             }
 
             try {
-                let drivers = await readFile(state.repoName, FILE_PATHS.DRIVERS) || [];
+                let drivers = await readFile(FILE_PATHS.DRIVERS) || [];
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Driver') {
@@ -2204,7 +2243,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.DRIVERS,
                     modalTitle === 'Add Driver' ? 'Add driver' : 'Update driver',
                     btoa(JSON.stringify(drivers, null, 2))
@@ -2241,7 +2279,7 @@
             }
 
             try {
-                let cars = await readFile(state.repoName, FILE_PATHS.CARS) || [];
+                let cars = await readFile(FILE_PATHS.CARS) || [];
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Car') {
@@ -2292,7 +2330,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.CARS,
                     modalTitle === 'Add Car' ? 'Add car' : 'Update car',
                     btoa(JSON.stringify(cars, null, 2))
@@ -2324,7 +2361,7 @@
             }
 
             try {
-                let cards = await readFile(state.repoName, FILE_PATHS.CARDS) || [];
+                let cards = await readFile(FILE_PATHS.CARDS) || [];
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Card') {
@@ -2363,7 +2400,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.CARDS,
                     modalTitle === 'Add Card' ? 'Add card' : 'Update card',
                     btoa(JSON.stringify(cards, null, 2))
@@ -2400,7 +2436,7 @@
             }
 
             try {
-                let tenders = await readFile(state.repoName, FILE_PATHS.TENDERS) || [];
+                let tenders = await readFile(FILE_PATHS.TENDERS) || [];
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Tender') {
@@ -2463,7 +2499,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.TENDERS,
                     modalTitle === 'Add Tender' ? 'Add tender' : 'Update tender',
                     btoa(JSON.stringify(tenders, null, 2))
@@ -2496,7 +2531,7 @@
             }
 
             try {
-                let invoices = await readFile(state.repoName, FILE_PATHS.INVOICES) || [];
+                let invoices = await readFile(FILE_PATHS.INVOICES) || [];
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -2541,7 +2576,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.INVOICES,
                     modalTitle === 'Add Invoice' ? 'Add invoice' : 'Update invoice',
                     btoa(JSON.stringify(invoices, null, 2))
@@ -2580,7 +2614,7 @@
             }
 
             try {
-                let users = await readFile(state.repoName, FILE_PATHS.USERS) || [];
+                let users = await readFile(FILE_PATHS.USERS) || [];
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add User') {
@@ -2625,7 +2659,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.USERS,
                     modalTitle === 'Add User' ? 'Add user' : 'Update user',
                     btoa(JSON.stringify(users, null, 2))
@@ -2654,7 +2687,7 @@
             }
 
             try {
-                let statuses = await readFile(state.repoName, FILE_PATHS.STATUSES) || [];
+                let statuses = await readFile(FILE_PATHS.STATUSES) || [];
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Status') {
@@ -2687,7 +2720,6 @@
 
                 // Save to GitHub
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.STATUSES,
                     modalTitle === 'Add Status' ? 'Add status' : 'Update status',
                     btoa(JSON.stringify(statuses, null, 2))
@@ -2711,11 +2743,10 @@
             }
 
             try {
-                let drivers = await readFile(state.repoName, FILE_PATHS.DRIVERS) || [];
+                let drivers = await readFile(FILE_PATHS.DRIVERS) || [];
                 drivers = drivers.filter(driver => driver.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.DRIVERS,
                     'Delete driver',
                     btoa(JSON.stringify(drivers, null, 2))
@@ -2736,11 +2767,10 @@
             }
 
             try {
-                let cars = await readFile(state.repoName, FILE_PATHS.CARS) || [];
+                let cars = await readFile(FILE_PATHS.CARS) || [];
                 cars = cars.filter(car => car.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.CARS,
                     'Delete car',
                     btoa(JSON.stringify(cars, null, 2))
@@ -2761,11 +2791,10 @@
             }
 
             try {
-                let cards = await readFile(state.repoName, FILE_PATHS.CARDS) || [];
+                let cards = await readFile(FILE_PATHS.CARDS) || [];
                 cards = cards.filter(card => card.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.CARDS,
                     'Delete card',
                     btoa(JSON.stringify(cards, null, 2))
@@ -2786,11 +2815,10 @@
             }
 
             try {
-                let tenders = await readFile(state.repoName, FILE_PATHS.TENDERS) || [];
+                let tenders = await readFile(FILE_PATHS.TENDERS) || [];
                 tenders = tenders.filter(tender => tender.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.TENDERS,
                     'Delete tender',
                     btoa(JSON.stringify(tenders, null, 2))
@@ -2811,11 +2839,10 @@
             }
 
             try {
-                let invoices = await readFile(state.repoName, FILE_PATHS.INVOICES) || [];
+                let invoices = await readFile(FILE_PATHS.INVOICES) || [];
                 invoices = invoices.filter(invoice => invoice.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.INVOICES,
                     'Delete invoice',
                     btoa(JSON.stringify(invoices, null, 2))
@@ -2836,11 +2863,10 @@
             }
 
             try {
-                let users = await readFile(state.repoName, FILE_PATHS.USERS) || [];
+                let users = await readFile(FILE_PATHS.USERS) || [];
                 users = users.filter(user => user.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.USERS,
                     'Delete user',
                     btoa(JSON.stringify(users, null, 2))
@@ -2861,11 +2887,10 @@
             }
 
             try {
-                let statuses = await readFile(state.repoName, FILE_PATHS.STATUSES) || [];
+                let statuses = await readFile(FILE_PATHS.STATUSES) || [];
                 statuses = statuses.filter(status => status.id !== id);
 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.STATUSES,
                     'Delete status',
                     btoa(JSON.stringify(statuses, null, 2))
@@ -3118,7 +3143,7 @@
 
             // Populate car and card select options
             const carSelect = document.getElementById('driver-car');
-            const cardSelect = document.getElementById('card-card');
+            const cardSelect = document.getElementById('driver-card');
             
             carSelect.innerHTML = '<option value="">Select Car</option>';
             cardSelect.innerHTML = '<option value="">Select Card</option>';
@@ -3410,7 +3435,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -3430,11 +3455,11 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
-                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
+                         [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
                         backgroundColor: '#3498db'
                     }]
                 },
@@ -3456,7 +3481,7 @@
                 data: {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
-                        data: [45, 30, 15, 10],
+                         [45, 30, 15, 10],
                         backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
                     }]
                 },
@@ -3855,7 +3880,7 @@
             if (!message) return;
             
             try {
-                const chat = await readFile(state.repoName, FILE_PATHS.CHAT) || [];
+                const chat = await readFile(FILE_PATHS.CHAT) || [];
                 const now = new Date().toISOString();
                 
                 const newMessage = {
@@ -3868,7 +3893,6 @@
                 chat.push(newMessage);
                 
                 await updateFile(
-                    state.repoName,
                     FILE_PATHS.CHAT,
                     'New chat message',
                     btoa(JSON.stringify(chat, null, 2))
@@ -4033,7 +4057,6 @@
             state.currentUser = null;
             state.githubToken = '';
             state.repoName = '';
-            state.octokit = null;
             
             document.getElementById('app').classList.add('hidden');
             document.getElementById('auth-container').classList.remove('hidden');
@@ -4075,6 +4098,74 @@
             
             // Show selected tab content
             document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+        }
+
+        // Navigation
+        function navigateTo(view) {
+            state.currentView = view;
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-view') === view) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Hide all views
+            document.querySelectorAll('#app > .main-content > div[id$="-view"]').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show current view
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+            
+            // Update page title
+            document.getElementById('page-title').textContent = 
+                view.charAt(0).toUpperCase() + view.slice(1);
+                
+            // Special handling for admin view
+            if (view === 'admin') {
+                if (state.currentUser.status !== 'admin') {
+                    addNotification('Access denied', 'error');
+                    navigateTo('dashboard');
+                    return;
+                }
+            }
+            
+            // Load data for the view
+            loadDataForView(view);
+        }
+
+        function loadDataForView(view) {
+            switch (view) {
+                case 'drivers':
+                    renderDrivers();
+                    break;
+                case 'cars':
+                    renderCars();
+                    break;
+                case 'cards':
+                    renderCards();
+                    break;
+                case 'tenders':
+                    renderTenders();
+                    break;
+                case 'invoices':
+                    renderInvoices();
+                    break;
+                case 'reports':
+                    renderReports();
+                    break;
+                case 'admin':
+                    renderAdmin();
+                    break;
+                case 'chat':
+                    renderChat();
+                    break;
+                default:
+                    renderDashboard();
+            }
         }
 
         // Close modals when clicking outside

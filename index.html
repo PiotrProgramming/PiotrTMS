@@ -1716,9 +1716,20 @@
 
         // Setup all event listeners
         function setupEventListeners() {
-            // Auth
-            document.getElementById('show-register').addEventListener('click', showRegister);
-            document.getElementById('show-login').addEventListener('click', showLogin);
+            // Auth - Fixed the event listeners for show/hide
+            document.getElementById('show-register').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            });
+            
+            document.getElementById('show-login').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+            });
+
+            // Auth buttons
             document.getElementById('login-btn').addEventListener('click', handleLogin);
             document.getElementById('register-btn').addEventListener('click', handleRegister);
             document.getElementById('logout-btn').addEventListener('click', handleLogout);
@@ -3478,7 +3489,7 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
                          [45, 30, 15, 10],

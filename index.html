@@ -1676,14 +1676,15 @@
             currentView: 'dashboard',
             notifications: [],
             unreadNotifications: 0,
-            // Data stores
-            drivers: [],
-            cars: [],
-            cards: [],
-            tenders: [],
-            invoices: [],
-            users: [],
-            statuses: []
+            // Data stores with SHA
+            drivers: { data: [], sha: null },
+            cars: { data: [], sha: null },
+            cards: { data: [], sha: null },
+            tenders: { data: [], sha: null },
+            invoices: { data: [], sha: null },
+            users: { data: [], sha: null },
+            statuses: { data: [], sha: null },
+            chat: { data: [], sha: null }
         };
 
         // GitHub file paths
@@ -1859,7 +1860,7 @@
                     this.classList.remove('highlight');
                     
                     const cardId = e.dataTransfer.getData('text/plain');
-                    const card = state.cards.find(c => c.id === cardId);
+                    const card = state.cards.data.find(c => c.id === cardId);
                     
                     if (card) {
                         // In a real app, we would update the card assignment
@@ -2139,6 +2140,8 @@
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to update file');
             }
+            
+            return response.json();
         }
 
         async function readFile(path) {
@@ -2153,7 +2156,7 @@
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        return null;
+                        return { data: null, sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -2161,12 +2164,15 @@
                 const data = await response.json();
                 
                 if (data.content) {
-                    return JSON.parse(atob(data.content));
+                    return {
+                        data: JSON.parse(atob(data.content)),
+                        sha: data.sha
+                    };
                 }
-                return null;
+                return { data: null, sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
-                    return null;
+                    return { data: null, sha: null };
                 }
                 throw error;
             }
@@ -2186,13 +2192,15 @@
 
         async function loadAllData() {
             try {
-                state.drivers = await readFile(FILE_PATHS.DRIVERS) || [];
-                state.cars = await readFile(FILE_PATHS.CARS) || [];
-                state.cards = await readFile(FILE_PATHS.CARDS) || [];
-                state.tenders = await readFile(FILE_PATHS.TENDERS) || [];
-                state.invoices = await readFile(FILE_PATHS.INVOICES) || [];
-                state.users = await readFile(FILE_PATHS.USERS) || [];
-                state.statuses = await readFile(FILE_PATHS.STATUSES) || [];
+                // Load all data with SHA
+                state.drivers = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                state.cars = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                state.cards = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                state.tenders = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                state.invoices = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                state.users = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                state.statuses = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                state.chat = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
 
                 // Update UI
                 updateDashboardStats();
@@ -2202,7 +2210,7 @@
                 // Set up periodic checks
                 setInterval(checkExpirations, 300000); // Check every 5 minutes
             } catch (error) {
-                addNotification('Failed to load data: ' + error.message, 'error');
+                addNotification('Failed to load  ' + error.message, 'error');
                 console.error('Load data error:', error);
             }
         }
@@ -2222,7 +2230,7 @@
             }
 
             try {
-                let drivers = await readFile(FILE_PATHS.DRIVERS) || [];
+                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Driver') {
@@ -2258,14 +2266,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.DRIVERS,
                     modalTitle === 'Add Driver' ? 'Add driver' : 'Update driver',
-                    utf8ToBase64(JSON.stringify(drivers, null, 2))
+                    utf8ToBase64(JSON.stringify(drivers, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.drivers = drivers;
+                // Update local state with new SHA
+                state.drivers = { data: drivers, sha: result.content.sha };
                 closeModal();
                 renderDrivers();
                 addNotification('Driver saved successfully', 'success');
@@ -2295,7 +2304,7 @@
             }
 
             try {
-                let cars = await readFile(FILE_PATHS.CARS) || [];
+                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Car') {
@@ -2345,14 +2354,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.CARS,
                     modalTitle === 'Add Car' ? 'Add car' : 'Update car',
-                    utf8ToBase64(JSON.stringify(cars, null, 2))
+                    utf8ToBase64(JSON.stringify(cars, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.cars = cars;
+                // Update local state with new SHA
+                state.cars = { data: cars, sha: result.content.sha };
                 closeModal();
                 renderCars();
                 addNotification('Car saved successfully', 'success');
@@ -2377,7 +2387,7 @@
             }
 
             try {
-                let cards = await readFile(FILE_PATHS.CARDS) || [];
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Card') {
@@ -2415,14 +2425,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.CARDS,
                     modalTitle === 'Add Card' ? 'Add card' : 'Update card',
-                    utf8ToBase64(JSON.stringify(cards, null, 2))
+                    utf8ToBase64(JSON.stringify(cards, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.cards = cards;
+                // Update local state with new SHA
+                state.cards = { data: cards, sha: result.content.sha };
                 closeModal();
                 renderCards();
                 addNotification('Card saved successfully', 'success');
@@ -2452,7 +2463,7 @@
             }
 
             try {
-                let tenders = await readFile(FILE_PATHS.TENDERS) || [];
+                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Tender') {
@@ -2514,14 +2525,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.TENDERS,
                     modalTitle === 'Add Tender' ? 'Add tender' : 'Update tender',
-                    utf8ToBase64(JSON.stringify(tenders, null, 2))
+                    utf8ToBase64(JSON.stringify(tenders, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.tenders = tenders;
+                // Update local state with new SHA
+                state.tenders = { data: tenders, sha: result.content.sha };
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
@@ -2547,7 +2559,7 @@
             }
 
             try {
-                let invoices = await readFile(FILE_PATHS.INVOICES) || [];
+                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -2591,14 +2603,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.INVOICES,
                     modalTitle === 'Add Invoice' ? 'Add invoice' : 'Update invoice',
-                    utf8ToBase64(JSON.stringify(invoices, null, 2))
+                    utf8ToBase64(JSON.stringify(invoices, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.invoices = invoices;
+                // Update local state with new SHA
+                state.invoices = { data: invoices, sha: result.content.sha };
                 closeModal();
                 renderInvoices();
                 addNotification('Invoice saved successfully', 'success');
@@ -2630,7 +2643,7 @@
             }
 
             try {
-                let users = await readFile(FILE_PATHS.USERS) || [];
+                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add User') {
@@ -2674,14 +2687,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.USERS,
                     modalTitle === 'Add User' ? 'Add user' : 'Update user',
-                    utf8ToBase64(JSON.stringify(users, null, 2))
+                    utf8ToBase64(JSON.stringify(users, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.users = users;
+                // Update local state with new SHA
+                state.users = { data: users, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('User saved successfully', 'success');
@@ -2703,7 +2717,7 @@
             }
 
             try {
-                let statuses = await readFile(FILE_PATHS.STATUSES) || [];
+                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 if (modalTitle === 'Add Status') {
@@ -2735,14 +2749,15 @@
                 }
 
                 // Save to GitHub
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.STATUSES,
                     modalTitle === 'Add Status' ? 'Add status' : 'Update status',
-                    utf8ToBase64(JSON.stringify(statuses, null, 2))
+                    utf8ToBase64(JSON.stringify(statuses, null, 2)),
+                    sha
                 );
 
-                // Update local state
-                state.statuses = statuses;
+                // Update local state with new SHA
+                state.statuses = { data: statuses, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('Status saved successfully', 'success');
@@ -2759,16 +2774,18 @@
             }
 
             try {
-                let drivers = await readFile(FILE_PATHS.DRIVERS) || [];
-                drivers = drivers.filter(driver => driver.id !== id);
+                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const newDrivers = drivers.filter(driver => driver.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.DRIVERS,
                     'Delete driver',
-                    utf8ToBase64(JSON.stringify(drivers, null, 2))
+                    utf8ToBase64(JSON.stringify(newDrivers, null, 2)),
+                    sha
                 );
 
-                state.drivers = drivers;
+                // Update local state with new SHA
+                state.drivers = { data: newDrivers, sha: result.content.sha };
                 renderDrivers();
                 addNotification('Driver deleted successfully', 'success');
             } catch (error) {
@@ -2783,16 +2800,18 @@
             }
 
             try {
-                let cars = await readFile(FILE_PATHS.CARS) || [];
-                cars = cars.filter(car => car.id !== id);
+                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const newCars = cars.filter(car => car.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.CARS,
                     'Delete car',
-                    utf8ToBase64(JSON.stringify(cars, null, 2))
+                    utf8ToBase64(JSON.stringify(newCars, null, 2)),
+                    sha
                 );
 
-                state.cars = cars;
+                // Update local state with new SHA
+                state.cars = { data: newCars, sha: result.content.sha };
                 renderCars();
                 addNotification('Car deleted successfully', 'success');
             } catch (error) {
@@ -2807,16 +2826,18 @@
             }
 
             try {
-                let cards = await readFile(FILE_PATHS.CARDS) || [];
-                cards = cards.filter(card => card.id !== id);
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const newCards = cards.filter(card => card.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.CARDS,
                     'Delete card',
-                    utf8ToBase64(JSON.stringify(cards, null, 2))
+                    utf8ToBase64(JSON.stringify(newCards, null, 2)),
+                    sha
                 );
 
-                state.cards = cards;
+                // Update local state with new SHA
+                state.cards = { data: newCards, sha: result.content.sha };
                 renderCards();
                 addNotification('Card deleted successfully', 'success');
             } catch (error) {
@@ -2831,16 +2852,18 @@
             }
 
             try {
-                let tenders = await readFile(FILE_PATHS.TENDERS) || [];
-                tenders = tenders.filter(tender => tender.id !== id);
+                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const newTenders = tenders.filter(tender => tender.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.TENDERS,
                     'Delete tender',
-                    utf8ToBase64(JSON.stringify(tenders, null, 2))
+                    utf8ToBase64(JSON.stringify(newTenders, null, 2)),
+                    sha
                 );
 
-                state.tenders = tenders;
+                // Update local state with new SHA
+                state.tenders = { data: newTenders, sha: result.content.sha };
                 renderTenders();
                 addNotification('Tender deleted successfully', 'success');
             } catch (error) {
@@ -2855,16 +2878,18 @@
             }
 
             try {
-                let invoices = await readFile(FILE_PATHS.INVOICES) || [];
-                invoices = invoices.filter(invoice => invoice.id !== id);
+                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const newInvoices = invoices.filter(invoice => invoice.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.INVOICES,
                     'Delete invoice',
-                    utf8ToBase64(JSON.stringify(invoices, null, 2))
+                    utf8ToBase64(JSON.stringify(newInvoices, null, 2)),
+                    sha
                 );
 
-                state.invoices = invoices;
+                // Update local state with new SHA
+                state.invoices = { data: newInvoices, sha: result.content.sha };
                 renderInvoices();
                 addNotification('Invoice deleted successfully', 'success');
             } catch (error) {
@@ -2879,16 +2904,18 @@
             }
 
             try {
-                let users = await readFile(FILE_PATHS.USERS) || [];
-                users = users.filter(user => user.id !== id);
+                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const newUsers = users.filter(user => user.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.USERS,
                     'Delete user',
-                    utf8ToBase64(JSON.stringify(users, null, 2))
+                    utf8ToBase64(JSON.stringify(newUsers, null, 2)),
+                    sha
                 );
 
-                state.users = users;
+                // Update local state with new SHA
+                state.users = { data: newUsers, sha: result.content.sha };
                 renderAdmin();
                 addNotification('User deleted successfully', 'success');
             } catch (error) {
@@ -2903,16 +2930,18 @@
             }
 
             try {
-                let statuses = await readFile(FILE_PATHS.STATUSES) || [];
-                statuses = statuses.filter(status => status.id !== id);
+                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const newStatuses = statuses.filter(status => status.id !== id);
 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.STATUSES,
                     'Delete status',
-                    utf8ToBase64(JSON.stringify(statuses, null, 2))
+                    utf8ToBase64(JSON.stringify(newStatuses, null, 2)),
+                    sha
                 );
 
-                state.statuses = statuses;
+                // Update local state with new SHA
+                state.statuses = { data: newStatuses, sha: result.content.sha };
                 renderAdmin();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
@@ -2930,11 +2959,11 @@
 
         function updateDashboardStats() {
             // Active drivers
-            const activeDrivers = state.drivers.filter(d => d.status === 'active' || d.status === 'on-route').length;
+            const activeDrivers = state.drivers.data.filter(d => d.status === 'active' || d.status === 'on-route').length;
             document.getElementById('active-drivers').textContent = activeDrivers;
 
             // Active tenders
-            const activeTenders = state.tenders.filter(t => 
+            const activeTenders = state.tenders.data.filter(t => 
                 t.status === 'pending' || t.status === 'on-route'
             ).length;
             document.getElementById('active-tenders').textContent = activeTenders;
@@ -2944,7 +2973,7 @@
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
             
-            const monthlyRevenue = state.tenders
+            const monthlyRevenue = state.tenders.data
                 .filter(t => {
                     const tenderDate = new Date(t.loading.date);
                     return tenderDate.getMonth() === currentMonth && 
@@ -2955,7 +2984,7 @@
             document.getElementById('monthly-revenue').textContent = '$' + monthlyRevenue.toLocaleString();
 
             // Pending invoices
-            const pendingInvoices = state.invoices.filter(i => 
+            const pendingInvoices = state.invoices.data.filter(i => 
                 i.status === 'pending' || i.status === 'unpaid' || i.status === 'overdue'
             ).length;
             document.getElementById('pending-invoices').textContent = pendingInvoices;
@@ -2969,7 +2998,7 @@
             let hasExpirations = false;
 
             // Check car insurance
-            state.cars.forEach(car => {
+            state.cars.data.forEach(car => {
                 const insuranceDate = new Date(car.insurance);
                 const notifyDays = car.insuranceNotify || 30;
                 const diffTime = insuranceDate - now;
@@ -2997,7 +3026,7 @@
             });
 
             // Check car inspection
-            state.cars.forEach(car => {
+            state.cars.data.forEach(car => {
                 const inspectionDate = new Date(car.inspection);
                 const notifyDays = car.inspectionNotify || 30;
                 const diffTime = inspectionDate - now;
@@ -3025,7 +3054,7 @@
             });
 
             // Check card expiry
-            state.cards.forEach(card => {
+            state.cards.data.forEach(card => {
                 const expiryDate = new Date(card.expiry);
                 const notifyDays = card.notify || 30;
                 const diffTime = expiryDate - now;
@@ -3053,7 +3082,7 @@
             });
 
             // Check invoice due dates
-            state.invoices.forEach(invoice => {
+            state.invoices.data.forEach(invoice => {
                 if (invoice.status === 'pending' || invoice.status === 'unpaid') {
                     const dueDate = new Date(invoice.dueDate);
                     const notifyDays = invoice.notify || 7;
@@ -3097,7 +3126,7 @@
             const activities = [];
 
             // Add recent drivers
-            const recentDrivers = [...state.drivers]
+            const recentDrivers = [...state.drivers.data]
                 .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                 .slice(0, 3);
             
@@ -3111,7 +3140,7 @@
             });
 
             // Add recent tenders
-            const recentTenders = [...state.tenders]
+            const recentTenders = [...state.tenders.data]
                 .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
                 .slice(0, 3);
             
@@ -3150,7 +3179,7 @@
             const tableBody = document.getElementById('drivers-table-body');
             tableBody.innerHTML = '';
 
-            if (state.drivers.length === 0) {
+            if (state.drivers.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="6" class="text-center">No drivers found</td>';
                 tableBody.appendChild(row);
@@ -3164,26 +3193,26 @@
             carSelect.innerHTML = '<option value="">Select Car</option>';
             cardSelect.innerHTML = '<option value="">Select Card</option>';
             
-            state.cars.forEach(car => {
+            state.cars.data.forEach(car => {
                 const option = document.createElement('option');
                 option.value = car.id;
                 option.textContent = `${car.tractor} / ${car.trailer}`;
                 carSelect.appendChild(option);
             });
             
-            state.cards.forEach(card => {
+            state.cards.data.forEach(card => {
                 const option = document.createElement('option');
                 option.value = card.id;
                 option.textContent = card.number;
                 cardSelect.appendChild(option);
             });
 
-            state.drivers.forEach(driver => {
+            state.drivers.data.forEach(driver => {
                 const row = document.createElement('tr');
                 
                 // Find car and card details
-                const car = state.cars.find(c => c.id === driver.car) || {};
-                const card = state.cards.find(c => c.id === driver.card) || {};
+                const car = state.cars.data.find(c => c.id === driver.car) || {};
+                const card = state.cards.data.find(c => c.id === driver.card) || {};
                 
                 row.innerHTML = `
                     <td>${driver.name} ${driver.lastname}</td>
@@ -3217,14 +3246,14 @@
             const tableBody = document.getElementById('cars-table-body');
             tableBody.innerHTML = '';
 
-            if (state.cars.length === 0) {
+            if (state.cars.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="8" class="text-center">No cars found</td>';
                 tableBody.appendChild(row);
                 return;
             }
 
-            state.cars.forEach(car => {
+            state.cars.data.forEach(car => {
                 const row = document.createElement('tr');
                 
                 const insuranceDate = new Date(car.insurance);
@@ -3280,14 +3309,14 @@
             const tableBody = document.getElementById('cards-table-body');
             tableBody.innerHTML = '';
 
-            if (state.cards.length === 0) {
+            if (state.cards.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No cards found</td>';
                 tableBody.appendChild(row);
                 return;
             }
 
-            state.cards.forEach(card => {
+            state.cards.data.forEach(card => {
                 const row = document.createElement('tr');
                 
                 const expiryDate = new Date(card.expiry);
@@ -3329,7 +3358,7 @@
             const tableBody = document.getElementById('tenders-table-body');
             tableBody.innerHTML = '';
 
-            if (state.tenders.length === 0) {
+            if (state.tenders.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="6" class="text-center">No tenders found</td>';
                 tableBody.appendChild(row);
@@ -3340,18 +3369,18 @@
             const driverSelect = document.getElementById('tender-driver');
             driverSelect.innerHTML = '<option value="">Select Driver</option>';
             
-            state.drivers.forEach(driver => {
+            state.drivers.data.forEach(driver => {
                 const option = document.createElement('option');
                 option.value = driver.id;
                 option.textContent = `${driver.name} ${driver.lastname}`;
                 driverSelect.appendChild(option);
             });
 
-            state.tenders.forEach(tender => {
+            state.tenders.data.forEach(tender => {
                 const row = document.createElement('tr');
                 
                 // Find driver details
-                const driver = state.drivers.find(d => d.id === tender.driver) || {};
+                const driver = state.drivers.data.find(d => d.id === tender.driver) || {};
                 
                 row.innerHTML = `
                     <td>
@@ -3392,14 +3421,14 @@
             const tableBody = document.getElementById('invoices-table-body');
             tableBody.innerHTML = '';
 
-            if (state.invoices.length === 0) {
+            if (state.invoices.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="6" class="text-center">No invoices found</td>';
                 tableBody.appendChild(row);
                 return;
             }
 
-            state.invoices.forEach(invoice => {
+            state.invoices.data.forEach(invoice => {
                 const row = document.createElement('tr');
                 
                 const dueDate = new Date(invoice.dueDate);
@@ -3451,7 +3480,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -3510,7 +3539,7 @@
             const topDrivers = document.getElementById('top-drivers');
             topDrivers.innerHTML = '';
             
-            const sortedDrivers = [...state.drivers]
+            const sortedDrivers = [...state.drivers.data]
                 .sort(() => Math.random() - 0.5) // Random sorting for demo
                 .slice(0, 5);
             
@@ -3533,7 +3562,7 @@
             const usersTableBody = document.getElementById('users-table-body');
             usersTableBody.innerHTML = '';
 
-            if (state.users.length === 0) {
+            if (state.users.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No users found</td>';
                 usersTableBody.appendChild(row);
@@ -3544,18 +3573,18 @@
             const supervisorSelect = document.getElementById('user-supervisor');
             supervisorSelect.innerHTML = '<option value="">None</option>';
             
-            state.users.forEach(user => {
+            state.users.data.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user.id;
                 option.textContent = `${user.name} ${user.lastname}`;
                 supervisorSelect.appendChild(option);
             });
 
-            state.users.forEach(user => {
+            state.users.data.forEach(user => {
                 const row = document.createElement('tr');
                 
                 // Find supervisor
-                const supervisor = state.users.find(u => u.id === user.supervisor) || {};
+                const supervisor = state.users.data.find(u => u.id === user.supervisor) || {};
                 
                 row.innerHTML = `
                     <td>${user.name} ${user.lastname}</td>
@@ -3593,8 +3622,8 @@
             orgTree.innerHTML = '';
 
             // Find root users (those with no supervisor or supervisor not in list)
-            const rootUsers = state.users.filter(user => 
-                !user.supervisor || !state.users.some(u => u.id === user.supervisor)
+            const rootUsers = state.users.data.filter(user => 
+                !user.supervisor || !state.users.data.some(u => u.id === user.supervisor)
             );
 
             rootUsers.forEach(user => {
@@ -3605,7 +3634,7 @@
                 orgTree.appendChild(li);
                 
                 // Add subordinates
-                const subordinates = state.users.filter(u => u.supervisor === user.id);
+                const subordinates = state.users.data.filter(u => u.supervisor === user.id);
                 if (subordinates.length > 0) {
                     const ul = document.createElement('ul');
                     subordinates.forEach(sub => {
@@ -3624,7 +3653,7 @@
             const chatUsersList = document.getElementById('chat-users-list');
             chatUsersList.innerHTML = '';
 
-            state.users.forEach(user => {
+            state.users.data.forEach(user => {
                 if (user.id !== state.currentUser.id) {
                     const div = document.createElement('div');
                     div.className = 'chat-user';
@@ -3659,14 +3688,14 @@
                 
                 // Populate form with existing data
                 if (type === 'driver') {
-                    const driver = state.drivers.find(d => d.id === id);
+                    const driver = state.drivers.data.find(d => d.id === id);
                     document.getElementById('driver-name').value = driver.name;
                     document.getElementById('driver-lastname').value = driver.lastname;
                     document.getElementById('driver-car').value = driver.car || '';
                     document.getElementById('driver-card').value = driver.card || '';
                     document.getElementById('driver-status').value = driver.status;
                 } else if (type === 'car') {
-                    const car = state.cars.find(c => c.id === id);
+                    const car = state.cars.data.find(c => c.id === id);
                     document.getElementById('car-tractor').value = car.tractor;
                     document.getElementById('car-trailer').value = car.trailer;
                     document.getElementById('car-max-weight').value = car.maxWeight;
@@ -3680,7 +3709,7 @@
                     document.getElementById('car-inspection-notify').value = car.inspectionNotify;
                     document.getElementById('car-status').value = car.status;
                 } else if (type === 'card') {
-                    const card = state.cards.find(c => c.id === id);
+                    const card = state.cards.data.find(c => c.id === id);
                     document.getElementById('card-number').value = card.number;
                     document.getElementById('card-pin').value = card.pin;
                     document.getElementById('card-expiry').value = card.expiry;
@@ -3688,7 +3717,7 @@
                     document.getElementById('card-reminder').value = card.reminder;
                     document.getElementById('card-status').value = card.status;
                 } else if (type === 'tender') {
-                    const tender = state.tenders.find(t => t.id === id);
+                    const tender = state.tenders.data.find(t => t.id === id);
                     document.getElementById('tender-loading-date').value = tender.loading.date;
                     document.getElementById('tender-unloading-date').value = tender.unloading.date;
                     document.getElementById('tender-loading-city').value = tender.loading.city;
@@ -3707,7 +3736,7 @@
                         document.getElementById('tender-sale-fields').classList.add('hidden');
                     }
                 } else if (type === 'invoice') {
-                    const invoice = state.invoices.find(i => i.id === id);
+                    const invoice = state.invoices.data.find(i => i.id === id);
                     document.getElementById('invoice-code').value = invoice.code;
                     document.getElementById('invoice-client').value = invoice.client;
                     document.getElementById('invoice-date').value = invoice.date;
@@ -3716,7 +3745,7 @@
                     document.getElementById('invoice-reminder').value = invoice.reminder;
                     document.getElementById('invoice-status').value = invoice.status;
                 } else if (type === 'user') {
-                    const user = state.users.find(u => u.id === id);
+                    const user = state.users.data.find(u => u.id === id);
                     document.getElementById('user-name-input').value = user.name;
                     document.getElementById('user-lastname').value = user.lastname;
                     document.getElementById('user-email').value = user.email;
@@ -3724,7 +3753,7 @@
                     document.getElementById('user-status').value = user.status;
                     document.getElementById('user-supervisor').value = user.supervisor || '';
                 } else if (type === 'status') {
-                    const status = state.statuses.find(s => s.id === id);
+                    const status = state.statuses.data.find(s => s.id === id);
                     document.getElementById('status-name').value = status.name;
                     document.getElementById('status-type').value = status.type;
                     document.getElementById('status-color').value = status.color;
@@ -3896,7 +3925,7 @@
             if (!message) return;
             
             try {
-                const chat = await readFile(FILE_PATHS.CHAT) || [];
+                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
                 const now = new Date().toISOString();
                 
                 const newMessage = {
@@ -3908,14 +3937,15 @@
                 
                 chat.push(newMessage);
                 
-                await updateFile(
+                const result = await updateFile(
                     FILE_PATHS.CHAT,
                     'New chat message',
-                    utf8ToBase64(JSON.stringify(chat, null, 2))
+                    utf8ToBase64(JSON.stringify(chat, null, 2)),
+                    sha
                 );
                 
-                // Update local state and UI
-                state.chat = chat;
+                // Update local state with new SHA
+                state.chat = { data: chat, sha: result.content.sha };
                 renderChatMessages();
                 input.value = '';
             } catch (error) {
@@ -3928,7 +3958,7 @@
             const messagesContainer = document.getElementById('chat-messages');
             messagesContainer.innerHTML = '';
             
-            if (!state.chat || state.chat.length === 0) {
+            if (!state.chat.data || state.chat.data.length === 0) {
                 const div = document.createElement('div');
                 div.className = 'message other';
                 div.innerHTML = `
@@ -3939,8 +3969,8 @@
                 return;
             }
             
-            state.chat.forEach(msg => {
-                const user = state.users.find(u => u.id === msg.userId);
+            state.chat.data.forEach(msg => {
+                const user = state.users.data.find(u => u.id === msg.userId);
                 const isOwn = msg.userId === state.currentUser.id;
                 
                 const div = document.createElement('div');
@@ -3982,7 +4012,6 @@
             countEl.textContent = state.unreadNotifications;
             
             const panel = document.getElementById('notification-panel');
-            const panelContent = panel.querySelector('.notification-item');
             
             if (state.notifications.length === 0) {
                 panel.innerHTML = '<div class="notification-item">No notifications</div>';

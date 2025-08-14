@@ -1898,10 +1898,20 @@
                 const userData = await response.json();
                 const login = userData.login;
 
-                // Check if repository exists
-                const repoResponse = await fetch(`https://api.github.com/repos/${login}/${repo}`);
+                // Check if repository exists - FIXED: Added token to this request
+                const repoResponse = await fetch(`https://api.github.com/repos/${login}/${repo}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
                 if (!repoResponse.ok) {
-                    throw new Error('Repository not found');
+                    if (repoResponse.status === 404) {
+                        throw new Error('Repository not found');
+                    } else {
+                        throw new Error(`GitHub API error: ${repoResponse.status}`);
+                    }
                 }
 
                 // Check if users file exists and user exists
@@ -1914,7 +1924,11 @@
                     });
 
                     if (!contentResponse.ok) {
-                        throw new Error('Users database not found');
+                        if (contentResponse.status === 404) {
+                            throw new Error('Users database not found');
+                        } else {
+                            throw new Error(`GitHub API error: ${contentResponse.status}`);
+                        }
                     }
 
                     const contentData = await contentResponse.json();
@@ -1934,7 +1948,7 @@
                         addNotification('Invalid credentials', 'error');
                     }
                 } catch (error) {
-                    addNotification('Users database not found', 'error');
+                    addNotification('Users database not found: ' + error.message, 'error');
                 }
             } catch (error) {
                 addNotification('Invalid repository or token: ' + error.message, 'error');
@@ -2210,7 +2224,7 @@
                 // Set up periodic checks
                 setInterval(checkExpirations, 300000); // Check every 5 minutes
             } catch (error) {
-                addNotification('Failed to load ' + error.message, 'error');
+                addNotification('Failed to load data: ' + error.message, 'error');
                 console.error('Load data error:', error);
             }
         }

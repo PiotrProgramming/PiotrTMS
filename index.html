@@ -1898,7 +1898,7 @@
                 const userData = await response.json();
                 const login = userData.login;
 
-                // Check if repository exists - FIXED: Added token to this request
+                // Check if repository exists
                 const repoResponse = await fetch(`https://api.github.com/repos/${login}/${repo}`, {
                     headers: {
                         'Authorization': `token ${token}`,
@@ -2247,6 +2247,7 @@
                 const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
+                let updatedDrivers;
                 if (modalTitle === 'Add Driver') {
                     // Add new driver
                     const newDriver = {
@@ -2259,11 +2260,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    drivers.push(newDriver);
+                    updatedDrivers = [...drivers, newDriver];
                 } else {
                     // Update existing driver
                     const driverId = document.getElementById('driver-modal').getAttribute('data-id');
-                    drivers = drivers.map(driver => {
+                    updatedDrivers = drivers.map(driver => {
                         if (driver.id === driverId) {
                             return {
                                 ...driver,
@@ -2283,12 +2284,12 @@
                 const result = await updateFile(
                     FILE_PATHS.DRIVERS,
                     modalTitle === 'Add Driver' ? 'Add driver' : 'Update driver',
-                    utf8ToBase64(JSON.stringify(drivers, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedDrivers, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: drivers, sha: result.content.sha };
+                state.drivers = { data: updatedDrivers, sha: result.content.sha };
                 closeModal();
                 renderDrivers();
                 addNotification('Driver saved successfully', 'success');
@@ -2321,6 +2322,7 @@
                 const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
+                let updatedCars;
                 if (modalTitle === 'Add Car') {
                     // Add new car
                     const newCar = {
@@ -2340,11 +2342,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    cars.push(newCar);
+                    updatedCars = [...cars, newCar];
                 } else {
                     // Update existing car
                     const carId = document.getElementById('car-modal').getAttribute('data-id');
-                    cars = cars.map(car => {
+                    updatedCars = cars.map(car => {
                         if (car.id === carId) {
                             return {
                                 ...car,
@@ -2371,12 +2373,12 @@
                 const result = await updateFile(
                     FILE_PATHS.CARS,
                     modalTitle === 'Add Car' ? 'Add car' : 'Update car',
-                    utf8ToBase64(JSON.stringify(cars, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedCars, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: cars, sha: result.content.sha };
+                state.cars = { data: updatedCars, sha: result.content.sha };
                 closeModal();
                 renderCars();
                 addNotification('Car saved successfully', 'success');
@@ -2404,6 +2406,7 @@
                 const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
+                let updatedCards;
                 if (modalTitle === 'Add Card') {
                     // Add new card
                     const newCard = {
@@ -2417,11 +2420,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    cards.push(newCard);
+                    updatedCards = [...cards, newCard];
                 } else {
                     // Update existing card
                     const cardId = document.getElementById('card-modal').getAttribute('data-id');
-                    cards = cards.map(card => {
+                    updatedCards = cards.map(card => {
                         if (card.id === cardId) {
                             return {
                                 ...card,
@@ -2442,12 +2445,12 @@
                 const result = await updateFile(
                     FILE_PATHS.CARDS,
                     modalTitle === 'Add Card' ? 'Add card' : 'Update card',
-                    utf8ToBase64(JSON.stringify(cards, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedCards, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: cards, sha: result.content.sha };
+                state.cards = { data: updatedCards, sha: result.content.sha };
                 closeModal();
                 renderCards();
                 addNotification('Card saved successfully', 'success');
@@ -2480,6 +2483,7 @@
                 const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
+                let updatedTenders;
                 if (modalTitle === 'Add Tender') {
                     // Add new tender
                     const newTender = {
@@ -2505,11 +2509,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    tenders.push(newTender);
+                    updatedTenders = [...tenders, newTender];
                 } else {
                     // Update existing tender
                     const tenderId = document.getElementById('tender-modal').getAttribute('data-id');
-                    tenders = tenders.map(tender => {
+                    updatedTenders = tenders.map(tender => {
                         if (tender.id === tenderId) {
                             return {
                                 ...tender,
@@ -2542,12 +2546,12 @@
                 const result = await updateFile(
                     FILE_PATHS.TENDERS,
                     modalTitle === 'Add Tender' ? 'Add tender' : 'Update tender',
-                    utf8ToBase64(JSON.stringify(tenders, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedTenders, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: tenders, sha: result.content.sha };
+                state.tenders = { data: updatedTenders, sha: result.content.sha };
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
@@ -2578,6 +2582,7 @@
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
 
+                let updatedInvoices;
                 if (modalTitle === 'Add Invoice') {
                     // Add new invoice
                     const newInvoice = {
@@ -2593,11 +2598,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    invoices.push(newInvoice);
+                    updatedInvoices = [...invoices, newInvoice];
                 } else {
                     // Update existing invoice
                     const invoiceId = document.getElementById('invoice-modal').getAttribute('data-id');
-                    invoices = invoices.map(invoice => {
+                    updatedInvoices = invoices.map(invoice => {
                         if (invoice.id === invoiceId) {
                             return {
                                 ...invoice,
@@ -2620,12 +2625,12 @@
                 const result = await updateFile(
                     FILE_PATHS.INVOICES,
                     modalTitle === 'Add Invoice' ? 'Add invoice' : 'Update invoice',
-                    utf8ToBase64(JSON.stringify(invoices, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedInvoices, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: invoices, sha: result.content.sha };
+                state.invoices = { data: updatedInvoices, sha: result.content.sha };
                 closeModal();
                 renderInvoices();
                 addNotification('Invoice saved successfully', 'success');
@@ -2660,6 +2665,7 @@
                 const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
+                let updatedUsers;
                 if (modalTitle === 'Add User') {
                     // Check if user already exists
                     if (users.some(u => u.email === email)) {
@@ -2679,11 +2685,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    users.push(newUser);
+                    updatedUsers = [...users, newUser];
                 } else {
                     // Update existing user
                     const userId = document.getElementById('user-modal').getAttribute('data-id');
-                    users = users.map(user => {
+                    updatedUsers = users.map(user => {
                         if (user.id === userId) {
                             return {
                                 ...user,
@@ -2704,12 +2710,12 @@
                 const result = await updateFile(
                     FILE_PATHS.USERS,
                     modalTitle === 'Add User' ? 'Add user' : 'Update user',
-                    utf8ToBase64(JSON.stringify(users, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedUsers, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.users = { data: users, sha: result.content.sha };
+                state.users = { data: updatedUsers, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('User saved successfully', 'success');
@@ -2734,6 +2740,7 @@
                 const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
+                let updatedStatuses;
                 if (modalTitle === 'Add Status') {
                     // Add new status
                     const newStatus = {
@@ -2744,11 +2751,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    statuses.push(newStatus);
+                    updatedStatuses = [...statuses, newStatus];
                 } else {
                     // Update existing status
                     const statusId = document.getElementById('status-modal').getAttribute('data-id');
-                    statuses = statuses.map(status => {
+                    updatedStatuses = statuses.map(status => {
                         if (status.id === statusId) {
                             return {
                                 ...status,
@@ -2766,12 +2773,12 @@
                 const result = await updateFile(
                     FILE_PATHS.STATUSES,
                     modalTitle === 'Add Status' ? 'Add status' : 'Update status',
-                    utf8ToBase64(JSON.stringify(statuses, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedStatuses, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: statuses, sha: result.content.sha };
+                state.statuses = { data: updatedStatuses, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('Status saved successfully', 'success');
@@ -2789,17 +2796,17 @@
 
             try {
                 const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
-                const newDrivers = drivers.filter(driver => driver.id !== id);
+                const updatedDrivers = drivers.filter(driver => driver.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.DRIVERS,
                     'Delete driver',
-                    utf8ToBase64(JSON.stringify(newDrivers, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedDrivers, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: newDrivers, sha: result.content.sha };
+                state.drivers = { data: updatedDrivers, sha: result.content.sha };
                 renderDrivers();
                 addNotification('Driver deleted successfully', 'success');
             } catch (error) {
@@ -2815,17 +2822,17 @@
 
             try {
                 const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
-                const newCars = cars.filter(car => car.id !== id);
+                const updatedCars = cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.CARS,
                     'Delete car',
-                    utf8ToBase64(JSON.stringify(newCars, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedCars, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: newCars, sha: result.content.sha };
+                state.cars = { data: updatedCars, sha: result.content.sha };
                 renderCars();
                 addNotification('Car deleted successfully', 'success');
             } catch (error) {
@@ -2841,17 +2848,17 @@
 
             try {
                 const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
-                const newCards = cards.filter(card => card.id !== id);
+                const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.CARDS,
                     'Delete card',
-                    utf8ToBase64(JSON.stringify(newCards, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedCards, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: newCards, sha: result.content.sha };
+                state.cards = { data: updatedCards, sha: result.content.sha };
                 renderCards();
                 addNotification('Card deleted successfully', 'success');
             } catch (error) {
@@ -2867,17 +2874,17 @@
 
             try {
                 const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
-                const newTenders = tenders.filter(tender => tender.id !== id);
+                const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.TENDERS,
                     'Delete tender',
-                    utf8ToBase64(JSON.stringify(newTenders, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedTenders, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: newTenders, sha: result.content.sha };
+                state.tenders = { data: updatedTenders, sha: result.content.sha };
                 renderTenders();
                 addNotification('Tender deleted successfully', 'success');
             } catch (error) {
@@ -2893,17 +2900,17 @@
 
             try {
                 const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
-                const newInvoices = invoices.filter(invoice => invoice.id !== id);
+                const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.INVOICES,
                     'Delete invoice',
-                    utf8ToBase64(JSON.stringify(newInvoices, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedInvoices, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: newInvoices, sha: result.content.sha };
+                state.invoices = { data: updatedInvoices, sha: result.content.sha };
                 renderInvoices();
                 addNotification('Invoice deleted successfully', 'success');
             } catch (error) {
@@ -2919,17 +2926,17 @@
 
             try {
                 const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
-                const newUsers = users.filter(user => user.id !== id);
+                const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.USERS,
                     'Delete user',
-                    utf8ToBase64(JSON.stringify(newUsers, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedUsers, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.users = { data: newUsers, sha: result.content.sha };
+                state.users = { data: updatedUsers, sha: result.content.sha };
                 renderAdmin();
                 addNotification('User deleted successfully', 'success');
             } catch (error) {
@@ -2945,17 +2952,17 @@
 
             try {
                 const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
-                const newStatuses = statuses.filter(status => status.id !== id);
+                const updatedStatuses = statuses.filter(status => status.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.STATUSES,
                     'Delete status',
-                    utf8ToBase64(JSON.stringify(newStatuses, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedStatuses, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: newStatuses, sha: result.content.sha };
+                state.statuses = { data: updatedStatuses, sha: result.content.sha };
                 renderAdmin();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
@@ -3949,17 +3956,17 @@
                     timestamp: now
                 };
                 
-                chat.push(newMessage);
+                const updatedChat = [...chat, newMessage];
                 
                 const result = await updateFile(
                     FILE_PATHS.CHAT,
                     'New chat message',
-                    utf8ToBase64(JSON.stringify(chat, null, 2)),
+                    utf8ToBase64(JSON.stringify(updatedChat, null, 2)),
                     sha
                 );
                 
                 // Update local state with new SHA
-                state.chat = { data: chat, sha: result.content.sha };
+                state.chat = { data: updatedChat, sha: result.content.sha };
                 renderChatMessages();
                 input.value = '';
             } catch (error) {

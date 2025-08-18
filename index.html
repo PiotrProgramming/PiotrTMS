@@ -990,4 +990,424 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table">
-                      
+                                <thead>
+                                    <tr>
+                                        <th>Card Number</th>
+                                        <th>PIN</th>
+                                        <th>Expiry</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cards-table-body">
+                                    <!-- Cards will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">Assign Cards to Cars/Drivers</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5>Available Cards</h5>
+                                        <div class="dropzone" id="available-cards">
+                                            <p>Drag cards here</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>Assigned Cards</h5>
+                                        <div class="dropzone" id="assigned-cards">
+                                            <p>Cards will appear here when assigned</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tenders View -->
+            <div id="tenders-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        Tenders Management
+                        <button class="btn btn-primary" id="add-tender-btn">Add Tender</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Loading</th>
+                                        <th>Unloading</th>
+                                        <th>Price</th>
+                                        <th>Driver</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tenders-table-body">
+                                    <!-- Tenders will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices View -->
+            <div id="invoices-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        Invoices Management
+                        <button class="btn btn-primary" id="add-invoice-btn">Add Invoice</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Due</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoices-table-body">
+                                    <!-- Invoices will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports View -->
+            <div id="reports-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">Performance Reports</div>
+                    <div class="card-body">
+                        <div class="tabs">
+                            <div class="tab active" data-tab="weekly">Weekly</div>
+                            <div class="tab" data-tab="monthly">Monthly</div>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="revenue-chart"></canvas>
+                        </div>
+                        
+                        <div class="chart-container">
+                            <canvas id="loading-chart"></canvas>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">Top Drivers</div>
+                                    <div class="card-body">
+                                        <ul id="top-drivers" class="list-group">
+                                            <!-- Top drivers will be listed here -->
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">Revenue Breakdown</div>
+                                    <div class="card-body">
+                                        <canvas id="revenue-breakdown-chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin View -->
+            <div id="admin-view" class="hidden">
+                <div class="tabs">
+                    <div class="tab active" data-tab="users">Users</div>
+                    <div class="tab" data-tab="statuses">Statuses</div>
+                    <div class="tab" data-tab="migration">Migration</div>
+                </div>
+                
+                <!-- Users Tab -->
+                <div class="tab-content" id="users-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            User Management
+                            <button class="btn btn-primary" id="add-user-btn">Add User</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Status</th>
+                                            <th>Supervisor</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-table-body">
+                                        <!-- Users will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="card mt-4">
+                                <div class="card-header">Organization Tree</div>
+                                <div class="card-body">
+                                    <ul class="tree" id="org-tree">
+                                        <!-- Organization tree will be built here -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statuses Tab -->
+                <div class="tab-content hidden" id="statuses-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            Status Management
+                            <button class="btn btn-primary" id="add-status-btn">Add Status</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status Name</th>
+                                            <th>Type</th>
+                                            <th>Color</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="statuses-table-body">
+                                        <!-- Statuses will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Migration Tab -->
+                <div class="tab-content hidden" id="migration-tab">
+                    <div class="card">
+                        <div class="card-header">Database Migration</div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="migration-token">New GitHub Token</label>
+                                <input type="password" class="form-control" id="migration-token">
+                            </div>
+                            <div class="form-group">
+                                <label for="migration-repo">New Repository Name</label>
+                                <input type="text" class="form-control" id="migration-repo">
+                            </div>
+                            <button class="btn btn-primary" id="migrate-btn">Migrate Database</button>
+                            <p class="mt-2 text-muted">This will migrate all data to a new repository. Make sure you have the necessary permissions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat View -->
+            <div id="chat-view" class="hidden">
+                <div class="card">
+                    <div class="card-header">Team Chat</div>
+                    <div class="card-body">
+                        <div class="chat-container">
+                            <div class="chat-sidebar">
+                                <div class="chat-user active" data-user="all">
+                                    <strong>General Chat</strong>
+                                </div>
+                                <div id="chat-users-list">
+                                    <!-- Chat users will be populated here -->
+                                </div>
+                            </div>
+                            <div class="chat-main">
+                                <div class="chat-messages" id="chat-messages">
+                                    <div class="message other">
+                                        <div class="message-content">Welcome to TransForward chat!</div>
+                                        <div class="message-meta">System - just now</div>
+                                    </div>
+                                </div>
+                                <div class="chat-input">
+                                    <input type="text" id="chat-input" placeholder="Type a message...">
+                                    <button class="btn btn-primary" id="chat-send">Send</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Driver Modal -->
+    <div class="modal" id="driver-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="driver-modal-title">Add Driver</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="driver-name">First Name</label>
+                    <input type="text" class="form-control" id="driver-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="driver-lastname">Last Name</label>
+                    <input type="text" class="form-control" id="driver-lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="driver-car">Assigned Car</label>
+                    <select class="form-control" id="driver-car">
+                        <option value="">Select Car</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="driver-card">Assigned Card</label>
+                    <select class="form-control" id="driver-card">
+                        <option value="">Select Card</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="driver-status">Status</label>
+                    <select class="form-control" id="driver-status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="on-route">On Route</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="driver-cancel">Cancel</button>
+                <button class="btn btn-primary" id="driver-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Car Modal -->
+    <div class="modal" id="car-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="car-modal-title">Add Car</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="car-tractor">Tractor Plate Number</label>
+                    <input type="text" class="form-control" id="car-tractor" required>
+                </div>
+                <div class="form-group">
+                    <label for="car-trailer">Trailer Plate Number</label>
+                    <input type="text" class="form-control" id="car-trailer" required>
+                </div>
+                <div class="form-group">
+                    <label for="car-max-weight">Max Weight (kg)</label>
+                    <input type="number" class="form-control" id="car-max-weight" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="car-length">Length (m)</label>
+                            <input type="number" step="0.1" class="form-control" id="car-length" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="car-width">Width (m)</label>
+                            <input type="number" step="0.1" class="form-control" id="car-width" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="car-height">Height (m)</label>
+                            <input type="number" step="0.1" class="form-control" id="car-height" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="car-cubic">Cubic Capacity (m³)</label>
+                    <input type="text" class="form-control" id="car-cubic" readonly>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="car-insurance">Insurance Expiry</label>
+                            <input type="date" class="form-control" id="car-insurance" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="car-inspection">Inspection Expiry</label>
+                            <input type="date" class="form-control" id="car-inspection" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="car-insurance-notify">Notify Before (days)</label>
+                            <input type="number" class="form-control" id="car-insurance-notify" value="30">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="car-inspection-notify">Notify Before (days)</label>
+                            <input type="number" class="form-control" id="car-inspection-notify" value="30">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="car-status">Status</label>
+                    <select class="form-control" id="car-status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="maintenance">Maintenance</option>
+                        <option value="inspection">Inspection Due</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="car-cancel">Cancel</button>
+                <button class="btn btn-primary" id="car-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card Modal -->
+    <div class="modal" id="card-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="card-modal-title">Add Card</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="card-number">Card Number</label>
+                    <input type="text" class="form-control" id="card-number" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-pin">PIN</label>
+                    <input type="password" class="form-control" id="card-pin" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-expiry">Expiry Date</label>
+                    <input type="date" class="form-control" id="card-expiry" required>
+                </div>
+                <div class="form-group">
+                    <label for="card-notify">Notify Before (days)</label>
+              

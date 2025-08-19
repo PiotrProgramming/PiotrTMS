@@ -1410,4 +1410,2873 @@
                 </div>
                 <div class="form-group">
                     <label for="card-notify">Notify Before (days)</label>
-              
+                    <input type="number" class="form-control" id="card-notify" value="30">
+                </div>
+                <div class="form-group">
+                    <label for="card-reminder">Reminder Frequency (days)</label>
+                    <input type="number" class="form-control" id="card-reminder" value="7">
+                </div>
+                <div class="form-group">
+                    <label for="card-status">Status</label>
+                    <select class="form-control" id="card-status">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="expired">Expired</option>
+                        <option value="expiring">Expiring Soon</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="card-cancel">Cancel</button>
+                <button class="btn btn-primary" id="card-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tender Modal -->
+    <div class="modal" id="tender-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="tender-modal-title">Add Tender</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tender-loading-date">Loading Date</label>
+                            <input type="datetime-local" class="form-control" id="tender-loading-date" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tender-unloading-date">Unloading Date</label>
+                            <input type="datetime-local" class="form-control" id="tender-unloading-date" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tender-loading-city">Loading City</label>
+                            <input type="text" class="form-control" id="tender-loading-city" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tender-loading-zip">Loading ZIP</label>
+                            <input type="text" class="form-control" id="tender-loading-zip" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tender-unloading-city">Unloading City</label>
+                            <input type="text" class="form-control" id="tender-unloading-city" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="tender-unloading-zip">Unloading ZIP</label>
+                            <input type="text" class="form-control" id="tender-unloading-zip" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="tender-price">Price ($)</label>
+                    <input type="number" step="0.01" class="form-control" id="tender-price" required>
+                </div>
+                <div class="form-group">
+                    <label for="tender-driver">Assigned Driver</label>
+                    <select class="form-control" id="tender-driver">
+                        <option value="">Select Driver</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tender-status">Status</label>
+                    <select class="form-control" id="tender-status">
+                        <option value="unassigned">Unassigned</option>
+                        <option value="pending">Pending</option>
+                        <option value="on-route">On Route</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="sold">Sold</option>
+                    </select>
+                </div>
+                <div id="tender-sale-fields" class="hidden">
+                    <div class="form-group">
+                        <label for="tender-sale-price">Sale Price ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="tender-sale-price">
+                    </div>
+                    <div class="form-group">
+                        <label for="tender-payment-days">Payment Terms (days)</label>
+                        <input type="number" class="form-control" id="tender-payment-days" value="30">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="tender-cancel">Cancel</button>
+                <button class="btn btn-primary" id="tender-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Modal -->
+    <div class="modal" id="invoice-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="invoice-modal-title">Add Invoice</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="invoice-code">Invoice Code</label>
+                    <input type="text" class="form-control" id="invoice-code" required>
+                </div>
+                <div class="form-group">
+                    <label for="invoice-client">Client Name</label>
+                    <input type="text" class="form-control" id="invoice-client" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="invoice-date">Issue Date</label>
+                            <input type="date" class="form-control" id="invoice-date" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="invoice-due-days">Payment Terms (days)</label>
+                            <input type="number" class="form-control" id="invoice-due-days" value="30" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="invoice-notify">Notify Before (days)</label>
+                    <input type="number" class="form-control" id="invoice-notify" value="7">
+                </div>
+                <div class="form-group">
+                    <label for="invoice-reminder">Reminder Frequency (days)</label>
+                    <input type="number" class="form-control" id="invoice-reminder" value="3">
+                </div>
+                <div class="form-group">
+                    <label for="invoice-status">Status</label>
+                    <select class="form-control" id="invoice-status">
+                        <option value="pending">Pending</option>
+                        <option value="paid">Paid</option>
+                        <option value="unpaid">Unpaid</option>
+                        <option value="overdue">Overdue</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="invoice-cancel">Cancel</button>
+                <button class="btn btn-primary" id="invoice-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Modal -->
+    <div class="modal" id="user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="user-modal-title">Add User</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="user-name-input">First Name</label>
+                    <input type="text" class="form-control" id="user-name-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-lastname">Last Name</label>
+                    <input type="text" class="form-control" id="user-lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-email">Email</label>
+                    <input type="email" class="form-control" id="user-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-password">Password</label>
+                    <input type="password" class="form-control" id="user-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="user-status">Status</label>
+                    <select class="form-control" id="user-status">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="user-supervisor">Supervisor</label>
+                    <select class="form-control" id="user-supervisor">
+                        <option value="">None</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="user-cancel">Cancel</button>
+                <button class="btn btn-primary" id="user-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Modal -->
+    <div class="modal" id="status-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="status-modal-title">Add Status</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="status-name">Status Name</label>
+                    <input type="text" class="form-control" id="status-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="status-type">Type</label>
+                    <select class="form-control" id="status-type">
+                        <option value="driver">Driver</option>
+                        <option value="car">Car</option>
+                        <option value="card">Card</option>
+                        <option value="tender">Tender</option>
+                        <option value="invoice">Invoice</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="status-color">Color</label>
+                    <select class="form-control" id="status-color">
+                        <option value="active">Green (Active)</option>
+                        <option value="pending">Yellow (Pending)</option>
+                        <option value="inactive">Red (Inactive)</option>
+                        <option value="completed">Blue (Completed)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="status-cancel">Cancel</button>
+                <button class="btn btn-primary" id="status-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Proper UTF-8 encoding/decoding functions
+        function utf8ToBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function base64ToUtf8(base64) {
+            return decodeURIComponent(escape(atob(base64)));
+        }
+
+        // App state
+        const state = {
+            currentUser: null,
+            githubToken: '',
+            repoName: '',
+            currentView: 'dashboard',
+            notifications: [],
+            unreadNotifications: 0,
+            // Data stores with SHA
+            drivers: { data: [], sha: null },
+            cars: { data: [], sha: null },
+            cards: { data: [], sha: null },
+            tenders: { data: [], sha: null },
+            invoices: { data: [], sha: null },
+            users: { data: [], sha: null },
+            statuses: { data: [], sha: null },
+            chat: { data: [], sha: null }
+        };
+
+        // GitHub file paths
+        const FILE_PATHS = {
+            DRIVERS: 'data/drivers.json',
+            CARS: 'data/cars.json',
+            CARDS: 'data/cards.json',
+            TENDERS: 'data/tenders.json',
+            INVOICES: 'data/invoices.json',
+            USERS: 'data/users.json',
+            STATUSES: 'data/statuses.json',
+            CHAT: 'data/chat.json'
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user is already logged in
+            const savedUser = localStorage.getItem('transforward_user');
+            if (savedUser) {
+                try {
+                    const user = JSON.parse(savedUser);
+                    state.currentUser = user;
+                    state.githubToken = user.token;
+                    state.repoName = user.repo;
+                    showApp();
+                } catch (e) {
+                    console.log('No saved user found');
+                }
+            }
+
+            // Setup event listeners
+            setupEventListeners();
+            setupDragAndDrop();
+        });
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            // Auth - Fixed the event listeners for show/hide
+            document.getElementById('show-register').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            });
+            
+            document.getElementById('show-login').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+            });
+
+            // Auth buttons
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('register-btn').addEventListener('click', handleRegister);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+
+            // Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const view = this.getAttribute('data-view');
+                    navigateTo(view);
+                });
+            });
+
+            // User menu
+            document.getElementById('user-menu-toggle').addEventListener('click', toggleUserDropdown);
+            document.getElementById('notification-icon').addEventListener('click', toggleNotificationPanel);
+
+            // Quick actions
+            document.getElementById('quick-add-driver').addEventListener('click', () => openModal('driver'));
+            document.getElementById('quick-add-tender').addEventListener('click', () => openModal('tender'));
+            document.getElementById('quick-add-invoice').addEventListener('click', () => openModal('invoice'));
+
+            // Modals
+            document.querySelectorAll('.close').forEach(btn => {
+                btn.addEventListener('click', closeModal);
+            });
+
+            // Modal save buttons
+            document.getElementById('driver-save').addEventListener('click', saveDriver);
+            document.getElementById('driver-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('car-save').addEventListener('click', saveCar);
+            document.getElementById('car-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('card-save').addEventListener('click', saveCard);
+            document.getElementById('card-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('tender-save').addEventListener('click', saveTender);
+            document.getElementById('tender-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('invoice-save').addEventListener('click', saveInvoice);
+            document.getElementById('invoice-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('user-save').addEventListener('click', saveUser);
+            document.getElementById('user-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('status-save').addEventListener('click', saveStatus);
+            document.getElementById('status-cancel').addEventListener('click', closeModal);
+
+            // Add buttons
+            document.getElementById('add-driver-btn').addEventListener('click', () => openModal('driver'));
+            document.getElementById('add-car-btn').addEventListener('click', () => openModal('car'));
+            document.getElementById('add-card-btn').addEventListener('click', () => openModal('card'));
+            document.getElementById('add-tender-btn').addEventListener('click', () => openModal('tender'));
+            document.getElementById('add-invoice-btn').addEventListener('click', () => openModal('invoice'));
+            document.getElementById('add-user-btn').addEventListener('click', () => openModal('user'));
+            document.getElementById('add-status-btn').addEventListener('click', () => openModal('status'));
+
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    activateTab(tabId);
+                });
+            });
+
+            // Chat
+            document.getElementById('chat-send').addEventListener('click', sendMessage);
+            document.getElementById('chat-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Calculate cubic capacity when dimensions change
+            document.getElementById('car-length').addEventListener('change', calculateCubicCapacity);
+            document.getElementById('car-width').addEventListener('change', calculateCubicCapacity);
+            document.getElementById('car-height').addEventListener('change', calculateCubicCapacity);
+
+            // Tender status change
+            document.getElementById('tender-status').addEventListener('change', function() {
+                const saleFields = document.getElementById('tender-sale-fields');
+                if (this.value === 'sold') {
+                    saleFields.classList.remove('hidden');
+                } else {
+                    saleFields.classList.add('hidden');
+                }
+            });
+        }
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            const availableCards = document.getElementById('available-cards');
+            const assignedCards = document.getElementById('assigned-cards');
+
+            // Make cards draggable
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('draggable')) {
+                    e.dataTransfer.setData('text/plain', e.target.dataset.cardId);
+                    e.target.classList.add('dragging');
+                }
+            });
+
+            document.addEventListener('dragend', function(e) {
+                if (e.target.classList.contains('draggable')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+
+            // Handle drop zones
+            [availableCards, assignedCards].forEach(zone => {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('highlight');
+                });
+
+                zone.addEventListener('dragleave', function() {
+                    this.classList.remove('highlight');
+                });
+
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('highlight');
+                    
+                    const cardId = e.dataTransfer.getData('text/plain');
+                    const card = state.cards.data.find(c => c.id === cardId);
+                    
+                    if (card) {
+                        // In a real app, we would update the card assignment
+                        addNotification('Card assignment updated', 'success');
+                    }
+                });
+            });
+        }
+
+        // Authentication handlers
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const token = document.getElementById('login-token').value;
+            const repo = document.getElementById('login-repo').value;
+
+            if (!email || !password || !token || !repo) {
+                addNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                // Test GitHub connection by getting user info
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+
+                const userData = await response.json();
+                const login = userData.login;
+
+                // Check if repository exists
+                const repoResponse = await fetch(`https://api.github.com/repos/${login}/${repo}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!repoResponse.ok) {
+                    if (repoResponse.status === 404) {
+                        throw new Error('Repository not found');
+                    } else {
+                        throw new Error(`GitHub API error: ${repoResponse.status}`);
+                    }
+                }
+
+                // Check if users file exists and user exists
+                try {
+                    const contentResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/${FILE_PATHS.USERS}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (!contentResponse.ok) {
+                        if (contentResponse.status === 404) {
+                            throw new Error('Users database not found');
+                        } else {
+                            throw new Error(`GitHub API error: ${contentResponse.status}`);
+                        }
+                    }
+
+                    const contentData = await contentResponse.json();
+                    const content = base64ToUtf8(contentData.content);
+                    const users = JSON.parse(content);
+                    const user = users.find(u => u.email === email && u.password === password);
+
+                    // CRITICAL FIX: Add error logging to see what's happening
+                    console.log('Users from GitHub:', users);
+                    console.log('Looking for user with email:', email, 'and password:', password);
+                    console.log('Found user:', user);
+
+                    if (user) {
+                        state.currentUser = user;
+                        state.githubToken = token;
+                        state.repoName = repo;
+                        localStorage.setItem('transforward_user', JSON.stringify(user));
+                        showApp();
+                        loadAllData();
+                        addNotification('Login successful', 'success');
+                    } else {
+                        // More specific error message
+                        addNotification('Invalid credentials or user not found in repository', 'error');
+                        console.error('User not found in repository. Email:', email);
+                    }
+                } catch (error) {
+                    addNotification('Users database not found: ' + error.message, 'error');
+                    console.error('Error reading users file:', error);
+                }
+            } catch (error) {
+                addNotification('Invalid repository or token: ' + error.message, 'error');
+                console.error('Login error:', error);
+            }
+        }
+
+        async function handleRegister() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const token = document.getElementById('register-token').value;
+            const repo = document.getElementById('register-repo').value;
+
+            if (!email || !password || !token || !repo) {
+                addNotification('Please fill in all fields', 'error');
+                return;
+            }
+
+            try {
+                // Test GitHub connection
+                const response = await fetch('https://api.github.com/user', {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+
+                const userData = await response.json();
+                const login = userData.login;
+
+                // Create repository
+                const createRepoResponse = await fetch('https://api.github.com/user/repos', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: repo,
+                        description: 'TransForward Manager Database',
+                        private: true,
+                        auto_init: true
+                    })
+                });
+
+                if (!createRepoResponse.ok) {
+                    const errorData = await createRepoResponse.json();
+                    throw new Error(errorData.message || 'Failed to create repository');
+                }
+
+                // Create data directory
+                const createDirResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/data/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Create data directory',
+                        content: ''
+                    })
+                });
+
+                if (!createDirResponse.ok && createDirResponse.status !== 422) { // 422 means already exists
+                    const errorData = await createDirResponse.json();
+                    throw new Error(errorData.message || 'Failed to create data directory');
+                }
+
+                // Create initial data files
+                const initialData = {
+                    drivers: [],
+                    cars: [],
+                    cards: [],
+                    tenders: [],
+                    invoices: [],
+                    users: [{
+                        id: generateId(),
+                        name: 'Admin',
+                        lastname: 'User',
+                        email: email,
+                        password: password,
+                        status: 'admin',
+                        supervisor: null,
+                        createdAt: new Date().toISOString()
+                    }],
+                    statuses: [
+                        // Default statuses
+                        { id: generateId(), name: 'Active', type: 'driver', color: 'active' },
+                        { id: generateId(), name: 'Inactive', type: 'driver', color: 'inactive' },
+                        { id: generateId(), name: 'On Route', type: 'driver', color: 'pending' },
+                        { id: generateId(), name: 'Maintenance', type: 'driver', color: 'warning' },
+                        { id: generateId(), name: 'Active', type: 'car', color: 'active' },
+                        { id: generateId(), name: 'Inactive', type: 'car', color: 'inactive' },
+                        { id: generateId(), name: 'Maintenance', type: 'car', color: 'warning' },
+                        { id: generateId(), name: 'Inspection Due', type: 'car', color: 'danger' },
+                        { id: generateId(), name: 'Active', type: 'card', color: 'active' },
+                        { id: generateId(), name: 'Inactive', type: 'card', color: 'inactive' },
+                        { id: generateId(), name: 'Expired', type: 'card', color: 'danger' },
+                        { id: generateId(), name: 'Expiring Soon', type: 'card', color: 'warning' },
+                        { id: generateId(), name: 'Unassigned', type: 'tender', color: 'inactive' },
+                        { id: generateId(), name: 'Pending', type: 'tender', color: 'pending' },
+                        { id: generateId(), name: 'On Route', type: 'tender', color: 'active' },
+                        { id: generateId(), name: 'Delivered', type: 'tender', color: 'completed' },
+                        { id: generateId(), name: 'Cancelled', type: 'tender', color: 'danger' },
+                        { id: generateId(), name: 'Sold', type: 'tender', color: 'success' },
+                        { id: generateId(), name: 'Pending', type: 'invoice', color: 'pending' },
+                        { id: generateId(), name: 'Paid', type: 'invoice', color: 'completed' },
+                        { id: generateId(), name: 'Unpaid', type: 'invoice', color: 'warning' },
+                        { id: generateId(), name: 'Overdue', type: 'invoice', color: 'danger' }
+                    ],
+                    chat: []
+                };
+
+                // Create all data files
+                for (const [key, path] of Object.entries(FILE_PATHS)) {
+                    const createFileResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/${path}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: 'Initial data',
+                            content: utf8ToBase64(JSON.stringify(initialData[key.toLowerCase()], null, 2))
+                        })
+                    });
+
+                    if (!createFileResponse.ok) {
+                        const errorData = await createFileResponse.json();
+                        throw new Error(`Failed to create ${path}: ${errorData.message}`);
+                    }
+                }
+
+                // Set current user
+                state.currentUser = initialData.users[0];
+                state.currentUser.token = token;
+                state.currentUser.repo = repo;
+                state.githubToken = token;
+                state.repoName = repo;
+                
+                localStorage.setItem('transforward_user', JSON.stringify(state.currentUser));
+                
+                showApp();
+                loadAllData();
+                addNotification('Registration successful', 'success');
+            } catch (error) {
+                addNotification('Registration failed: ' + error.message, 'error');
+                console.error('Registration error:', error);
+            }
+        }
+
+        // GitHub API functions
+        async function createFile(path, message, content) {
+            const login = await getCurrentUserLogin();
+            const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${state.githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    content: content
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to create file');
+            }
+        }
+
+        async function updateFile(path, message, content, sha = null) {
+            const login = await getCurrentUserLogin();
+            const data = {
+                message: message,
+                content: content
+            };
+            
+            if (sha) {
+                data.sha = sha;
+            }
+
+            const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${state.githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update file');
+            }
+            
+            return response.json();
+        }
+
+        async function readFile(path) {
+            const login = await getCurrentUserLogin();
+            try {
+                const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${path}`, {
+                    headers: {
+                        'Authorization': `token ${state.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        return { data: null, sha: null };
+                    }
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.content) {
+                    return {
+                        data: JSON.parse(base64ToUtf8(data.content)),
+                        sha: data.sha
+                    };
+                }
+                return { data: null, sha: null };
+            } catch (error) {
+                if (error.message.includes('404')) {
+                    return { data: null, sha: null };
+                }
+                throw error;
+            }
+        }
+
+        async function getCurrentUserLogin() {
+            const response = await fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `token ${state.githubToken}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            const userData = await response.json();
+            return userData.login;
+        }
+
+        async function loadAllData() {
+            try {
+                // Load all data with SHA
+                state.drivers = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                state.cars = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                state.cards = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                state.tenders = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                state.invoices = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                state.users = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                state.statuses = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                state.chat = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
+
+                // Update UI
+                updateDashboardStats();
+                checkExpirations();
+                loadDataForView(state.currentView);
+                
+                // Set up periodic checks
+                setInterval(checkExpirations, 300000); // Check every 5 minutes
+            } catch (error) {
+                addNotification('Failed to load data: ' + error.message, 'error');
+                console.error('Load data error:', error);
+            }
+        }
+
+        // CRUD Operations
+        async function saveDriver() {
+            const name = document.getElementById('driver-name').value;
+            const lastname = document.getElementById('driver-lastname').value;
+            const car = document.getElementById('driver-car').value;
+            const card = document.getElementById('driver-card').value;
+            const status = document.getElementById('driver-status').value;
+            const modalTitle = document.getElementById('driver-modal-title').textContent;
+
+            if (!name || !lastname) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedDrivers;
+                if (modalTitle === 'Add Driver') {
+                    // Add new driver
+                    const newDriver = {
+                        id: generateId(),
+                        name: name,
+                        lastname: lastname,
+                        car: car,
+                        card: card,
+                        status: status,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedDrivers = [...drivers, newDriver];
+                } else {
+                    // Update existing driver
+                    const driverId = document.getElementById('driver-modal').getAttribute('data-id');
+                    updatedDrivers = drivers.map(driver => {
+                        if (driver.id === driverId) {
+                            return {
+                                ...driver,
+                                name: name,
+                                lastname: lastname,
+                                car: car,
+                                card: card,
+                                status: status,
+                                updatedAt: now
+                            };
+                        }
+                        return driver;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.DRIVERS,
+                    modalTitle === 'Add Driver' ? 'Add driver' : 'Update driver',
+                    utf8ToBase64(JSON.stringify(updatedDrivers, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                closeModal();
+                renderDrivers();
+                addNotification('Driver saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save driver: ' + error.message, 'error');
+                console.error('Save driver error:', error);
+            }
+        }
+
+        async function saveCar() {
+            const tractor = document.getElementById('car-tractor').value;
+            const trailer = document.getElementById('car-trailer').value;
+            const maxWeight = document.getElementById('car-max-weight').value;
+            const length = document.getElementById('car-length').value;
+            const width = document.getElementById('car-width').value;
+            const height = document.getElementById('car-height').value;
+            const insurance = document.getElementById('car-insurance').value;
+            const inspection = document.getElementById('car-inspection').value;
+            const insuranceNotify = document.getElementById('car-insurance-notify').value;
+            const inspectionNotify = document.getElementById('car-inspection-notify').value;
+            const status = document.getElementById('car-status').value;
+            const modalTitle = document.getElementById('car-modal-title').textContent;
+
+            if (!tractor || !trailer || !maxWeight || !length || !width || !height || !insurance || !inspection) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedCars;
+                if (modalTitle === 'Add Car') {
+                    // Add new car
+                    const newCar = {
+                        id: generateId(),
+                        tractor: tractor,
+                        trailer: trailer,
+                        maxWeight: parseFloat(maxWeight),
+                        length: parseFloat(length),
+                        width: parseFloat(width),
+                        height: parseFloat(height),
+                        cubic: parseFloat(length) * parseFloat(width) * parseFloat(height),
+                        insurance: insurance,
+                        inspection: inspection,
+                        insuranceNotify: parseInt(insuranceNotify),
+                        inspectionNotify: parseInt(inspectionNotify),
+                        status: status,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedCars = [...cars, newCar];
+                } else {
+                    // Update existing car
+                    const carId = document.getElementById('car-modal').getAttribute('data-id');
+                    updatedCars = cars.map(car => {
+                        if (car.id === carId) {
+                            return {
+                                ...car,
+                                tractor: tractor,
+                                trailer: trailer,
+                                maxWeight: parseFloat(maxWeight),
+                                length: parseFloat(length),
+                                width: parseFloat(width),
+                                height: parseFloat(height),
+                                cubic: parseFloat(length) * parseFloat(width) * parseFloat(height),
+                                insurance: insurance,
+                                inspection: inspection,
+                                insuranceNotify: parseInt(insuranceNotify),
+                                inspectionNotify: parseInt(inspectionNotify),
+                                status: status,
+                                updatedAt: now
+                            };
+                        }
+                        return car;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.CARS,
+                    modalTitle === 'Add Car' ? 'Add car' : 'Update car',
+                    utf8ToBase64(JSON.stringify(updatedCars, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.cars = { data: updatedCars, sha: result.content.sha };
+                closeModal();
+                renderCars();
+                addNotification('Car saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save car: ' + error.message, 'error');
+                console.error('Save car error:', error);
+            }
+        }
+
+        async function saveCard() {
+            const number = document.getElementById('card-number').value;
+            const pin = document.getElementById('card-pin').value;
+            const expiry = document.getElementById('card-expiry').value;
+            const notify = document.getElementById('card-notify').value;
+            const reminder = document.getElementById('card-reminder').value;
+            const status = document.getElementById('card-status').value;
+            const modalTitle = document.getElementById('card-modal-title').textContent;
+
+            if (!number || !pin || !expiry) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedCards;
+                if (modalTitle === 'Add Card') {
+                    // Add new card
+                    const newCard = {
+                        id: generateId(),
+                        number: number,
+                        pin: pin,
+                        expiry: expiry,
+                        notify: parseInt(notify),
+                        reminder: parseInt(reminder),
+                        status: status,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedCards = [...cards, newCard];
+                } else {
+                    // Update existing card
+                    const cardId = document.getElementById('card-modal').getAttribute('data-id');
+                    updatedCards = cards.map(card => {
+                        if (card.id === cardId) {
+                            return {
+                                ...card,
+                                number: number,
+                                pin: pin,
+                                expiry: expiry,
+                                notify: parseInt(notify),
+                                reminder: parseInt(reminder),
+                                status: status,
+                                updatedAt: now
+                            };
+                        }
+                        return card;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.CARDS,
+                    modalTitle === 'Add Card' ? 'Add card' : 'Update card',
+                    utf8ToBase64(JSON.stringify(updatedCards, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.cards = { data: updatedCards, sha: result.content.sha };
+                closeModal();
+                renderCards();
+                addNotification('Card saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save card: ' + error.message, 'error');
+                console.error('Save card error:', error);
+            }
+        }
+
+        async function saveTender() {
+            const loadingDate = document.getElementById('tender-loading-date').value;
+            const unloadingDate = document.getElementById('tender-unloading-date').value;
+            const loadingCity = document.getElementById('tender-loading-city').value;
+            const loadingZip = document.getElementById('tender-loading-zip').value;
+            const unloadingCity = document.getElementById('tender-unloading-city').value;
+            const unloadingZip = document.getElementById('tender-unloading-zip').value;
+            const price = document.getElementById('tender-price').value;
+            const driver = document.getElementById('tender-driver').value;
+            const status = document.getElementById('tender-status').value;
+            const salePrice = document.getElementById('tender-sale-price').value;
+            const paymentDays = document.getElementById('tender-payment-days').value;
+            const modalTitle = document.getElementById('tender-modal-title').textContent;
+
+            if (!loadingDate || !unloadingDate || !loadingCity || !loadingZip || !unloadingCity || !unloadingZip || !price) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedTenders;
+                if (modalTitle === 'Add Tender') {
+                    // Add new tender
+                    const newTender = {
+                        id: generateId(),
+                        loading: {
+                            date: loadingDate,
+                            city: loadingCity,
+                            zip: loadingZip
+                        },
+                        unloading: {
+                            date: unloadingDate,
+                            city: unloadingCity,
+                            zip: unloadingZip
+                        },
+                        price: parseFloat(price),
+                        driver: driver,
+                        status: status,
+                        sale: status === 'sold' ? {
+                            price: salePrice ? parseFloat(salePrice) : 0,
+                            paymentDays: parseInt(paymentDays),
+                            soldAt: now
+                        } : null,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedTenders = [...tenders, newTender];
+                } else {
+                    // Update existing tender
+                    const tenderId = document.getElementById('tender-modal').getAttribute('data-id');
+                    updatedTenders = tenders.map(tender => {
+                        if (tender.id === tenderId) {
+                            return {
+                                ...tender,
+                                loading: {
+                                    date: loadingDate,
+                                    city: loadingCity,
+                                    zip: loadingZip
+                                },
+                                unloading: {
+                                    date: unloadingDate,
+                                    city: unloadingCity,
+                                    zip: unloadingZip
+                                },
+                                price: parseFloat(price),
+                                driver: driver,
+                                status: status,
+                                sale: status === 'sold' ? {
+                                    price: salePrice ? parseFloat(salePrice) : 0,
+                                    paymentDays: parseInt(paymentDays),
+                                    soldAt: now
+                                } : null,
+                                updatedAt: now
+                            };
+                        }
+                        return tender;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.TENDERS,
+                    modalTitle === 'Add Tender' ? 'Add tender' : 'Update tender',
+                    utf8ToBase64(JSON.stringify(updatedTenders, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                closeModal();
+                renderTenders();
+                addNotification('Tender saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save tender: ' + error.message, 'error');
+                console.error('Save tender error:', error);
+            }
+        }
+
+        async function saveInvoice() {
+            const code = document.getElementById('invoice-code').value;
+            const client = document.getElementById('invoice-client').value;
+            const date = document.getElementById('invoice-date').value;
+            const dueDays = document.getElementById('invoice-due-days').value;
+            const notify = document.getElementById('invoice-notify').value;
+            const reminder = document.getElementById('invoice-reminder').value;
+            const status = document.getElementById('invoice-status').value;
+            const modalTitle = document.getElementById('invoice-modal-title').textContent;
+
+            if (!code || !client || !date || !dueDays) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const now = new Date().toISOString();
+                const dueDate = new Date(date);
+                dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
+
+                let updatedInvoices;
+                if (modalTitle === 'Add Invoice') {
+                    // Add new invoice
+                    const newInvoice = {
+                        id: generateId(),
+                        code: code,
+                        client: client,
+                        date: date,
+                        dueDays: parseInt(dueDays),
+                        dueDate: dueDate.toISOString().split('T')[0],
+                        notify: parseInt(notify),
+                        reminder: parseInt(reminder),
+                        status: status,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedInvoices = [...invoices, newInvoice];
+                } else {
+                    // Update existing invoice
+                    const invoiceId = document.getElementById('invoice-modal').getAttribute('data-id');
+                    updatedInvoices = invoices.map(invoice => {
+                        if (invoice.id === invoiceId) {
+                            return {
+                                ...invoice,
+                                code: code,
+                                client: client,
+                                date: date,
+                                dueDays: parseInt(dueDays),
+                                dueDate: dueDate.toISOString().split('T')[0],
+                                notify: parseInt(notify),
+                                reminder: parseInt(reminder),
+                                status: status,
+                                updatedAt: now
+                            };
+                        }
+                        return invoice;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.INVOICES,
+                    modalTitle === 'Add Invoice' ? 'Add invoice' : 'Update invoice',
+                    utf8ToBase64(JSON.stringify(updatedInvoices, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                closeModal();
+                renderInvoices();
+                addNotification('Invoice saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save invoice: ' + error.message, 'error');
+                console.error('Save invoice error:', error);
+            }
+        }
+
+        async function saveUser() {
+            const name = document.getElementById('user-name-input').value;
+            const lastname = document.getElementById('user-lastname').value;
+            const email = document.getElementById('user-email').value;
+            const password = document.getElementById('user-password').value;
+            const status = document.getElementById('user-status').value;
+            const supervisor = document.getElementById('user-supervisor').value;
+            const modalTitle = document.getElementById('user-modal-title').textContent;
+
+            if (!name || !lastname || !email || !password) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Validate email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                addNotification('Please enter a valid email address', 'error');
+                return;
+            }
+
+            try {
+                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedUsers;
+                if (modalTitle === 'Add User') {
+                    // Check if user already exists
+                    if (users.some(u => u.email === email)) {
+                        addNotification('User with this email already exists', 'error');
+                        return;
+                    }
+
+                    // Add new user
+                    const newUser = {
+                        id: generateId(),
+                        name: name,
+                        lastname: lastname,
+                        email: email,
+                        password: password,
+                        status: status,
+                        supervisor: supervisor || null,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedUsers = [...users, newUser];
+                } else {
+                    // Update existing user
+                    const userId = document.getElementById('user-modal').getAttribute('data-id');
+                    updatedUsers = users.map(user => {
+                        if (user.id === userId) {
+                            return {
+                                ...user,
+                                name: name,
+                                lastname: lastname,
+                                email: email,
+                                password: password,
+                                status: status,
+                                supervisor: supervisor || null,
+                                updatedAt: now
+                            };
+                        }
+                        return user;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.USERS,
+                    modalTitle === 'Add User' ? 'Add user' : 'Update user',
+                    utf8ToBase64(JSON.stringify(updatedUsers, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.users = { data: updatedUsers, sha: result.content.sha };
+                closeModal();
+                renderAdmin();
+                addNotification('User saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save user: ' + error.message, 'error');
+                console.error('Save user error:', error);
+            }
+        }
+
+        async function saveStatus() {
+            const name = document.getElementById('status-name').value;
+            const type = document.getElementById('status-type').value;
+            const color = document.getElementById('status-color').value;
+            const modalTitle = document.getElementById('status-modal-title').textContent;
+
+            if (!name || !type) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedStatuses;
+                if (modalTitle === 'Add Status') {
+                    // Add new status
+                    const newStatus = {
+                        id: generateId(),
+                        name: name,
+                        type: type,
+                        color: color,
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedStatuses = [...statuses, newStatus];
+                } else {
+                    // Update existing status
+                    const statusId = document.getElementById('status-modal').getAttribute('data-id');
+                    updatedStatuses = statuses.map(status => {
+                        if (status.id === statusId) {
+                            return {
+                                ...status,
+                                name: name,
+                                type: type,
+                                color: color,
+                                updatedAt: now
+                            };
+                        }
+                        return status;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.STATUSES,
+                    modalTitle === 'Add Status' ? 'Add status' : 'Update status',
+                    utf8ToBase64(JSON.stringify(updatedStatuses, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                closeModal();
+                renderAdmin();
+                addNotification('Status saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save status: ' + error.message, 'error');
+                console.error('Save status error:', error);
+            }
+        }
+
+        // Delete operations
+        async function deleteDriver(id) {
+            if (!confirm('Are you sure you want to delete this driver?')) {
+                return;
+            }
+
+            try {
+                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const updatedDrivers = drivers.filter(driver => driver.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.DRIVERS,
+                    'Delete driver',
+                    utf8ToBase64(JSON.stringify(updatedDrivers, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                renderDrivers();
+                addNotification('Driver deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete driver: ' + error.message, 'error');
+                console.error('Delete driver error:', error);
+            }
+        }
+
+        async function deleteCar(id) {
+            if (!confirm('Are you sure you want to delete this car?')) {
+                return;
+            }
+
+            try {
+                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const updatedCars = cars.filter(car => car.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.CARS,
+                    'Delete car',
+                    utf8ToBase64(JSON.stringify(updatedCars, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.cars = { data: updatedCars, sha: result.content.sha };
+                renderCars();
+                addNotification('Car deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete car: ' + error.message, 'error');
+                console.error('Delete car error:', error);
+            }
+        }
+
+        async function deleteCard(id) {
+            if (!confirm('Are you sure you want to delete this card?')) {
+                return;
+            }
+
+            try {
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const updatedCards = cards.filter(card => card.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.CARDS,
+                    'Delete card',
+                    utf8ToBase64(JSON.stringify(updatedCards, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.cards = { data: updatedCards, sha: result.content.sha };
+                renderCards();
+                addNotification('Card deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete card: ' + error.message, 'error');
+                console.error('Delete card error:', error);
+            }
+        }
+
+        async function deleteTender(id) {
+            if (!confirm('Are you sure you want to delete this tender?')) {
+                return;
+            }
+
+            try {
+                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const updatedTenders = tenders.filter(tender => tender.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.TENDERS,
+                    'Delete tender',
+                    utf8ToBase64(JSON.stringify(updatedTenders, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                renderTenders();
+                addNotification('Tender deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete tender: ' + error.message, 'error');
+                console.error('Delete tender error:', error);
+            }
+        }
+
+        async function deleteInvoice(id) {
+            if (!confirm('Are you sure you want to delete this invoice?')) {
+                return;
+            }
+
+            try {
+                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.INVOICES,
+                    'Delete invoice',
+                    utf8ToBase64(JSON.stringify(updatedInvoices, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                renderInvoices();
+                addNotification('Invoice deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete invoice: ' + error.message, 'error');
+                console.error('Delete invoice error:', error);
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Are you sure you want to delete this user?')) {
+                return;
+            }
+
+            try {
+                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const updatedUsers = users.filter(user => user.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.USERS,
+                    'Delete user',
+                    utf8ToBase64(JSON.stringify(updatedUsers, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.users = { data: updatedUsers, sha: result.content.sha };
+                renderAdmin();
+                addNotification('User deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete user: ' + error.message, 'error');
+                console.error('Delete user error:', error);
+            }
+        }
+
+        async function deleteStatus(id) {
+            if (!confirm('Are you sure you want to delete this status?')) {
+                return;
+            }
+
+            try {
+                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const updatedStatuses = statuses.filter(status => status.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.STATUSES,
+                    'Delete status',
+                    utf8ToBase64(JSON.stringify(updatedStatuses, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                renderAdmin();
+                addNotification('Status deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete status: ' + error.message, 'error');
+                console.error('Delete status error:', error);
+            }
+        }
+
+        // Render functions
+        function renderDashboard() {
+            updateDashboardStats();
+            checkExpirations();
+            loadRecentActivity();
+        }
+
+        function updateDashboardStats() {
+            // Active drivers
+            const activeDrivers = state.drivers.data.filter(d => d.status === 'active' || d.status === 'on-route').length;
+            document.getElementById('active-drivers').textContent = activeDrivers;
+
+            // Active tenders
+            const activeTenders = state.tenders.data.filter(t => 
+                t.status === 'pending' || t.status === 'on-route'
+            ).length;
+            document.getElementById('active-tenders').textContent = activeTenders;
+
+            // Monthly revenue
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            
+            const monthlyRevenue = state.tenders.data
+                .filter(t => {
+                    const tenderDate = new Date(t.loading.date);
+                    return tenderDate.getMonth() === currentMonth && 
+                           tenderDate.getFullYear() === currentYear;
+                })
+                .reduce((sum, t) => sum + t.price, 0);
+            
+            document.getElementById('monthly-revenue').textContent = '$' + monthlyRevenue.toLocaleString();
+
+            // Pending invoices
+            const pendingInvoices = state.invoices.data.filter(i => 
+                i.status === 'pending' || i.status === 'unpaid' || i.status === 'overdue'
+            ).length;
+            document.getElementById('pending-invoices').textContent = pendingInvoices;
+        }
+
+        function checkExpirations() {
+            const expirationsList = document.getElementById('expirations-list');
+            expirationsList.innerHTML = '';
+
+            const now = new Date();
+            let hasExpirations = false;
+
+            // Check car insurance
+            state.cars.data.forEach(car => {
+                const insuranceDate = new Date(car.insurance);
+                const notifyDays = car.insuranceNotify || 30;
+                const diffTime = insuranceDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays <= notifyDays && diffDays > 0) {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>${car.tractor}</strong> insurance expires in ${diffDays} days
+                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
+                } else if (diffDays <= 0) {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>${car.tractor}</strong> insurance has expired!
+                        <span class="badge status-danger" style="float: right;">Expired</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
+                }
+            });
+
+            // Check car inspection
+            state.cars.data.forEach(car => {
+                const inspectionDate = new Date(car.inspection);
+                const notifyDays = car.inspectionNotify || 30;
+                const diffTime = inspectionDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays <= notifyDays && diffDays > 0) {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>${car.tractor}</strong> inspection due in ${diffDays} days
+                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
+                } else if (diffDays <= 0) {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>${car.tractor}</strong> inspection has expired!
+                        <span class="badge status-danger" style="float: right;">Expired</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
+                }
+            });
+
+            // Check card expiry
+            state.cards.data.forEach(card => {
+                const expiryDate = new Date(card.expiry);
+                const notifyDays = card.notify || 30;
+                const diffTime = expiryDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays <= notifyDays && diffDays > 0) {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>Card ${card.number}</strong> expires in ${diffDays} days
+                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
+                } else if (diffDays <= 0) {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>Card ${card.number}</strong> has expired!
+                        <span class="badge status-danger" style="float: right;">Expired</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
+                }
+            });
+
+            // Check invoice due dates
+            state.invoices.data.forEach(invoice => {
+                if (invoice.status === 'pending' || invoice.status === 'unpaid') {
+                    const dueDate = new Date(invoice.dueDate);
+                    const notifyDays = invoice.notify || 7;
+                    const diffTime = dueDate - now;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays <= notifyDays && diffDays > 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>Invoice ${invoice.code}</strong> due in ${diffDays} days
+                            <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    } else if (diffDays <= 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>Invoice ${invoice.code}</strong> is overdue by ${Math.abs(diffDays)} days
+                            <span class="badge status-danger" style="float: right;">Overdue</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    }
+                }
+            });
+
+            if (!hasExpirations) {
+                const li = document.createElement('li');
+                li.textContent = 'No upcoming expirations';
+                expirationsList.appendChild(li);
+            }
+        }
+
+        function loadRecentActivity() {
+            const activityList = document.getElementById('recent-activity');
+            activityList.innerHTML = '';
+
+            // Get latest activities from all data types
+            const activities = [];
+
+            // Add recent drivers
+            const recentDrivers = [...state.drivers.data]
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .slice(0, 3);
+            
+            recentDrivers.forEach(driver => {
+                activities.push({
+                    type: 'driver',
+                    action: driver.createdAt === driver.updatedAt ? 'created' : 'updated',
+                    name: `${driver.name} ${driver.lastname}`,
+                    time: driver.updatedAt
+                });
+            });
+
+            // Add recent tenders
+            const recentTenders = [...state.tenders.data]
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .slice(0, 3);
+            
+            recentTenders.forEach(tender => {
+                activities.push({
+                    type: 'tender',
+                    action: tender.createdAt === tender.updatedAt ? 'created' : 'updated',
+                    name: `${tender.loading.city} → ${tender.unloading.city}`,
+                    time: tender.updatedAt
+                });
+            });
+
+            // Sort by time and get latest 5
+            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+            const latestActivities = activities.slice(0, 5);
+
+            if (latestActivities.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No recent activity';
+                activityList.appendChild(li);
+            } else {
+                latestActivities.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    const timeAgo = getTimeAgo(activity.time);
+                    li.innerHTML = `
+                        <strong>${activity.name}</strong> ${activity.action} (${activity.type})
+                        <span class="text-muted" style="float: right;">${timeAgo}</span>
+                    `;
+                    activityList.appendChild(li);
+                });
+            }
+        }
+
+        function renderDrivers() {
+            const tableBody = document.getElementById('drivers-table-body');
+            tableBody.innerHTML = '';
+
+            if (state.drivers.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="6" class="text-center">No drivers found</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            // Populate car and card select options
+            const carSelect = document.getElementById('driver-car');
+            const cardSelect = document.getElementById('driver-card');
+            
+            carSelect.innerHTML = '<option value="">Select Car</option>';
+            cardSelect.innerHTML = '<option value="">Select Card</option>';
+            
+            state.cars.data.forEach(car => {
+                const option = document.createElement('option');
+                option.value = car.id;
+                option.textContent = `${car.tractor} / ${car.trailer}`;
+                carSelect.appendChild(option);
+            });
+            
+            state.cards.data.forEach(card => {
+                const option = document.createElement('option');
+                option.value = card.id;
+                option.textContent = card.number;
+                cardSelect.appendChild(option);
+            });
+
+            state.drivers.data.forEach(driver => {
+                const row = document.createElement('tr');
+                
+                // Find car and card details
+                const car = state.cars.data.find(c => c.id === driver.car) || {};
+                const card = state.cards.data.find(c => c.id === driver.card) || {};
+                
+                row.innerHTML = `
+                    <td>${driver.name} ${driver.lastname}</td>
+                    <td>${car.tractor || 'Not assigned'}</td>
+                    <td>${card.number || 'Not assigned'}</td>
+                    <td><span class="status-badge status-${getStatusColor(driver.status)}">${driver.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-driver" data-id="${driver.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-driver" data-id="${driver.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-driver').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editDriver(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-driver').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteDriver(this.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function renderCars() {
+            const tableBody = document.getElementById('cars-table-body');
+            tableBody.innerHTML = '';
+
+            if (state.cars.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="8" class="text-center">No cars found</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            state.cars.data.forEach(car => {
+                const row = document.createElement('tr');
+                
+                const insuranceDate = new Date(car.insurance);
+                const inspectionDate = new Date(car.inspection);
+                const now = new Date();
+                
+                const insuranceDiff = Math.ceil((insuranceDate - now) / (1000 * 60 * 60 * 24));
+                const inspectionDiff = Math.ceil((inspectionDate - now) / (1000 * 60 * 60 * 24));
+                
+                const insuranceStatus = insuranceDiff <= 0 ? 'danger' : 
+                                      insuranceDiff <= (car.insuranceNotify || 30) ? 'warning' : 'active';
+                
+                const inspectionStatus = inspectionDiff <= 0 ? 'danger' : 
+                                       inspectionDiff <= (car.inspectionNotify || 30) ? 'warning' : 'active';
+
+                row.innerHTML = `
+                    <td>${car.tractor}</td>
+                    <td>${car.trailer}</td>
+                    <td>${car.cubic} m³ (${car.maxWeight} kg)</td>
+                    <td>
+                        ${car.insurance}
+                        <span class="status-badge status-${insuranceStatus}">${insuranceDiff > 0 ? insuranceDiff + ' days' : 'Expired'}</span>
+                    </td>
+                    <td>
+                        ${car.inspection}
+                        <span class="status-badge status-${inspectionStatus}">${inspectionDiff > 0 ? inspectionDiff + ' days' : 'Expired'}</span>
+                    </td>
+                    <td><span class="status-badge status-${getStatusColor(car.status)}">${car.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-car" data-id="${car.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-car" data-id="${car.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-car').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editCar(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-car').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteCar(this.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function renderCards() {
+            const tableBody = document.getElementById('cards-table-body');
+            tableBody.innerHTML = '';
+
+            if (state.cards.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" class="text-center">No cards found</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            state.cards.data.forEach(card => {
+                const row = document.createElement('tr');
+                
+                const expiryDate = new Date(card.expiry);
+                const now = new Date();
+                const diff = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+                
+                const status = diff <= 0 ? 'danger' : 
+                             diff <= (card.notify || 30) ? 'warning' : 'active';
+
+                row.innerHTML = `
+                    <td>${card.number}</td>
+                    <td>${card.pin}</td>
+                    <td>${card.expiry}</td>
+                    <td><span class="status-badge status-${status}">${diff > 0 ? diff + ' days' : 'Expired'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-card" data-id="${card.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-card" data-id="${card.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-card').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editCard(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-card').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteCard(this.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function renderTenders() {
+            const tableBody = document.getElementById('tenders-table-body');
+            tableBody.innerHTML = '';
+
+            if (state.tenders.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="6" class="text-center">No tenders found</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            // Populate driver select options
+            const driverSelect = document.getElementById('tender-driver');
+            driverSelect.innerHTML = '<option value="">Select Driver</option>';
+            
+            state.drivers.data.forEach(driver => {
+                const option = document.createElement('option');
+                option.value = driver.id;
+                option.textContent = `${driver.name} ${driver.lastname}`;
+                driverSelect.appendChild(option);
+            });
+
+            state.tenders.data.forEach(tender => {
+                const row = document.createElement('tr');
+                
+                // Find driver details
+                const driver = state.drivers.data.find(d => d.id === tender.driver) || {};
+                
+                row.innerHTML = `
+                    <td>
+                        ${tender.loading.city}<br>
+                        <small>${new Date(tender.loading.date).toLocaleString()}</small>
+                    </td>
+                    <td>
+                        ${tender.unloading.city}<br>
+                        <small>${new Date(tender.unloading.date).toLocaleString()}</small>
+                    </td>
+                    <td>$${tender.price.toLocaleString()}</td>
+                    <td>${driver.name ? `${driver.name} ${driver.lastname}` : 'Not assigned'}</td>
+                    <td><span class="status-badge status-${getStatusColor(tender.status)}">${tender.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-tender" data-id="${tender.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-tender" data-id="${tender.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-tender').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editTender(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-tender').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteTender(this.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function renderInvoices() {
+            const tableBody = document.getElementById('invoices-table-body');
+            tableBody.innerHTML = '';
+
+            if (state.invoices.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="6" class="text-center">No invoices found</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            state.invoices.data.forEach(invoice => {
+                const row = document.createElement('tr');
+                
+                const dueDate = new Date(invoice.dueDate);
+                const now = new Date();
+                const diff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+                
+                let status = invoice.status;
+                if (invoice.status === 'pending' || invoice.status === 'unpaid') {
+                    if (diff < 0) {
+                        status = 'overdue';
+                    }
+                }
+
+                row.innerHTML = `
+                    <td>${invoice.code}</td>
+                    <td>${invoice.client}</td>
+                    <td>${invoice.date}</td>
+                    <td>${invoice.dueDate} (${diff} days)</td>
+                    <td><span class="status-badge status-${getStatusColor(status)}">${status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-invoice" data-id="${invoice.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-invoice" data-id="${invoice.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-invoice').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editInvoice(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-invoice').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteInvoice(this.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function renderReports() {
+            // Revenue chart
+            const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Loading chart
+            const loadingCtx = document.getElementById('loading-chart').getContext('2d');
+            new Chart(loadingCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [{
+                        label: '% Loading',
+                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
+                        backgroundColor: '#3498db'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Revenue breakdown chart
+            const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
+            new Chart(breakdownCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Domestic', 'International', 'Express', 'Special'],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
+                    }]
+                },
+                options: {
+                    responsive: true
+                }
+            });
+
+            // Top drivers
+            const topDrivers = document.getElementById('top-drivers');
+            topDrivers.innerHTML = '';
+            
+            const sortedDrivers = [...state.drivers.data]
+                .sort(() => Math.random() - 0.5) // Random sorting for demo
+                .slice(0, 5);
+            
+            sortedDrivers.forEach((driver, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.innerHTML = `
+                    <div>
+                        <strong>#${index + 1} ${driver.name} ${driver.lastname}</strong><br>
+                        <small>$${Math.floor(Math.random() * 10000) + 5000} revenue</small>
+                    </div>
+                    <span class="badge bg-primary rounded-pill">${Math.floor(Math.random() * 20) + 10} trips</span>
+                `;
+                topDrivers.appendChild(li);
+            });
+        }
+
+        function renderAdmin() {
+            // Users tab
+            const usersTableBody = document.getElementById('users-table-body');
+            usersTableBody.innerHTML = '';
+
+            if (state.users.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" class="text-center">No users found</td>';
+                usersTableBody.appendChild(row);
+                return;
+            }
+
+            // Populate supervisor select
+            const supervisorSelect = document.getElementById('user-supervisor');
+            supervisorSelect.innerHTML = '<option value="">None</option>';
+            
+            state.users.data.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} ${user.lastname}`;
+                supervisorSelect.appendChild(option);
+            });
+
+            state.users.data.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Find supervisor
+                const supervisor = state.users.data.find(u => u.id === user.supervisor) || {};
+                
+                row.innerHTML = `
+                    <td>${user.name} ${user.lastname}</td>
+                    <td>${user.email}</td>
+                    <td><span class="status-badge status-${getStatusColor(user.status)}">${user.status}</span></td>
+                    <td>${supervisor.name ? `${supervisor.name} ${supervisor.lastname}` : 'None'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-user" data-id="${user.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-user" data-id="${user.id}">Delete</button>
+                    </td>
+                `;
+                
+                usersTableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editUser(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-user').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteUser(this.getAttribute('data-id'));
+                });
+            });
+
+            // Build organization tree
+            buildOrgTree();
+        }
+
+        function buildOrgTree() {
+            const orgTree = document.getElementById('org-tree');
+            orgTree.innerHTML = '';
+
+            // Find root users (those with no supervisor or supervisor not in list)
+            const rootUsers = state.users.data.filter(user => 
+                !user.supervisor || !state.users.data.some(u => u.id === user.supervisor)
+            );
+
+            rootUsers.forEach(user => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <strong>${user.name} ${user.lastname}</strong> (${user.status})
+                `;
+                orgTree.appendChild(li);
+                
+                // Add subordinates
+                const subordinates = state.users.data.filter(u => u.supervisor === user.id);
+                if (subordinates.length > 0) {
+                    const ul = document.createElement('ul');
+                    subordinates.forEach(sub => {
+                        const subLi = document.createElement('li');
+                        subLi.innerHTML = `
+                            ${sub.name} ${sub.lastname} (${sub.status})
+                        `;
+                        ul.appendChild(subLi);
+                    });
+                    li.appendChild(ul);
+                }
+            });
+        }
+
+        function renderChat() {
+            const chatUsersList = document.getElementById('chat-users-list');
+            chatUsersList.innerHTML = '';
+
+            state.users.data.forEach(user => {
+                if (user.id !== state.currentUser.id) {
+                    const div = document.createElement('div');
+                    div.className = 'chat-user';
+                    div.setAttribute('data-user', user.id);
+                    div.innerHTML = `
+                        <strong>${user.name} ${user.lastname}</strong><br>
+                        <small>${user.status}</small>
+                    `;
+                    chatUsersList.appendChild(div);
+                }
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.chat-user').forEach(user => {
+                user.addEventListener('click', function() {
+                    document.querySelectorAll('.chat-user').forEach(u => {
+                        u.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        // Modal functions
+        function openModal(type, id = null) {
+            const modal = document.getElementById(`${type}-modal`);
+            const modalTitle = document.getElementById(`${type}-modal-title`);
+            
+            if (id) {
+                modalTitle.textContent = `Edit ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                modal.setAttribute('data-id', id);
+                
+                // Populate form with existing data
+                if (type === 'driver') {
+                    const driver = state.drivers.data.find(d => d.id === id);
+                    document.getElementById('driver-name').value = driver.name;
+                    document.getElementById('driver-lastname').value = driver.lastname;
+                    document.getElementById('driver-car').value = driver.car || '';
+                    document.getElementById('driver-card').value = driver.card || '';
+                    document.getElementById('driver-status').value = driver.status;
+                } else if (type === 'car') {
+                    const car = state.cars.data.find(c => c.id === id);
+                    document.getElementById('car-tractor').value = car.tractor;
+                    document.getElementById('car-trailer').value = car.trailer;
+                    document.getElementById('car-max-weight').value = car.maxWeight;
+                    document.getElementById('car-length').value = car.length;
+                    document.getElementById('car-width').value = car.width;
+                    document.getElementById('car-height').value = car.height;
+                    document.getElementById('car-cubic').value = car.cubic;
+                    document.getElementById('car-insurance').value = car.insurance;
+                    document.getElementById('car-inspection').value = car.inspection;
+                    document.getElementById('car-insurance-notify').value = car.insuranceNotify;
+                    document.getElementById('car-inspection-notify').value = car.inspectionNotify;
+                    document.getElementById('car-status').value = car.status;
+                } else if (type === 'card') {
+                    const card = state.cards.data.find(c => c.id === id);
+                    document.getElementById('card-number').value = card.number;
+                    document.getElementById('card-pin').value = card.pin;
+                    document.getElementById('card-expiry').value = card.expiry;
+                    document.getElementById('card-notify').value = card.notify;
+                    document.getElementById('card-reminder').value = card.reminder;
+                    document.getElementById('card-status').value = card.status;
+                } else if (type === 'tender') {
+                    const tender = state.tenders.data.find(t => t.id === id);
+                    document.getElementById('tender-loading-date').value = tender.loading.date;
+                    document.getElementById('tender-unloading-date').value = tender.unloading.date;
+                    document.getElementById('tender-loading-city').value = tender.loading.city;
+                    document.getElementById('tender-loading-zip').value = tender.loading.zip;
+                    document.getElementById('tender-unloading-city').value = tender.unloading.city;
+                    document.getElementById('tender-unloading-zip').value = tender.unloading.zip;
+                    document.getElementById('tender-price').value = tender.price;
+                    document.getElementById('tender-driver').value = tender.driver || '';
+                    document.getElementById('tender-status').value = tender.status;
+                    
+                    if (tender.status === 'sold') {
+                        document.getElementById('tender-sale-fields').classList.remove('hidden');
+                        document.getElementById('tender-sale-price').value = tender.sale.price;
+                        document.getElementById('tender-payment-days').value = tender.sale.paymentDays;
+                    } else {
+                        document.getElementById('tender-sale-fields').classList.add('hidden');
+                    }
+                } else if (type === 'invoice') {
+                    const invoice = state.invoices.data.find(i => i.id === id);
+                    document.getElementById('invoice-code').value = invoice.code;
+                    document.getElementById('invoice-client').value = invoice.client;
+                    document.getElementById('invoice-date').value = invoice.date;
+                    document.getElementById('invoice-due-days').value = invoice.dueDays;
+                    document.getElementById('invoice-notify').value = invoice.notify;
+                    document.getElementById('invoice-reminder').value = invoice.reminder;
+                    document.getElementById('invoice-status').value = invoice.status;
+                } else if (type === 'user') {
+                    const user = state.users.data.find(u => u.id === id);
+                    document.getElementById('user-name-input').value = user.name;
+                    document.getElementById('user-lastname').value = user.lastname;
+                    document.getElementById('user-email').value = user.email;
+                    document.getElementById('user-password').value = user.password;
+                    document.getElementById('user-status').value = user.status;
+                    document.getElementById('user-supervisor').value = user.supervisor || '';
+                } else if (type === 'status') {
+                    const status = state.statuses.data.find(s => s.id === id);
+                    document.getElementById('status-name').value = status.name;
+                    document.getElementById('status-type').value = status.type;
+                    document.getElementById('status-color').value = status.color;
+                }
+            } else {
+                modalTitle.textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                modal.removeAttribute('data-id');
+                
+                // Clear form
+                if (type === 'driver') {
+                    document.getElementById('driver-name').value = '';
+                    document.getElementById('driver-lastname').value = '';
+                    document.getElementById('driver-car').value = '';
+                    document.getElementById('driver-card').value = '';
+                    document.getElementById('driver-status').value = 'active';
+                } else if (type === 'car') {
+                    document.getElementById('car-tractor').value = '';
+                    document.getElementById('car-trailer').value = '';
+                    document.getElementById('car-max-weight').value = '';
+                    document.getElementById('car-length').value = '';
+                    document.getElementById('car-width').value = '';
+                    document.getElementById('car-height').value = '';
+                    document.getElementById('car-cubic').value = '';
+                    document.getElementById('car-insurance').value = '';
+                    document.getElementById('car-inspection').value = '';
+                    document.getElementById('car-insurance-notify').value = '30';
+                    document.getElementById('car-inspection-notify').value = '30';
+                    document.getElementById('car-status').value = 'active';
+                } else if (type === 'card') {
+                    document.getElementById('card-number').value = '';
+                    document.getElementById('card-pin').value = '';
+                    document.getElementById('card-expiry').value = '';
+                    document.getElementById('card-notify').value = '30';
+                    document.getElementById('card-reminder').value = '7';
+                    document.getElementById('card-status').value = 'active';
+                } else if (type === 'tender') {
+                    document.getElementById('tender-loading-date').value = '';
+                    document.getElementById('tender-unloading-date').value = '';
+                    document.getElementById('tender-loading-city').value = '';
+                    document.getElementById('tender-loading-zip').value = '';
+                    document.getElementById('tender-unloading-city').value = '';
+                    document.getElementById('tender-unloading-zip').value = '';
+                    document.getElementById('tender-price').value = '';
+                    document.getElementById('tender-driver').value = '';
+                    document.getElementById('tender-status').value = 'unassigned';
+                    document.getElementById('tender-sale-fields').classList.add('hidden');
+                    document.getElementById('tender-sale-price').value = '';
+                    document.getElementById('tender-payment-days').value = '30';
+                } else if (type === 'invoice') {
+                    document.getElementById('invoice-code').value = '';
+                    document.getElementById('invoice-client').value = '';
+                    document.getElementById('invoice-date').value = '';
+                    document.getElementById('invoice-due-days').value = '30';
+                    document.getElementById('invoice-notify').value = '7';
+                    document.getElementById('invoice-reminder').value = '3';
+                    document.getElementById('invoice-status').value = 'pending';
+                } else if (type === 'user') {
+                    document.getElementById('user-name-input').value = '';
+                    document.getElementById('user-lastname').value = '';
+                    document.getElementById('user-email').value = '';
+                    document.getElementById('user-password').value = '';
+                    document.getElementById('user-status').value = 'user';
+                    document.getElementById('user-supervisor').value = '';
+                } else if (type === 'status') {
+                    document.getElementById('status-name').value = '';
+                    document.getElementById('status-type').value = 'driver';
+                    document.getElementById('status-color').value = 'active';
+                }
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+            });
+        }
+
+        // Edit functions
+        function editDriver(id) {
+            openModal('driver', id);
+        }
+
+        function editCar(id) {
+            openModal('car', id);
+        }
+
+        function editCard(id) {
+            openModal('card', id);
+        }
+
+        function editTender(id) {
+            openModal('tender', id);
+        }
+
+        function editInvoice(id) {
+            openModal('invoice', id);
+        }
+
+        function editUser(id) {
+            openModal('user', id);
+        }
+
+        function editStatus(id) {
+            openModal('status', id);
+        }
+
+        // Helper functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function getStatusColor(status) {
+            const statusMap = {
+                'active': 'active',
+                'on-route': 'active',
+                'pending': 'pending',
+                'inactive': 'inactive',
+                'maintenance': 'warning',
+                'inspection': 'warning',
+                'expired': 'danger',
+                'expiring': 'warning',
+                'delivered': 'completed',
+                'cancelled': 'danger',
+                'sold': 'success',
+                'paid': 'completed',
+                'unpaid': 'warning',
+                'overdue': 'danger'
+            };
+            return statusMap[status] || 'active';
+        }
+
+        function calculateCubicCapacity() {
+            const length = parseFloat(document.getElementById('car-length').value) || 0;
+            const width = parseFloat(document.getElementById('car-width').value) || 0;
+            const height = parseFloat(document.getElementById('car-height').value) || 0;
+            
+            const cubic = length * width * height;
+            document.getElementById('car-cubic').value = cubic.toFixed(2);
+        }
+
+        function getTimeAgo(dateString) {
+            const now = new Date();
+            const past = new Date(dateString);
+            const diff = now - past;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) {
+                return days + ' days ago';
+            } else if (hours > 0) {
+                return hours + ' hours ago';
+            } else if (minutes > 0) {
+                return minutes + ' minutes ago';
+            } else {
+                return seconds + ' seconds ago';
+            }
+        }
+
+        // Chat functions
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            try {
+                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
+                const now = new Date().toISOString();
+                
+                const newMessage = {
+                    id: generateId(),
+                    userId: state.currentUser.id,
+                    message: message,
+                    timestamp: now
+                };
+                
+                const updatedChat = [...chat, newMessage];
+                
+                const result = await updateFile(
+                    FILE_PATHS.CHAT,
+                    'New chat message',
+                    utf8ToBase64(JSON.stringify(updatedChat, null, 2)),
+                    sha
+                );
+                
+                // Update local state with new SHA
+                state.chat = { data: updatedChat, sha: result.content.sha };
+                renderChatMessages();
+                input.value = '';
+            } catch (error) {
+                addNotification('Failed to send message: ' + error.message, 'error');
+                console.error('Send message error:', error);
+            }
+        }
+
+        function renderChatMessages() {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+            
+            if (!state.chat.data || state.chat.data.length === 0) {
+                const div = document.createElement('div');
+                div.className = 'message other';
+                div.innerHTML = `
+                    <div class="message-content">No messages yet</div>
+                    <div class="message-meta">System - just now</div>
+                `;
+                messagesContainer.appendChild(div);
+                return;
+            }
+            
+            state.chat.data.forEach(msg => {
+                const user = state.users.data.find(u => u.id === msg.userId);
+                const isOwn = msg.userId === state.currentUser.id;
+                
+                const div = document.createElement('div');
+                div.className = `message ${isOwn ? 'own' : 'other'}`;
+                
+                const timeAgo = getTimeAgo(msg.timestamp);
+                
+                div.innerHTML = `
+                    <div class="message-content">${msg.message}</div>
+                    <div class="message-meta">${user ? `${user.name} ${user.lastname}` : 'Unknown'} - ${timeAgo}</div>
+                `;
+                
+                messagesContainer.appendChild(div);
+            });
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Notification functions
+        function addNotification(message, type = 'info') {
+            const notification = {
+                id: generateId(),
+                message: message,
+                type: type,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            state.notifications.unshift(notification);
+            state.unreadNotifications++;
+            
+            updateNotificationUI();
+            showTemporaryNotification(message, type);
+        }
+
+        function updateNotificationUI() {
+            const countEl = document.getElementById('notification-count');
+            countEl.textContent = state.unreadNotifications;
+            
+            const panel = document.getElementById('notification-panel');
+            
+            if (state.notifications.length === 0) {
+                panel.innerHTML = '<div class="notification-item">No notifications</div>';
+            } else {
+                panel.innerHTML = '';
+                state.notifications.forEach(notif => {
+                    const item = document.createElement('div');
+                    item.className = `notification-item ${!notif.read ? 'unread' : ''}`;
+                    
+                    const typeClass = {
+                        'success': 'text-success',
+                        'error': 'text-danger',
+                        'warning': 'text-warning',
+                        'info': 'text-info'
+                    }[notif.type] || '';
+                    
+                    item.innerHTML = `
+                        <div class="notification-title ${typeClass}">${notif.message}</div>
+                        <div class="notification-time">${getTimeAgo(notif.timestamp)}</div>
+                    `;
+                    
+                    panel.appendChild(item);
+                });
+            }
+        }
+
+        function showTemporaryNotification(message, type) {
+            // Create temporary notification element
+            const tempNotification = document.createElement('div');
+            tempNotification.style.position = 'fixed';
+            tempNotification.style.top = '20px';
+            tempNotification.style.right = '20px';
+            tempNotification.style.backgroundColor = type === 'error' ? '#e74c3c' : 
+                                                 type === 'success' ? '#2ecc71' : '#3498db';
+            tempNotification.style.color = 'white';
+            tempNotification.style.padding = '15px 20px';
+            tempNotification.style.borderRadius = '5px';
+            tempNotification.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+            tempNotification.style.zIndex = '3000';
+            tempNotification.style.transition = 'opacity 0.3s';
+            tempNotification.textContent = message;
+            
+            document.body.appendChild(tempNotification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                tempNotification.style.opacity = '0';
+                setTimeout(() => {
+                    if (tempNotification.parentNode) {
+                        document.body.removeChild(tempNotification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // UI functions
+        function showRegister(e) {
+            e.preventDefault();
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        function showLogin(e) {
+            e.preventDefault();
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+        }
+
+        function showApp() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+            
+            // Update user info
+            if (state.currentUser) {
+                document.getElementById('user-name').textContent = `${state.currentUser.name} ${state.currentUser.lastname}`;
+                document.getElementById('user-avatar').textContent = state.currentUser.name.charAt(0) + state.currentUser.lastname.charAt(0);
+                
+                // Show admin menu if user is admin
+                if (state.currentUser.status === 'admin') {
+                    document.getElementById('admin-menu').style.display = 'flex';
+                }
+                
+                // Navigate to dashboard
+                navigateTo('dashboard');
+            } else {
+                addNotification('User information is missing', 'error');
+                console.error('state.currentUser is null or undefined in showApp()');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('transforward_user');
+            state.currentUser = null;
+            state.githubToken = '';
+            state.repoName = '';
+            
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('auth-container').classList.remove('hidden');
+            
+            // Reset forms
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-token').value = '';
+            document.getElementById('login-repo').value = '';
+        }
+
+        function toggleUserDropdown() {
+            document.getElementById('user-dropdown').classList.toggle('show');
+        }
+
+        function toggleNotificationPanel() {
+            document.getElementById('notification-panel').classList.toggle('show');
+            
+            // Mark all notifications as read
+            if (state.unreadNotifications > 0) {
+                state.unreadNotifications = 0;
+                updateNotificationUI();
+            }
+        }
+
+        function activateTab(tabId) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tab content
+            document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+        }
+
+        // Navigation
+        function navigateTo(view) {
+            state.currentView = view;
+            
+            // Update active nav item
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-view') === view) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Hide all views
+            document.querySelectorAll('#app > .main-content > div[id$="-view"]').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // Show current view
+            document.getElementById(`${view}-view`).classList.remove('hidden');
+            
+            // Update page title
+            document.getElementById('page-title').textContent = 
+                view.charAt(0).toUpperCase() + view.slice(1);
+                
+            // Special handling for admin view
+            if (view === 'admin') {
+                if (state.currentUser && state.currentUser.status !== 'admin') {
+                    addNotification('Access denied', 'error');
+                    navigateTo('dashboard');
+                    return;
+                }
+            }
+            
+            // Load data for the view
+            loadDataForView(view);
+        }
+
+        function loadDataForView(view) {
+            switch (view) {
+                case 'drivers':
+                    renderDrivers();
+                    break;
+                case 'cars':
+                    renderCars();
+                    break;
+                case 'cards':
+                    renderCards();
+                    break;
+                case 'tenders':
+                    renderTenders();
+                    break;
+                case 'invoices':
+                    renderInvoices();
+                    break;
+                case 'reports':
+                    renderReports();
+                    break;
+                case 'admin':
+                    renderAdmin();
+                    break;
+                case 'chat':
+                    renderChat();
+                    break;
+                default:
+                    renderDashboard();
+            }
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', function(event) {
+            document.querySelectorAll('.modal').forEach(modal => {
+                if (event.target === modal) {
+                    modal.classList.remove('show');
+                }
+            });
+            
+            // Close dropdowns when clicking outside
+            if (!event.target.closest('.user-info') && !event.target.closest('.dropdown-menu')) {
+                document.getElementById('user-dropdown').classList.remove('show');
+            }
+            
+            if (!event.target.closest('.notification-icon') && !event.target.closest('.notification-panel')) {
+                document.getElementById('notification-panel').classList.remove('show');
+            }
+        });
+
+        // Close modals with escape key
+        window.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                document.getElementById('user-dropdown').classList.remove('show');
+                document.getElementById('notification-panel').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -741,6 +741,81 @@
         .tree li:last-child::after {
             height: 10px;
         }
+
+        /* Status hierarchy */
+        .status-hierarchy {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+
+        .status-hierarchy-item {
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-hierarchy-item .status-badge {
+            padding: 3px 6px;
+            font-size: 11px;
+        }
+
+        .status-hierarchy-item .actions {
+            margin-left: auto;
+            display: none;
+        }
+
+        .status-hierarchy-item:hover .actions {
+            display: flex;
+        }
+
+        .status-hierarchy-item .actions button {
+            padding: 2px 5px;
+            margin-left: 5px;
+            font-size: 12px;
+        }
+
+        .status-hierarchy-item.dragging {
+            opacity: 0.5;
+        }
+
+        .status-hierarchy-item.placeholder {
+            height: 30px;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+
+        /* Car type dimensions */
+        .car-type-dimensions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .car-type-dimensions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .car-type-dimensions .form-group {
+            margin-bottom: 0;
+        }
+
+        /* Status selector */
+        .status-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .status-selector {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -927,7 +1002,6 @@
                 <div class="card">
                     <div class="card-header">
                         Drivers Management
-                        <button class="btn btn-primary" id="add-driver-btn">Add Driver</button>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -938,6 +1012,7 @@
                                         <th>Car</th>
                                         <th>Card</th>
                                         <th>Status</th>
+                                        <th>Sub-Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -964,6 +1039,7 @@
                                     <tr>
                                         <th>Tractor Plate</th>
                                         <th>Trailer Plate</th>
+                                        <th>Type</th>
                                         <th>Capacity</th>
                                         <th>Insurance</th>
                                         <th>Inspection</th>
@@ -1045,6 +1121,7 @@
                                         <th>Price</th>
                                         <th>Driver</th>
                                         <th>Status</th>
+                                        <th>Sub-Status</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -1133,6 +1210,7 @@
                 <div class="tabs">
                     <div class="tab active" data-tab="users">Users</div>
                     <div class="tab" data-tab="statuses">Statuses</div>
+                    <div class="tab" data-tab="cartypes">Car Types</div>
                     <div class="tab" data-tab="migration">Migration</div>
                 </div>
                 
@@ -1181,18 +1259,63 @@
                             <button class="btn btn-primary" id="add-status-btn">Add Status</button>
                         </div>
                         <div class="card-body">
+                            <div class="form-group">
+                                <label for="status-type-filter">Filter by Type</label>
+                                <select class="form-control" id="status-type-filter">
+                                    <option value="all">All Types</option>
+                                    <option value="driver">Driver</option>
+                                    <option value="car">Car</option>
+                                    <option value="card">Card</option>
+                                    <option value="tender">Tender</option>
+                                    <option value="invoice">Invoice</option>
+                                </select>
+                            </div>
+                            
+                            <div class="card mt-3">
+                                <div class="card-header">Driver Status Hierarchy</div>
+                                <div class="card-body">
+                                    <div class="status-hierarchy" id="driver-status-hierarchy">
+                                        <!-- Driver statuses will be populated here -->
+                                    </div>
+                                    <button class="btn btn-primary mt-3" id="add-driver-status-btn">Add Driver Status</button>
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-3">
+                                <div class="card-header">Car Status Hierarchy</div>
+                                <div class="card-body">
+                                    <div class="status-hierarchy" id="car-status-hierarchy">
+                                        <!-- Car statuses will be populated here -->
+                                    </div>
+                                    <button class="btn btn-primary mt-3" id="add-car-status-btn">Add Car Status</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Car Types Tab -->
+                <div class="tab-content hidden" id="cartypes-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            Car Types Management
+                            <button class="btn btn-primary" id="add-cartype-btn">Add Car Type</button>
+                        </div>
+                        <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
                                         <tr>
-                                            <th>Status Name</th>
-                                            <th>Type</th>
-                                            <th>Color</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Dimensions (LxWxH)</th>
+                                            <th>Max Weight</th>
+                                            <th>Tandem</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="statuses-table-body">
-                                        <!-- Statuses will be populated here -->
+                                    <tbody id="cartypes-table-body">
+                                        <!-- Car types will be populated here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -1283,13 +1406,22 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="driver-status">Status</label>
-                    <select class="form-control" id="driver-status">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="on-route">On Route</option>
-                        <option value="maintenance">Maintenance</option>
+                    <label for="driver-on-break">On Break</label>
+                    <select class="form-control" id="driver-on-break">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="driver-on-vacation">On Vacation</label>
+                    <select class="form-control" id="driver-on-vacation">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="driver-work-hours">Work Hours</label>
+                    <input type="text" class="form-control" id="driver-work-hours" placeholder="e.g. 8:00-17:00" required>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1314,6 +1446,12 @@
                 <div class="form-group">
                     <label for="car-trailer">Trailer Plate Number</label>
                     <input type="text" class="form-control" id="car-trailer" required>
+                </div>
+                <div class="form-group">
+                    <label for="car-type">Car Type</label>
+                    <select class="form-control" id="car-type">
+                        <option value="">Select Type</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="car-max-weight">Max Weight (kg)</label>
@@ -1374,10 +1512,7 @@
                 <div class="form-group">
                     <label for="car-status">Status</label>
                     <select class="form-control" id="car-status">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="inspection">Inspection Due</option>
+                        <!-- Will be populated from statuses -->
                     </select>
                 </div>
             </div>
@@ -1419,10 +1554,7 @@
                 <div class="form-group">
                     <label for="card-status">Status</label>
                     <select class="form-control" id="card-status">
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                        <option value="expired">Expired</option>
-                        <option value="expiring">Expiring Soon</option>
+                        <!-- Will be populated from statuses -->
                     </select>
                 </div>
             </div>
@@ -1493,16 +1625,19 @@
                         <option value="">Select Driver</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="tender-status">Status</label>
-                    <select class="form-control" id="tender-status">
-                        <option value="unassigned">Unassigned</option>
-                        <option value="pending">Pending</option>
-                        <option value="on-route">On Route</option>
-                        <option value="delivered">Delivered</option>
-                        <option value="cancelled">Cancelled</option>
-                        <option value="sold">Sold</option>
-                    </select>
+                <div class="status-selector">
+                    <div class="form-group">
+                        <label for="tender-status">Status</label>
+                        <select class="form-control" id="tender-status">
+                            <!-- Will be populated from driver statuses -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tender-substatus">Sub-Status</label>
+                        <select class="form-control" id="tender-substatus">
+                            <!-- Will be populated based on selected status -->
+                        </select>
+                    </div>
                 </div>
                 <div id="tender-sale-fields" class="hidden">
                     <div class="form-group">
@@ -1563,10 +1698,7 @@
                 <div class="form-group">
                     <label for="invoice-status">Status</label>
                     <select class="form-control" id="invoice-status">
-                        <option value="pending">Pending</option>
-                        <option value="paid">Paid</option>
-                        <option value="unpaid">Unpaid</option>
-                        <option value="overdue">Overdue</option>
+                        <!-- Will be populated from statuses -->
                     </select>
                 </div>
             </div>
@@ -1646,18 +1778,82 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="status-is-primary">Status Level</label>
+                    <select class="form-control" id="status-is-primary">
+                        <option value="true">Primary Status</option>
+                        <option value="false">Sub-Status</option>
+                    </select>
+                </div>
+                <div class="form-group" id="status-parent-container" style="display: none;">
+                    <label for="status-parent">Parent Status</label>
+                    <select class="form-control" id="status-parent">
+                        <!-- Will be populated based on type -->
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="status-color">Color</label>
                     <select class="form-control" id="status-color">
                         <option value="active">Green (Active)</option>
                         <option value="pending">Yellow (Pending)</option>
                         <option value="inactive">Red (Inactive)</option>
                         <option value="completed">Blue (Completed)</option>
+                        <option value="warning">Orange (Warning)</option>
+                        <option value="danger">Dark Red (Danger)</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="status-cancel">Cancel</button>
                 <button class="btn btn-primary" id="status-save">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Car Type Modal -->
+    <div class="modal" id="cartype-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="cartype-modal-title">Add Car Type</h5>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cartype-name">Name</label>
+                    <input type="text" class="form-control" id="cartype-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="cartype-description">Description</label>
+                    <textarea class="form-control" id="cartype-description" rows="3"></textarea>
+                </div>
+                <div class="car-type-dimensions">
+                    <div class="form-group">
+                        <label for="cartype-length">Length (m)</label>
+                        <input type="number" step="0.1" class="form-control" id="cartype-length" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cartype-width">Width (m)</label>
+                        <input type="number" step="0.1" class="form-control" id="cartype-width" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cartype-height">Height (m)</label>
+                        <input type="number" step="0.1" class="form-control" id="cartype-height" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cartype-max-weight">Max Weight (kg)</label>
+                        <input type="number" class="form-control" id="cartype-max-weight" required>
+                    </div>
+                </div>
+                <div class="form-group mt-3">
+                    <label for="cartype-is-tandem">Tandem Configuration</label>
+                    <select class="form-control" id="cartype-is-tandem">
+                        <option value="false">No (Standard)</option>
+                        <option value="true">Yes (Tandem)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cartype-cancel">Cancel</button>
+                <button class="btn btn-primary" id="cartype-save">Save</button>
             </div>
         </div>
     </div>
@@ -1688,6 +1884,7 @@
             invoices: { data: [], sha: null },
             users: { data: [], sha: null },
             statuses: { data: [], sha: null },
+            carTypes: { data: [], sha: null },
             chat: { data: [], sha: null }
         };
 
@@ -1700,7 +1897,27 @@
             INVOICES: 'data/invoices.json',
             USERS: 'data/users.json',
             STATUSES: 'data/statuses.json',
+            CARTYPES: 'data/carTypes.json',
             CHAT: 'data/chat.json'
+        };
+
+        // Status types
+        const STATUS_TYPES = {
+            DRIVER: 'driver',
+            CAR: 'car',
+            CARD: 'card',
+            TENDER: 'tender',
+            INVOICE: 'invoice'
+        };
+
+        // Status colors
+        const STATUS_COLORS = {
+            active: 'status-active',
+            pending: 'status-pending',
+            inactive: 'status-inactive',
+            completed: 'status-completed',
+            warning: 'status-pending',
+            danger: 'status-inactive'
         };
 
         // Initialize app
@@ -1787,6 +2004,9 @@
             
             document.getElementById('status-save').addEventListener('click', saveStatus);
             document.getElementById('status-cancel').addEventListener('click', closeModal);
+            
+            document.getElementById('cartype-save').addEventListener('click', saveCarType);
+            document.getElementById('cartype-cancel').addEventListener('click', closeModal);
 
             // Add buttons
             document.getElementById('add-driver-btn').addEventListener('click', () => openModal('driver'));
@@ -1796,6 +2016,9 @@
             document.getElementById('add-invoice-btn').addEventListener('click', () => openModal('invoice'));
             document.getElementById('add-user-btn').addEventListener('click', () => openModal('user'));
             document.getElementById('add-status-btn').addEventListener('click', () => openModal('status'));
+            document.getElementById('add-cartype-btn').addEventListener('click', () => openModal('cartype'));
+            document.getElementById('add-driver-status-btn').addEventListener('click', () => openModal('status', null, STATUS_TYPES.DRIVER));
+            document.getElementById('add-car-status-btn').addEventListener('click', () => openModal('status', null, STATUS_TYPES.CAR));
 
             // Tabs
             document.querySelectorAll('.tab').forEach(tab => {
@@ -1803,6 +2026,39 @@
                     const tabId = this.getAttribute('data-tab');
                     activateTab(tabId);
                 });
+            });
+
+            // Status type filter
+            document.getElementById('status-type-filter').addEventListener('change', function() {
+                const type = this.value;
+                if (type === 'all') {
+                    renderStatuses();
+                } else {
+                    renderStatuses(type);
+                }
+            });
+
+            // Status type change in status modal
+            document.getElementById('status-type').addEventListener('change', function() {
+                const type = this.value;
+                populateParentStatuses(type);
+            });
+
+            // Status level change in status modal
+            document.getElementById('status-is-primary').addEventListener('change', function() {
+                const isPrimary = this.value === 'true';
+                document.getElementById('status-parent-container').style.display = isPrimary ? 'none' : 'block';
+                
+                if (!isPrimary) {
+                    const type = document.getElementById('status-type').value;
+                    populateParentStatuses(type);
+                }
+            });
+
+            // Status change in tender modal
+            document.getElementById('tender-status').addEventListener('change', function() {
+                const statusId = this.value;
+                populateSubStatuses(statusId);
             });
 
             // Chat
@@ -1833,6 +2089,48 @@
         function setupDragAndDrop() {
             const availableCards = document.getElementById('available-cards');
             const assignedCards = document.getElementById('assigned-cards');
+
+            // Make statuses draggable for hierarchy
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.classList.contains('status-hierarchy-item')) {
+                    e.dataTransfer.setData('text/plain', e.target.dataset.statusId);
+                    e.target.classList.add('dragging');
+                }
+            });
+
+            document.addEventListener('dragend', function(e) {
+                if (e.target.classList.contains('status-hierarchy-item')) {
+                    e.target.classList.remove('dragging');
+                }
+            });
+
+            // Handle status hierarchy drop zones
+            document.querySelectorAll('.status-hierarchy').forEach(zone => {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('highlight');
+                });
+
+                zone.addEventListener('dragleave', function() {
+                    this.classList.remove('highlight');
+                });
+
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('highlight');
+                    
+                    const statusId = e.dataTransfer.getData('text/plain');
+                    const target = e.target.closest('.status-hierarchy-item');
+                    
+                    if (target) {
+                        const targetStatusId = target.dataset.statusId;
+                        const statusType = this.dataset.type;
+                        
+                        // Update the status hierarchy
+                        updateStatusHierarchy(statusId, targetStatusId, statusType);
+                    }
+                });
+            });
 
             // Make cards draggable
             document.addEventListener('dragstart', function(e) {
@@ -2035,6 +2333,10 @@
                     throw new Error(errorData.message || 'Failed to create data directory');
                 }
 
+                // Get active status ID for initialization
+                const activeStatusId = generateId();
+                const unassignedStatusId = generateId();
+
                 // Create initial data files
                 const initialData = {
                     drivers: [],
@@ -2053,29 +2355,295 @@
                         createdAt: new Date().toISOString()
                     }],
                     statuses: [
-                        // Default statuses
-                        { id: generateId(), name: 'Active', type: 'driver', color: 'active' },
-                        { id: generateId(), name: 'Inactive', type: 'driver', color: 'inactive' },
-                        { id: generateId(), name: 'On Route', type: 'driver', color: 'pending' },
-                        { id: generateId(), name: 'Maintenance', type: 'driver', color: 'warning' },
-                        { id: generateId(), name: 'Active', type: 'car', color: 'active' },
-                        { id: generateId(), name: 'Inactive', type: 'car', color: 'inactive' },
-                        { id: generateId(), name: 'Maintenance', type: 'car', color: 'warning' },
-                        { id: generateId(), name: 'Inspection Due', type: 'car', color: 'danger' },
-                        { id: generateId(), name: 'Active', type: 'card', color: 'active' },
-                        { id: generateId(), name: 'Inactive', type: 'card', color: 'inactive' },
-                        { id: generateId(), name: 'Expired', type: 'card', color: 'danger' },
-                        { id: generateId(), name: 'Expiring Soon', type: 'card', color: 'warning' },
-                        { id: generateId(), name: 'Unassigned', type: 'tender', color: 'inactive' },
-                        { id: generateId(), name: 'Pending', type: 'tender', color: 'pending' },
-                        { id: generateId(), name: 'On Route', type: 'tender', color: 'active' },
-                        { id: generateId(), name: 'Delivered', type: 'tender', color: 'completed' },
-                        { id: generateId(), name: 'Cancelled', type: 'tender', color: 'danger' },
-                        { id: generateId(), name: 'Sold', type: 'tender', color: 'success' },
-                        { id: generateId(), name: 'Pending', type: 'invoice', color: 'pending' },
-                        { id: generateId(), name: 'Paid', type: 'invoice', color: 'completed' },
-                        { id: generateId(), name: 'Unpaid', type: 'invoice', color: 'warning' },
-                        { id: generateId(), name: 'Overdue', type: 'invoice', color: 'danger' }
+                        // Driver statuses
+                        { 
+                            id: unassignedStatusId, 
+                            name: 'Unassigned', 
+                            type: 'driver', 
+                            color: 'inactive', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: activeStatusId, 
+                            name: 'Active', 
+                            type: 'driver', 
+                            color: 'active', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'On Break', 
+                            type: 'driver', 
+                            color: 'warning', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'On Vacation', 
+                            type: 'driver', 
+                            color: 'warning', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'No Time', 
+                            type: 'driver', 
+                            color: 'inactive', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        // Sub-statuses for Active
+                        { 
+                            id: generateId(), 
+                            name: 'Awaiting Loading', 
+                            type: 'driver', 
+                            color: 'pending', 
+                            isPrimary: false, 
+                            parentStatusId: activeStatusId,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Loading', 
+                            type: 'driver', 
+                            color: 'warning', 
+                            isPrimary: false, 
+                            parentStatusId: activeStatusId,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'In Transit', 
+                            type: 'driver', 
+                            color: 'active', 
+                            isPrimary: false, 
+                            parentStatusId: activeStatusId,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Awaiting Unloading', 
+                            type: 'driver', 
+                            color: 'pending', 
+                            isPrimary: false, 
+                            parentStatusId: activeStatusId,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Unloading', 
+                            type: 'driver', 
+                            color: 'warning', 
+                            isPrimary: false, 
+                            parentStatusId: activeStatusId,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        // Car statuses
+                        { 
+                            id: generateId(), 
+                            name: 'Active', 
+                            type: 'car', 
+                            color: 'active', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Inactive', 
+                            type: 'car', 
+                            color: 'inactive', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Maintenance', 
+                            type: 'car', 
+                            color: 'warning', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Inspection Due', 
+                            type: 'car', 
+                            color: 'danger', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        // Card statuses
+                        { 
+                            id: generateId(), 
+                            name: 'Active', 
+                            type: 'card', 
+                            color: 'active', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Inactive', 
+                            type: 'card', 
+                            color: 'inactive', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Expired', 
+                            type: 'card', 
+                            color: 'danger', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Expiring Soon', 
+                            type: 'card', 
+                            color: 'warning', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        // Tender statuses
+                        { 
+                            id: generateId(), 
+                            name: 'Unassigned', 
+                            type: 'tender', 
+                            color: 'inactive', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Pending', 
+                            type: 'tender', 
+                            color: 'pending', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'On Route', 
+                            type: 'tender', 
+                            color: 'active', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Delivered', 
+                            type: 'tender', 
+                            color: 'completed', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Cancelled', 
+                            type: 'tender', 
+                            color: 'danger', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Sold', 
+                            type: 'tender', 
+                            color: 'success', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        // Invoice statuses
+                        { 
+                            id: generateId(), 
+                            name: 'Pending', 
+                            type: 'invoice', 
+                            color: 'pending', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Paid', 
+                            type: 'invoice', 
+                            color: 'completed', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Unpaid', 
+                            type: 'invoice', 
+                            color: 'warning', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Overdue', 
+                            type: 'invoice', 
+                            color: 'danger', 
+                            isPrimary: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        }
+                    ],
+                    carTypes: [
+                        { 
+                            id: generateId(), 
+                            name: 'Semi-Trailer', 
+                            description: 'Standard semi-trailer with one long trailer',
+                            length: 13.6,
+                            width: 2.45,
+                            height: 2.7,
+                            maxWeight: 24000,
+                            isTandem: false,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        },
+                        { 
+                            id: generateId(), 
+                            name: 'Jumbo', 
+                            description: 'Split into 2 cars in tandem',
+                            length: 13.6,
+                            width: 2.45,
+                            height: 2.7,
+                            maxWeight: 40000,
+                            isTandem: true,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        }
                     ],
                     chat: []
                 };
@@ -2226,6 +2794,7 @@
                 state.invoices = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
                 state.users = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 state.statuses = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                state.carTypes = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
                 state.chat = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
 
                 // Update UI
@@ -2235,9 +2804,150 @@
                 
                 // Set up periodic checks
                 setInterval(checkExpirations, 300000); // Check every 5 minutes
+                
+                // Update driver statuses based on tenders
+                updateAllDriverStatuses();
             } catch (error) {
                 addNotification('Failed to load data: ' + error.message, 'error');
                 console.error('Load data error:', error);
+            }
+        }
+
+        // Status management functions
+        function getStatusById(statusId) {
+            return state.statuses.data.find(status => status.id === statusId);
+        }
+
+        function getPrimaryStatuses(type) {
+            return state.statuses.data.filter(status => 
+                status.type === type && status.isPrimary
+            );
+        }
+
+        function getSubStatuses(parentStatusId) {
+            return state.statuses.data.filter(status => 
+                status.parentStatusId === parentStatusId
+            );
+        }
+
+        function getDriverPrimaryStatuses() {
+            return getPrimaryStatuses(STATUS_TYPES.DRIVER);
+        }
+
+        function getDriverSubStatuses(parentStatusId) {
+            return getSubStatuses(parentStatusId);
+        }
+
+        function getCarStatuses() {
+            return state.statuses.data.filter(status => status.type === STATUS_TYPES.CAR);
+        }
+
+        function getCardStatuses() {
+            return state.statuses.data.filter(status => status.type === STATUS_TYPES.CARD);
+        }
+
+        function getTenderStatuses() {
+            return state.statuses.data.filter(status => status.type === STATUS_TYPES.TENDER);
+        }
+
+        function getInvoiceStatuses() {
+            return state.statuses.data.filter(status => status.type === STATUS_TYPES.INVOICE);
+        }
+
+        function getCarTypeById(carTypeId) {
+            return state.carTypes.data.find(type => type.id === carTypeId);
+        }
+
+        function getStatusColorClass(status) {
+            return STATUS_COLORS[status.color] || 'status-active';
+        }
+
+        // Driver status calculation functions
+        function updateAllDriverStatuses() {
+            state.drivers.data.forEach(driver => {
+                updateDriverStatus(driver.id);
+            });
+        }
+
+        function updateDriverStatus(driverId) {
+            const driver = state.drivers.data.find(d => d.id === driverId);
+            if (!driver) return;
+            
+            // Check if on vacation
+            if (driver.onVacation === 'true') {
+                setDriverStatus(driverId, getDriverPrimaryStatuses().find(s => s.name === 'On Vacation').id, null);
+                return;
+            }
+            
+            // Check if on break
+            if (driver.onBreak === 'true') {
+                setDriverStatus(driverId, getDriverPrimaryStatuses().find(s => s.name === 'On Break').id, null);
+                return;
+            }
+            
+            // Check work hours
+            const now = new Date();
+            const currentHour = now.getHours();
+            const workHours = driver.workHours ? driver.workHours.split('-') : ['8:00', '17:00'];
+            const startHour = parseInt(workHours[0].split(':')[0]);
+            const endHour = parseInt(workHours[1].split(':')[0]);
+            
+            if (currentHour < startHour || currentHour >= endHour) {
+                setDriverStatus(driverId, getDriverPrimaryStatuses().find(s => s.name === 'No Time').id, null);
+                return;
+            }
+            
+            // Check if has active tender
+            const activeTender = state.tenders.data.find(t => 
+                t.driver === driverId && 
+                t.status !== getTenderStatuses().find(s => s.name === 'Cancelled').id &&
+                t.status !== getTenderStatuses().find(s => s.name === 'Delivered').id
+            );
+            
+            if (activeTender) {
+                // Check tender status
+                const tenderStatus = getStatusById(activeTender.status);
+                let primaryStatusId = getDriverPrimaryStatuses().find(s => s.name === 'Active').id;
+                let subStatusId = activeTender.subStatus;
+                
+                setDriverStatus(driverId, primaryStatusId, subStatusId);
+            } else {
+                const unassignedStatus = getDriverPrimaryStatuses().find(s => s.name === 'Unassigned');
+                setDriverStatus(driverId, unassignedStatus ? unassignedStatus.id : null, null);
+            }
+        }
+
+        function setDriverStatus(driverId, primaryStatusId, subStatusId) {
+            // Update driver status
+            state.drivers.data = state.drivers.data.map(driver => {
+                if (driver.id === driverId) {
+                    return {
+                        ...driver,
+                        status: primaryStatusId,
+                        subStatus: subStatusId
+                    };
+                }
+                return driver;
+            });
+        }
+
+        function handleTenderStatusChange(tenderId, newStatusId, newSubStatusId) {
+            // Update tender status
+            state.tenders.data = state.tenders.data.map(tender => {
+                if (tender.id === tenderId) {
+                    return {
+                        ...tender,
+                        status: newStatusId,
+                        subStatus: newSubStatusId
+                    };
+                }
+                return tender;
+            });
+            
+            // If tender has a driver, update driver status
+            const tender = state.tenders.data.find(t => t.id === tenderId);
+            if (tender && tender.driver) {
+                updateDriverStatus(tender.driver);
             }
         }
 
@@ -2247,10 +2957,12 @@
             const lastname = document.getElementById('driver-lastname').value;
             const car = document.getElementById('driver-car').value;
             const card = document.getElementById('driver-card').value;
-            const status = document.getElementById('driver-status').value;
+            const onBreak = document.getElementById('driver-on-break').value;
+            const onVacation = document.getElementById('driver-on-vacation').value;
+            const workHours = document.getElementById('driver-work-hours').value;
             const modalTitle = document.getElementById('driver-modal-title').textContent;
 
-            if (!name || !lastname) {
+            if (!name || !lastname || !workHours) {
                 addNotification('Please fill in all required fields', 'error');
                 return;
             }
@@ -2268,7 +2980,9 @@
                         lastname: lastname,
                         car: car,
                         card: card,
-                        status: status,
+                        onBreak: onBreak,
+                        onVacation: onVacation,
+                        workHours: workHours,
                         createdAt: now,
                         updatedAt: now
                     };
@@ -2284,7 +2998,9 @@
                                 lastname: lastname,
                                 car: car,
                                 card: card,
-                                status: status,
+                                onBreak: onBreak,
+                                onVacation: onVacation,
+                                workHours: workHours,
                                 updatedAt: now
                             };
                         }
@@ -2305,6 +3021,9 @@
                 closeModal();
                 renderDrivers();
                 addNotification('Driver saved successfully', 'success');
+                
+                // Update driver statuses
+                updateAllDriverStatuses();
             } catch (error) {
                 addNotification('Failed to save driver: ' + error.message, 'error');
                 console.error('Save driver error:', error);
@@ -2314,6 +3033,7 @@
         async function saveCar() {
             const tractor = document.getElementById('car-tractor').value;
             const trailer = document.getElementById('car-trailer').value;
+            const carType = document.getElementById('car-type').value;
             const maxWeight = document.getElementById('car-max-weight').value;
             const length = document.getElementById('car-length').value;
             const width = document.getElementById('car-width').value;
@@ -2341,6 +3061,7 @@
                         id: generateId(),
                         tractor: tractor,
                         trailer: trailer,
+                        carType: carType,
                         maxWeight: parseFloat(maxWeight),
                         length: parseFloat(length),
                         width: parseFloat(width),
@@ -2364,6 +3085,7 @@
                                 ...car,
                                 tractor: tractor,
                                 trailer: trailer,
+                                carType: carType,
                                 maxWeight: parseFloat(maxWeight),
                                 length: parseFloat(length),
                                 width: parseFloat(width),
@@ -2482,6 +3204,7 @@
             const price = document.getElementById('tender-price').value;
             const driver = document.getElementById('tender-driver').value;
             const status = document.getElementById('tender-status').value;
+            const subStatus = document.getElementById('tender-substatus').value || null;
             const salePrice = document.getElementById('tender-sale-price').value;
             const paymentDays = document.getElementById('tender-payment-days').value;
             const modalTitle = document.getElementById('tender-modal-title').textContent;
@@ -2513,7 +3236,8 @@
                         price: parseFloat(price),
                         driver: driver,
                         status: status,
-                        sale: status === 'sold' ? {
+                        subStatus: subStatus,
+                        sale: status === getTenderStatuses().find(s => s.name === 'Sold').id ? {
                             price: salePrice ? parseFloat(salePrice) : 0,
                             paymentDays: parseInt(paymentDays),
                             soldAt: now
@@ -2542,7 +3266,8 @@
                                 price: parseFloat(price),
                                 driver: driver,
                                 status: status,
-                                sale: status === 'sold' ? {
+                                subStatus: subStatus,
+                                sale: status === getTenderStatuses().find(s => s.name === 'Sold').id ? {
                                     price: salePrice ? parseFloat(salePrice) : 0,
                                     paymentDays: parseInt(paymentDays),
                                     soldAt: now
@@ -2567,6 +3292,11 @@
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
+                
+                // Update driver status if driver changed
+                if (driver) {
+                    updateDriverStatus(driver);
+                }
             } catch (error) {
                 addNotification('Failed to save tender: ' + error.message, 'error');
                 console.error('Save tender error:', error);
@@ -2740,6 +3470,8 @@
         async function saveStatus() {
             const name = document.getElementById('status-name').value;
             const type = document.getElementById('status-type').value;
+            const isPrimary = document.getElementById('status-is-primary').value === 'true';
+            const parentStatusId = isPrimary ? null : document.getElementById('status-parent').value;
             const color = document.getElementById('status-color').value;
             const modalTitle = document.getElementById('status-modal-title').textContent;
 
@@ -2760,6 +3492,8 @@
                         name: name,
                         type: type,
                         color: color,
+                        isPrimary: isPrimary,
+                        parentStatusId: parentStatusId,
                         createdAt: now,
                         updatedAt: now
                     };
@@ -2774,6 +3508,8 @@
                                 name: name,
                                 type: type,
                                 color: color,
+                                isPrimary: isPrimary,
+                                parentStatusId: parentStatusId,
                                 updatedAt: now
                             };
                         }
@@ -2791,12 +3527,136 @@
 
                 // Update local state with new SHA
                 state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                
+                // Re-render statuses
+                renderStatuses();
+                
                 closeModal();
-                renderAdmin();
                 addNotification('Status saved successfully', 'success');
             } catch (error) {
                 addNotification('Failed to save status: ' + error.message, 'error');
                 console.error('Save status error:', error);
+            }
+        }
+
+        async function saveCarType() {
+            const name = document.getElementById('cartype-name').value;
+            const description = document.getElementById('cartype-description').value;
+            const length = document.getElementById('cartype-length').value;
+            const width = document.getElementById('cartype-width').value;
+            const height = document.getElementById('cartype-height').value;
+            const maxWeight = document.getElementById('cartype-max-weight').value;
+            const isTandem = document.getElementById('cartype-is-tandem').value;
+            const modalTitle = document.getElementById('cartype-modal-title').textContent;
+
+            if (!name || !length || !width || !height || !maxWeight) {
+                addNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const now = new Date().toISOString();
+
+                let updatedCarTypes;
+                if (modalTitle === 'Add Car Type') {
+                    // Add new car type
+                    const newCarType = {
+                        id: generateId(),
+                        name: name,
+                        description: description,
+                        length: parseFloat(length),
+                        width: parseFloat(width),
+                        height: parseFloat(height),
+                        maxWeight: parseFloat(maxWeight),
+                        isTandem: isTandem === 'true',
+                        createdAt: now,
+                        updatedAt: now
+                    };
+                    updatedCarTypes = [...carTypes, newCarType];
+                } else {
+                    // Update existing car type
+                    const carTypeId = document.getElementById('cartype-modal').getAttribute('data-id');
+                    updatedCarTypes = carTypes.map(carType => {
+                        if (carType.id === carTypeId) {
+                            return {
+                                ...carType,
+                                name: name,
+                                description: description,
+                                length: parseFloat(length),
+                                width: parseFloat(width),
+                                height: parseFloat(height),
+                                maxWeight: parseFloat(maxWeight),
+                                isTandem: isTandem === 'true',
+                                updatedAt: now
+                            };
+                        }
+                        return carType;
+                    });
+                }
+
+                // Save to GitHub
+                const result = await updateFile(
+                    FILE_PATHS.CARTYPES,
+                    modalTitle === 'Add Car Type' ? 'Add car type' : 'Update car type',
+                    utf8ToBase64(JSON.stringify(updatedCarTypes, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                closeModal();
+                renderCarTypes();
+                addNotification('Car type saved successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to save car type: ' + error.message, 'error');
+                console.error('Save car type error:', error);
+            }
+        }
+
+        // Status hierarchy functions
+        function updateStatusHierarchy(statusId, targetStatusId, statusType) {
+            const status = getStatusById(statusId);
+            const targetStatus = getStatusById(targetStatusId);
+            
+            if (!status || !targetStatus || status.type !== statusType || targetStatus.type !== statusType) {
+                return;
+            }
+            
+            // Update the status to be a sub-status of the target
+            const now = new Date().toISOString();
+            state.statuses.data = state.statuses.data.map(s => {
+                if (s.id === statusId) {
+                    return {
+                        ...s,
+                        isPrimary: false,
+                        parentStatusId: targetStatusId,
+                        updatedAt: now
+                    };
+                }
+                return s;
+            });
+            
+            // Save to GitHub
+            saveStatusHierarchy();
+        }
+
+        async function saveStatusHierarchy() {
+            try {
+                const { sha } = await readFile(FILE_PATHS.STATUSES);
+                const result = await updateFile(
+                    FILE_PATHS.STATUSES,
+                    'Update status hierarchy',
+                    utf8ToBase64(JSON.stringify(state.statuses.data, null, 2)),
+                    sha
+                );
+                
+                state.statuses.sha = result.content.sha;
+                renderStatuses();
+                addNotification('Status hierarchy updated', 'success');
+            } catch (error) {
+                addNotification('Failed to update status hierarchy: ' + error.message, 'error');
+                console.error('Status hierarchy error:', error);
             }
         }
 
@@ -2975,11 +3835,37 @@
 
                 // Update local state with new SHA
                 state.statuses = { data: updatedStatuses, sha: result.content.sha };
-                renderAdmin();
+                renderStatuses();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
                 addNotification('Failed to delete status: ' + error.message, 'error');
                 console.error('Delete status error:', error);
+            }
+        }
+
+        async function deleteCarType(id) {
+            if (!confirm('Are you sure you want to delete this car type?')) {
+                return;
+            }
+
+            try {
+                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const updatedCarTypes = carTypes.filter(carType => carType.id !== id);
+
+                const result = await updateFile(
+                    FILE_PATHS.CARTYPES,
+                    'Delete car type',
+                    utf8ToBase64(JSON.stringify(updatedCarTypes, null, 2)),
+                    sha
+                );
+
+                // Update local state with new SHA
+                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                renderCarTypes();
+                addNotification('Car type deleted successfully', 'success');
+            } catch (error) {
+                addNotification('Failed to delete car type: ' + error.message, 'error');
+                console.error('Delete car type error:', error);
             }
         }
 
@@ -2991,13 +3877,17 @@
         }
 
         function updateDashboardStats() {
-            // Active drivers
-            const activeDrivers = state.drivers.data.filter(d => d.status === 'active' || d.status === 'on-route').length;
+            // Active drivers (drivers with status Active)
+            const activeDrivers = state.drivers.data.filter(d => {
+                const activeStatus = getDriverPrimaryStatuses().find(s => s.name === 'Active');
+                return activeStatus && d.status === activeStatus.id;
+            }).length;
             document.getElementById('active-drivers').textContent = activeDrivers;
 
             // Active tenders
             const activeTenders = state.tenders.data.filter(t => 
-                t.status === 'pending' || t.status === 'on-route'
+                t.status !== getTenderStatuses().find(s => s.name === 'Cancelled').id &&
+                t.status !== getTenderStatuses().find(s => s.name === 'Delivered').id
             ).length;
             document.getElementById('active-tenders').textContent = activeTenders;
 
@@ -3018,7 +3908,9 @@
 
             // Pending invoices
             const pendingInvoices = state.invoices.data.filter(i => 
-                i.status === 'pending' || i.status === 'unpaid' || i.status === 'overdue'
+                i.status === getInvoiceStatuses().find(s => s.name === 'Pending').id ||
+                i.status === getInvoiceStatuses().find(s => s.name === 'Unpaid').id ||
+                i.status === getInvoiceStatuses().find(s => s.name === 'Overdue').id
             ).length;
             document.getElementById('pending-invoices').textContent = pendingInvoices;
         }
@@ -3116,7 +4008,8 @@
 
             // Check invoice due dates
             state.invoices.data.forEach(invoice => {
-                if (invoice.status === 'pending' || invoice.status === 'unpaid') {
+                const status = getStatusById(invoice.status);
+                if (status && (status.name === 'Pending' || status.name === 'Unpaid')) {
                     const dueDate = new Date(invoice.dueDate);
                     const notifyDays = invoice.notify || 7;
                     const diffTime = dueDate - now;
@@ -3247,11 +4140,16 @@
                 const car = state.cars.data.find(c => c.id === driver.car) || {};
                 const card = state.cards.data.find(c => c.id === driver.card) || {};
                 
+                // Get status names
+                const primaryStatus = driver.status ? getStatusById(driver.status) : null;
+                const subStatus = driver.subStatus ? getStatusById(driver.subStatus) : null;
+                
                 row.innerHTML = `
                     <td>${driver.name} ${driver.lastname}</td>
                     <td>${car.tractor || 'Not assigned'}</td>
                     <td>${card.number || 'Not assigned'}</td>
-                    <td><span class="status-badge status-${getStatusColor(driver.status)}">${driver.status}</span></td>
+                    <td><span class="status-badge ${primaryStatus ? getStatusColorClass(primaryStatus) : 'status-inactive'}">${primaryStatus ? primaryStatus.name : 'Unknown'}</span></td>
+                    <td><span class="status-badge ${subStatus ? getStatusColorClass(subStatus) : ''}">${subStatus ? subStatus.name : ''}</span></td>
                     <td>
                         <button class="btn btn-secondary btn-sm edit-driver" data-id="${driver.id}">Edit</button>
                         <button class="btn btn-danger btn-sm delete-driver" data-id="${driver.id}">Delete</button>
@@ -3286,6 +4184,28 @@
                 return;
             }
 
+            // Populate car type select options
+            const carTypeSelect = document.getElementById('car-type');
+            carTypeSelect.innerHTML = '<option value="">Select Type</option>';
+            
+            state.carTypes.data.forEach(carType => {
+                const option = document.createElement('option');
+                option.value = carType.id;
+                option.textContent = carType.name;
+                carTypeSelect.appendChild(option);
+            });
+
+            // Populate status select options
+            const carStatusSelect = document.getElementById('car-status');
+            carStatusSelect.innerHTML = '<option value="">Select Status</option>';
+            
+            getCarStatuses().forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                carStatusSelect.appendChild(option);
+            });
+
             state.cars.data.forEach(car => {
                 const row = document.createElement('tr');
                 
@@ -3301,10 +4221,15 @@
                 
                 const inspectionStatus = inspectionDiff <= 0 ? 'danger' : 
                                        inspectionDiff <= (car.inspectionNotify || 30) ? 'warning' : 'active';
+                
+                // Get car type name
+                const carType = car.carType ? getCarTypeById(car.carType) : null;
+                const carTypeName = carType ? carType.name : 'Custom';
 
                 row.innerHTML = `
                     <td>${car.tractor}</td>
                     <td>${car.trailer}</td>
+                    <td>${carTypeName}</td>
                     <td>${car.cubic} m³ (${car.maxWeight} kg)</td>
                     <td>
                         ${car.insurance}
@@ -3314,7 +4239,7 @@
                         ${car.inspection}
                         <span class="status-badge status-${inspectionStatus}">${inspectionDiff > 0 ? inspectionDiff + ' days' : 'Expired'}</span>
                     </td>
-                    <td><span class="status-badge status-${getStatusColor(car.status)}">${car.status}</span></td>
+                    <td><span class="status-badge status-${getStatusColorClass(getStatusById(car.status))}">${getStatusById(car.status)?.name || 'Unknown'}</span></td>
                     <td>
                         <button class="btn btn-secondary btn-sm edit-car" data-id="${car.id}">Edit</button>
                         <button class="btn btn-danger btn-sm delete-car" data-id="${car.id}">Delete</button>
@@ -3348,6 +4273,17 @@
                 tableBody.appendChild(row);
                 return;
             }
+
+            // Populate status select options
+            const cardStatusSelect = document.getElementById('card-status');
+            cardStatusSelect.innerHTML = '<option value="">Select Status</option>';
+            
+            getCardStatuses().forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                cardStatusSelect.appendChild(option);
+            });
 
             state.cards.data.forEach(card => {
                 const row = document.createElement('tr');
@@ -3393,7 +4329,7 @@
 
             if (state.tenders.data.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="6" class="text-center">No tenders found</td>';
+                row.innerHTML = '<td colspan="7" class="text-center">No tenders found</td>';
                 tableBody.appendChild(row);
                 return;
             }
@@ -3409,11 +4345,26 @@
                 driverSelect.appendChild(option);
             });
 
+            // Populate status select options
+            const statusSelect = document.getElementById('tender-status');
+            statusSelect.innerHTML = '<option value="">Select Status</option>';
+            
+            getTenderStatuses().forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                statusSelect.appendChild(option);
+            });
+
             state.tenders.data.forEach(tender => {
                 const row = document.createElement('tr');
                 
                 // Find driver details
                 const driver = state.drivers.data.find(d => d.id === tender.driver) || {};
+                
+                // Get status names
+                const status = getStatusById(tender.status);
+                const subStatus = tender.subStatus ? getStatusById(tender.subStatus) : null;
                 
                 row.innerHTML = `
                     <td>
@@ -3426,7 +4377,8 @@
                     </td>
                     <td>$${tender.price.toLocaleString()}</td>
                     <td>${driver.name ? `${driver.name} ${driver.lastname}` : 'Not assigned'}</td>
-                    <td><span class="status-badge status-${getStatusColor(tender.status)}">${tender.status}</span></td>
+                    <td><span class="status-badge ${status ? getStatusColorClass(status) : 'status-inactive'}">${status ? status.name : 'Unknown'}</span></td>
+                    <td><span class="status-badge ${subStatus ? getStatusColorClass(subStatus) : ''}">${subStatus ? subStatus.name : ''}</span></td>
                     <td>
                         <button class="btn btn-secondary btn-sm edit-tender" data-id="${tender.id}">Edit</button>
                         <button class="btn btn-danger btn-sm delete-tender" data-id="${tender.id}">Delete</button>
@@ -3461,6 +4413,17 @@
                 return;
             }
 
+            // Populate status select options
+            const invoiceStatusSelect = document.getElementById('invoice-status');
+            invoiceStatusSelect.innerHTML = '<option value="">Select Status</option>';
+            
+            getInvoiceStatuses().forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                invoiceStatusSelect.appendChild(option);
+            });
+
             state.invoices.data.forEach(invoice => {
                 const row = document.createElement('tr');
                 
@@ -3468,19 +4431,15 @@
                 const now = new Date();
                 const diff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
                 
-                let status = invoice.status;
-                if (invoice.status === 'pending' || invoice.status === 'unpaid') {
-                    if (diff < 0) {
-                        status = 'overdue';
-                    }
-                }
+                const status = getStatusById(invoice.status);
+                const statusClass = status ? getStatusColorClass(status) : 'status-inactive';
 
                 row.innerHTML = `
                     <td>${invoice.code}</td>
                     <td>${invoice.client}</td>
                     <td>${invoice.date}</td>
                     <td>${invoice.dueDate} (${diff} days)</td>
-                    <td><span class="status-badge status-${getStatusColor(status)}">${status}</span></td>
+                    <td><span class="status-badge ${statusClass}">${status ? status.name : 'Unknown'}</span></td>
                     <td>
                         <button class="btn btn-secondary btn-sm edit-invoice" data-id="${invoice.id}">Edit</button>
                         <button class="btn btn-danger btn-sm delete-invoice" data-id="${invoice.id}">Delete</button>
@@ -3590,6 +4549,133 @@
             });
         }
 
+        function renderStatuses(filterType = 'all') {
+            // Render driver statuses
+            const driverHierarchy = document.getElementById('driver-status-hierarchy');
+            driverHierarchy.innerHTML = '';
+            
+            const driverPrimaryStatuses = getDriverPrimaryStatuses();
+            driverPrimaryStatuses.forEach(primaryStatus => {
+                const item = document.createElement('div');
+                item.className = 'status-hierarchy-item';
+                item.dataset.statusId = primaryStatus.id;
+                item.draggable = true;
+                
+                const subStatuses = getDriverSubStatuses(primaryStatus.id);
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="status-badge ${getStatusColorClass(primaryStatus)}">${primaryStatus.name}</span>
+                        ${subStatuses.length > 0 ? 
+                            `<div class="status-hierarchy" style="margin-left: 20px; margin-top: 5px;">
+                                ${subStatuses.map(subStatus => `
+                                    <div class="status-hierarchy-item" data-status-id="${subStatus.id}" draggable="true">
+                                        <span class="status-badge ${getStatusColorClass(subStatus)}">${subStatus.name}</span>
+                                    </div>
+                                `).join('')}
+                            </div>` : ''}
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-secondary btn-sm edit-status" data-id="${primaryStatus.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-status" data-id="${primaryStatus.id}">Delete</button>
+                    </div>
+                `;
+                
+                driverHierarchy.appendChild(item);
+            });
+            
+            // Add event listeners for driver statuses
+            document.querySelectorAll('.edit-status').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editStatus(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-status').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteStatus(this.getAttribute('data-id'));
+                });
+            });
+            
+            // Render car statuses
+            const carHierarchy = document.getElementById('car-status-hierarchy');
+            carHierarchy.innerHTML = '';
+            
+            const carStatuses = getCarStatuses();
+            carStatuses.forEach(status => {
+                const item = document.createElement('div');
+                item.className = 'status-hierarchy-item';
+                item.dataset.statusId = status.id;
+                item.draggable = true;
+                
+                item.innerHTML = `
+                    <span class="status-badge ${getStatusColorClass(status)}">${status.name}</span>
+                    <div class="actions">
+                        <button class="btn btn-secondary btn-sm edit-status" data-id="${status.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-status" data-id="${status.id}">Delete</button>
+                    </div>
+                `;
+                
+                carHierarchy.appendChild(item);
+            });
+            
+            // Add event listeners for car statuses
+            document.querySelectorAll('.edit-status').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editStatus(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-status').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteStatus(this.getAttribute('data-id'));
+                });
+            });
+        }
+
+        function renderCarTypes() {
+            const tableBody = document.getElementById('cartypes-table-body');
+            tableBody.innerHTML = '';
+
+            if (state.carTypes.data.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="6" class="text-center">No car types found</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            state.carTypes.data.forEach(carType => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${carType.name}</td>
+                    <td>${carType.description || 'No description'}</td>
+                    <td>${carType.length}m x ${carType.width}m x ${carType.height}m</td>
+                    <td>${carType.maxWeight} kg</td>
+                    <td>${carType.isTandem ? 'Yes' : 'No'}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm edit-cartype" data-id="${carType.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-cartype" data-id="${carType.id}">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Add event listeners
+            document.querySelectorAll('.edit-cartype').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    editCarType(this.getAttribute('data-id'));
+                });
+            });
+
+            document.querySelectorAll('.delete-cartype').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    deleteCarType(this.getAttribute('data-id'));
+                });
+            });
+        }
+
         function renderAdmin() {
             // Users tab
             const usersTableBody = document.getElementById('users-table-body');
@@ -3648,6 +4734,12 @@
 
             // Build organization tree
             buildOrgTree();
+            
+            // Statuses tab
+            renderStatuses();
+            
+            // Car Types tab
+            renderCarTypes();
         }
 
         function buildOrgTree() {
@@ -3711,7 +4803,7 @@
         }
 
         // Modal functions
-        function openModal(type, id = null) {
+        function openModal(type, id = null, statusType = null) {
             const modal = document.getElementById(`${type}-modal`);
             const modalTitle = document.getElementById(`${type}-modal-title`);
             
@@ -3726,11 +4818,14 @@
                     document.getElementById('driver-lastname').value = driver.lastname;
                     document.getElementById('driver-car').value = driver.car || '';
                     document.getElementById('driver-card').value = driver.card || '';
-                    document.getElementById('driver-status').value = driver.status;
+                    document.getElementById('driver-on-break').value = driver.onBreak || 'false';
+                    document.getElementById('driver-on-vacation').value = driver.onVacation || 'false';
+                    document.getElementById('driver-work-hours').value = driver.workHours || '8:00-17:00';
                 } else if (type === 'car') {
                     const car = state.cars.data.find(c => c.id === id);
                     document.getElementById('car-tractor').value = car.tractor;
                     document.getElementById('car-trailer').value = car.trailer;
+                    document.getElementById('car-type').value = car.carType || '';
                     document.getElementById('car-max-weight').value = car.maxWeight;
                     document.getElementById('car-length').value = car.length;
                     document.getElementById('car-width').value = car.width;
@@ -3740,7 +4835,7 @@
                     document.getElementById('car-inspection').value = car.inspection;
                     document.getElementById('car-insurance-notify').value = car.insuranceNotify;
                     document.getElementById('car-inspection-notify').value = car.inspectionNotify;
-                    document.getElementById('car-status').value = car.status;
+                    document.getElementById('car-status').value = car.status || '';
                 } else if (type === 'card') {
                     const card = state.cards.data.find(c => c.id === id);
                     document.getElementById('card-number').value = card.number;
@@ -3748,7 +4843,7 @@
                     document.getElementById('card-expiry').value = card.expiry;
                     document.getElementById('card-notify').value = card.notify;
                     document.getElementById('card-reminder').value = card.reminder;
-                    document.getElementById('card-status').value = card.status;
+                    document.getElementById('card-status').value = card.status || '';
                 } else if (type === 'tender') {
                     const tender = state.tenders.data.find(t => t.id === id);
                     document.getElementById('tender-loading-date').value = tender.loading.date;
@@ -3759,9 +4854,13 @@
                     document.getElementById('tender-unloading-zip').value = tender.unloading.zip;
                     document.getElementById('tender-price').value = tender.price;
                     document.getElementById('tender-driver').value = tender.driver || '';
-                    document.getElementById('tender-status').value = tender.status;
+                    document.getElementById('tender-status').value = tender.status || '';
                     
-                    if (tender.status === 'sold') {
+                    // Populate sub-statuses based on selected status
+                    populateSubStatuses(tender.status);
+                    document.getElementById('tender-substatus').value = tender.subStatus || '';
+                    
+                    if (tender.status === getTenderStatuses().find(s => s.name === 'Sold').id) {
                         document.getElementById('tender-sale-fields').classList.remove('hidden');
                         document.getElementById('tender-sale-price').value = tender.sale.price;
                         document.getElementById('tender-payment-days').value = tender.sale.paymentDays;
@@ -3776,7 +4875,7 @@
                     document.getElementById('invoice-due-days').value = invoice.dueDays;
                     document.getElementById('invoice-notify').value = invoice.notify;
                     document.getElementById('invoice-reminder').value = invoice.reminder;
-                    document.getElementById('invoice-status').value = invoice.status;
+                    document.getElementById('invoice-status').value = invoice.status || '';
                 } else if (type === 'user') {
                     const user = state.users.data.find(u => u.id === id);
                     document.getElementById('user-name-input').value = user.name;
@@ -3789,7 +4888,25 @@
                     const status = state.statuses.data.find(s => s.id === id);
                     document.getElementById('status-name').value = status.name;
                     document.getElementById('status-type').value = status.type;
+                    document.getElementById('status-is-primary').value = status.isPrimary ? 'true' : 'false';
+                    document.getElementById('status-parent').value = status.parentStatusId || '';
                     document.getElementById('status-color').value = status.color;
+                    
+                    // Show/hide parent status field
+                    document.getElementById('status-parent-container').style.display = 
+                        status.isPrimary ? 'none' : 'block';
+                    
+                    // Populate parent statuses
+                    populateParentStatuses(status.type);
+                } else if (type === 'cartype') {
+                    const carType = state.carTypes.data.find(c => c.id === id);
+                    document.getElementById('cartype-name').value = carType.name;
+                    document.getElementById('cartype-description').value = carType.description || '';
+                    document.getElementById('cartype-length').value = carType.length;
+                    document.getElementById('cartype-width').value = carType.width;
+                    document.getElementById('cartype-height').value = carType.height;
+                    document.getElementById('cartype-max-weight').value = carType.maxWeight;
+                    document.getElementById('cartype-is-tandem').value = carType.isTandem ? 'true' : 'false';
                 }
             } else {
                 modalTitle.textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
@@ -3801,10 +4918,13 @@
                     document.getElementById('driver-lastname').value = '';
                     document.getElementById('driver-car').value = '';
                     document.getElementById('driver-card').value = '';
-                    document.getElementById('driver-status').value = 'active';
+                    document.getElementById('driver-on-break').value = 'false';
+                    document.getElementById('driver-on-vacation').value = 'false';
+                    document.getElementById('driver-work-hours').value = '8:00-17:00';
                 } else if (type === 'car') {
                     document.getElementById('car-tractor').value = '';
                     document.getElementById('car-trailer').value = '';
+                    document.getElementById('car-type').value = '';
                     document.getElementById('car-max-weight').value = '';
                     document.getElementById('car-length').value = '';
                     document.getElementById('car-width').value = '';
@@ -3814,14 +4934,14 @@
                     document.getElementById('car-inspection').value = '';
                     document.getElementById('car-insurance-notify').value = '30';
                     document.getElementById('car-inspection-notify').value = '30';
-                    document.getElementById('car-status').value = 'active';
+                    document.getElementById('car-status').value = '';
                 } else if (type === 'card') {
                     document.getElementById('card-number').value = '';
                     document.getElementById('card-pin').value = '';
                     document.getElementById('card-expiry').value = '';
                     document.getElementById('card-notify').value = '30';
                     document.getElementById('card-reminder').value = '7';
-                    document.getElementById('card-status').value = 'active';
+                    document.getElementById('card-status').value = '';
                 } else if (type === 'tender') {
                     document.getElementById('tender-loading-date').value = '';
                     document.getElementById('tender-unloading-date').value = '';
@@ -3831,7 +4951,8 @@
                     document.getElementById('tender-unloading-zip').value = '';
                     document.getElementById('tender-price').value = '';
                     document.getElementById('tender-driver').value = '';
-                    document.getElementById('tender-status').value = 'unassigned';
+                    document.getElementById('tender-status').value = '';
+                    document.getElementById('tender-substatus').value = '';
                     document.getElementById('tender-sale-fields').classList.add('hidden');
                     document.getElementById('tender-sale-price').value = '';
                     document.getElementById('tender-payment-days').value = '30';
@@ -3842,7 +4963,7 @@
                     document.getElementById('invoice-due-days').value = '30';
                     document.getElementById('invoice-notify').value = '7';
                     document.getElementById('invoice-reminder').value = '3';
-                    document.getElementById('invoice-status').value = 'pending';
+                    document.getElementById('invoice-status').value = '';
                 } else if (type === 'user') {
                     document.getElementById('user-name-input').value = '';
                     document.getElementById('user-lastname').value = '';
@@ -3852,8 +4973,24 @@
                     document.getElementById('user-supervisor').value = '';
                 } else if (type === 'status') {
                     document.getElementById('status-name').value = '';
-                    document.getElementById('status-type').value = 'driver';
+                    document.getElementById('status-type').value = statusType || 'driver';
+                    document.getElementById('status-is-primary').value = 'true';
+                    document.getElementById('status-parent').value = '';
                     document.getElementById('status-color').value = 'active';
+                    
+                    // Show/hide parent status field
+                    document.getElementById('status-parent-container').style.display = 'none';
+                    
+                    // Populate parent statuses
+                    populateParentStatuses(statusType || 'driver');
+                } else if (type === 'cartype') {
+                    document.getElementById('cartype-name').value = '';
+                    document.getElementById('cartype-description').value = '';
+                    document.getElementById('cartype-length').value = '';
+                    document.getElementById('cartype-width').value = '';
+                    document.getElementById('cartype-height').value = '';
+                    document.getElementById('cartype-max-weight').value = '';
+                    document.getElementById('cartype-is-tandem').value = 'false';
                 }
             }
             
@@ -3863,6 +5000,33 @@
         function closeModal() {
             document.querySelectorAll('.modal').forEach(modal => {
                 modal.classList.remove('show');
+            });
+        }
+
+        // Status helper functions
+        function populateParentStatuses(type) {
+            const parentSelect = document.getElementById('status-parent');
+            parentSelect.innerHTML = '';
+            
+            const primaryStatuses = getPrimaryStatuses(type);
+            primaryStatuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                parentSelect.appendChild(option);
+            });
+        }
+
+        function populateSubStatuses(statusId) {
+            const subStatusSelect = document.getElementById('tender-substatus');
+            subStatusSelect.innerHTML = '<option value="">Select Sub-Status</option>';
+            
+            const subStatuses = getSubStatuses(statusId);
+            subStatuses.forEach(status => {
+                const option = document.createElement('option');
+                option.value = status.id;
+                option.textContent = status.name;
+                subStatusSelect.appendChild(option);
             });
         }
 
@@ -3893,6 +5057,10 @@
 
         function editStatus(id) {
             openModal('status', id);
+        }
+
+        function editCarType(id) {
+            openModal('cartype', id);
         }
 
         // Helper functions

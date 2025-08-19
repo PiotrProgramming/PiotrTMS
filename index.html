@@ -816,6 +816,36 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Cubic capacity display */
+        .cubic-display {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .cubic-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .cubic-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cubic-label {
+            font-weight: 500;
+        }
+
+        .trailer-dimensions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
     </style>
 </head>
 <body>
@@ -1309,7 +1339,9 @@
                                             <th>Name</th>
                                             <th>Description</th>
                                             <th>Dimensions (LxWxH)</th>
+                                            <th>Trailer Dimensions (LxWxH)</th>
                                             <th>Max Weight</th>
+                                            <th>Cubic Capacity</th>
                                             <th>Tandem</th>
                                             <th>Actions</th>
                                         </tr>
@@ -1827,28 +1859,71 @@
                 </div>
                 <div class="car-type-dimensions">
                     <div class="form-group">
-                        <label for="cartype-length">Length (m)</label>
+                        <label for="cartype-length">Main Vehicle Length (m)</label>
                         <input type="number" step="0.1" class="form-control" id="cartype-length" required>
                     </div>
                     <div class="form-group">
-                        <label for="cartype-width">Width (m)</label>
+                        <label for="cartype-width">Main Vehicle Width (m)</label>
                         <input type="number" step="0.1" class="form-control" id="cartype-width" required>
                     </div>
                     <div class="form-group">
-                        <label for="cartype-height">Height (m)</label>
+                        <label for="cartype-height">Main Vehicle Height (m)</label>
                         <input type="number" step="0.1" class="form-control" id="cartype-height" required>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group mt-3">
+                        <label for="cartype-is-tandem">Tandem Configuration</label>
+                        <select class="form-control" id="cartype-is-tandem">
+                            <option value="false">No (Standard)</option>
+                            <option value="true">Yes (Tandem)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="trailer-dimensions hidden" id="trailer-dimensions">
+                        <h5 class="mt-3">Trailer Dimensions</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="cartype-trailer-length">Trailer Length (m)</label>
+                                    <input type="number" step="0.1" class="form-control" id="cartype-trailer-length" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="cartype-trailer-width">Trailer Width (m)</label>
+                                    <input type="number" step="0.1" class="form-control" id="cartype-trailer-width" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="cartype-trailer-height">Trailer Height (m)</label>
+                                    <input type="number" step="0.1" class="form-control" id="cartype-trailer-height" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mt-3">
                         <label for="cartype-max-weight">Max Weight (kg)</label>
                         <input type="number" class="form-control" id="cartype-max-weight" required>
                     </div>
-                </div>
-                <div class="form-group mt-3">
-                    <label for="cartype-is-tandem">Tandem Configuration</label>
-                    <select class="form-control" id="cartype-is-tandem">
-                        <option value="false">No (Standard)</option>
-                        <option value="true">Yes (Tandem)</option>
-                    </select>
+                    
+                    <div class="cubic-display">
+                        <h5>Cubic Capacity Calculation</h5>
+                        <div class="cubic-breakdown">
+                            <div class="cubic-row">
+                                <span class="cubic-label">Main Vehicle:</span>
+                                <span id="cartype-main-cubic">0.00 m³</span>
+                            </div>
+                            <div class="cubic-row">
+                                <span class="cubic-label">Trailer:</span>
+                                <span id="cartype-trailer-cubic">0.00 m³</span>
+                            </div>
+                            <div class="cubic-row">
+                                <span class="cubic-label">Total:</span>
+                                <span id="cartype-total-cubic">0.00 m³</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1877,15 +1952,15 @@
             notifications: [],
             unreadNotifications: 0,
             // Data stores with SHA
-            drivers: { data: [], sha: null },
-            cars: { data: [], sha: null },
-            cards: { data: [], sha: null },
-            tenders: { data: [], sha: null },
-            invoices: { data: [], sha: null },
-            users: { data: [], sha: null },
-            statuses: { data: [], sha: null },
-            carTypes: { data: [], sha: null },
-            chat: { data: [], sha: null }
+            drivers: {  [], sha: null },
+            cars: {  [], sha: null },
+            cards: {  [], sha: null },
+            tenders: {  [], sha: null },
+            invoices: {  [], sha: null },
+            users: {  [], sha: null },
+            statuses: {  [], sha: null },
+            carTypes: {  [], sha: null },
+            chat: {  [], sha: null }
         };
 
         // GitHub file paths
@@ -2248,6 +2323,33 @@
                     }
                 });
             }
+            
+            // Car type tandem configuration
+            const cartypeIsTandem = document.getElementById('cartype-is-tandem');
+            if (cartypeIsTandem) {
+                cartypeIsTandem.addEventListener('change', function() {
+                    const trailerDimensions = document.getElementById('trailer-dimensions');
+                    if (trailerDimensions) {
+                        trailerDimensions.classList.toggle('hidden', this.value === 'false');
+                        calculateCarTypeCubicCapacity();
+                    }
+                });
+            }
+            
+            // Car type dimensions change
+            const cartypeLength = document.getElementById('cartype-length');
+            const cartypeWidth = document.getElementById('cartype-width');
+            const cartypeHeight = document.getElementById('cartype-height');
+            const cartypeTrailerLength = document.getElementById('cartype-trailer-length');
+            const cartypeTrailerWidth = document.getElementById('cartype-trailer-width');
+            const cartypeTrailerHeight = document.getElementById('cartype-trailer-height');
+            
+            if (cartypeLength) cartypeLength.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeWidth) cartypeWidth.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeHeight) cartypeHeight.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeTrailerLength) cartypeTrailerLength.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeTrailerWidth) cartypeTrailerWidth.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeTrailerHeight) cartypeTrailerHeight.addEventListener('input', calculateCarTypeCubicCapacity);
         }
 
         // Setup drag and drop
@@ -2791,9 +2893,12 @@
                             id: generateId(), 
                             name: 'Semi-Trailer', 
                             description: 'Standard semi-trailer with one long trailer',
-                            length: 13.6,
-                            width: 2.45,
-                            height: 2.7,
+                            mainDimensions: {
+                                length: 13.6,
+                                width: 2.45,
+                                height: 2.7
+                            },
+                            trailerDimensions: null,
                             maxWeight: 24000,
                             isTandem: false,
                             createdAt: new Date().toISOString(),
@@ -2803,9 +2908,16 @@
                             id: generateId(), 
                             name: 'Jumbo', 
                             description: 'Split into 2 cars in tandem',
-                            length: 13.6,
-                            width: 2.45,
-                            height: 2.7,
+                            mainDimensions: {
+                                length: 13.6,
+                                width: 2.45,
+                                height: 2.7
+                            },
+                            trailerDimensions: {
+                                length: 13.6,
+                                width: 2.45,
+                                height: 2.7
+                            },
                             maxWeight: 40000,
                             isTandem: true,
                             createdAt: new Date().toISOString(),
@@ -2918,7 +3030,7 @@
                 if (!response.ok) {
                     if (response.status === 404) {
                         // Return empty array instead of null for data
-                        return { data: [], sha: null };
+                        return {  [], sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -2927,16 +3039,16 @@
                 
                 if (data.content) {
                     return {
-                        data: JSON.parse(base64ToUtf8(data.content)),
+                         JSON.parse(base64ToUtf8(data.content)),
                         sha: data.sha
                     };
                 }
                 // Return empty array instead of null for data
-                return { data: [], sha: null };
+                return {  [], sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
                     // Return empty array instead of null for data
-                    return { data: [], sha: null };
+                    return {  [], sha: null };
                 }
                 throw error;
             }
@@ -2960,55 +3072,55 @@
                 // FIXED: Always ensure data is an array, never null
                 const driversData = await readFile(FILE_PATHS.DRIVERS);
                 state.drivers = { 
-                    data: driversData.data || [], 
+                     driversData.data || [], 
                     sha: driversData.sha 
                 };
                 
                 const carsData = await readFile(FILE_PATHS.CARS);
                 state.cars = { 
-                    data: carsData.data || [], 
+                     carsData.data || [], 
                     sha: carsData.sha 
                 };
                 
                 const cardsData = await readFile(FILE_PATHS.CARDS);
                 state.cards = { 
-                    data: cardsData.data || [], 
+                     cardsData.data || [], 
                     sha: cardsData.sha 
                 };
                 
                 const tendersData = await readFile(FILE_PATHS.TENDERS);
                 state.tenders = { 
-                    data: tendersData.data || [], 
+                     tendersData.data || [], 
                     sha: tendersData.sha 
                 };
                 
                 const invoicesData = await readFile(FILE_PATHS.INVOICES);
                 state.invoices = { 
-                    data: invoicesData.data || [], 
+                     invoicesData.data || [], 
                     sha: invoicesData.sha 
                 };
                 
                 const usersData = await readFile(FILE_PATHS.USERS);
                 state.users = { 
-                    data: usersData.data || [], 
+                     usersData.data || [], 
                     sha: usersData.sha 
                 };
                 
                 const statusesData = await readFile(FILE_PATHS.STATUSES);
                 state.statuses = { 
-                    data: statusesData.data || [], 
+                     statusesData.data || [], 
                     sha: statusesData.sha 
                 };
                 
                 const carTypesData = await readFile(FILE_PATHS.CARTYPES);
                 state.carTypes = { 
-                    data: carTypesData.data || [], 
+                     carTypesData.data || [], 
                     sha: carTypesData.sha 
                 };
                 
                 const chatData = await readFile(FILE_PATHS.CHAT);
                 state.chat = { 
-                    data: chatData.data || [], 
+                     chatData.data || [], 
                     sha: chatData.sha 
                 };
 
@@ -3183,7 +3295,7 @@
             }
 
             try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedDrivers;
@@ -3266,7 +3378,7 @@
             }
 
             try {
-                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCars;
@@ -3327,7 +3439,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: updatedCars, sha: result.content.sha };
+                state.cars = {  updatedCars, sha: result.content.sha };
                 closeModal();
                 renderCars();
                 addNotification('Car saved successfully', 'success');
@@ -3352,7 +3464,7 @@
             }
 
             try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCards;
@@ -3399,7 +3511,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: updatedCards, sha: result.content.sha };
+                state.cards = {  updatedCards, sha: result.content.sha };
                 closeModal();
                 renderCards();
                 addNotification('Card saved successfully', 'success');
@@ -3430,7 +3542,7 @@
             }
 
             try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedTenders;
@@ -3503,7 +3615,7 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                state.tenders = {  updatedTenders, sha: result.content.sha };
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
@@ -3534,7 +3646,7 @@
             }
 
             try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -3587,7 +3699,7 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                state.invoices = {  updatedInvoices, sha: result.content.sha };
                 closeModal();
                 renderInvoices();
                 addNotification('Invoice saved successfully', 'success');
@@ -3619,7 +3731,7 @@
             }
 
             try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedUsers;
@@ -3672,7 +3784,7 @@
                 );
 
                 // Update local state with new SHA
-                state.users = { data: updatedUsers, sha: result.content.sha };
+                state.users = {  updatedUsers, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('User saved successfully', 'success');
@@ -3696,7 +3808,7 @@
             }
 
             try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedStatuses;
@@ -3760,6 +3872,9 @@
             const length = document.getElementById('cartype-length').value;
             const width = document.getElementById('cartype-width').value;
             const height = document.getElementById('cartype-height').value;
+            const trailerLength = document.getElementById('cartype-trailer-length').value;
+            const trailerWidth = document.getElementById('cartype-trailer-width').value;
+            const trailerHeight = document.getElementById('cartype-trailer-height').value;
             const maxWeight = document.getElementById('cartype-max-weight').value;
             const isTandem = document.getElementById('cartype-is-tandem').value;
             const modalTitle = document.getElementById('cartype-modal-title').textContent;
@@ -3769,8 +3884,14 @@
                 return;
             }
 
+            // For tandem vehicles, ensure trailer dimensions are provided
+            if (isTandem === 'true' && (!trailerLength || !trailerWidth || !trailerHeight)) {
+                addNotification('Please provide trailer dimensions for tandem vehicles', 'error');
+                return;
+            }
+
             try {
-                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
@@ -3780,9 +3901,16 @@
                         id: generateId(),
                         name: name,
                         description: description,
-                        length: parseFloat(length),
-                        width: parseFloat(width),
-                        height: parseFloat(height),
+                        mainDimensions: {
+                            length: parseFloat(length),
+                            width: parseFloat(width),
+                            height: parseFloat(height)
+                        },
+                        trailerDimensions: isTandem === 'true' ? {
+                            length: parseFloat(trailerLength),
+                            width: parseFloat(trailerWidth),
+                            height: parseFloat(trailerHeight)
+                        } : null,
                         maxWeight: parseFloat(maxWeight),
                         isTandem: isTandem === 'true',
                         createdAt: now,
@@ -3798,9 +3926,16 @@
                                 ...carType,
                                 name: name,
                                 description: description,
-                                length: parseFloat(length),
-                                width: parseFloat(width),
-                                height: parseFloat(height),
+                                mainDimensions: {
+                                    length: parseFloat(length),
+                                    width: parseFloat(width),
+                                    height: parseFloat(height)
+                                },
+                                trailerDimensions: isTandem === 'true' ? {
+                                    length: parseFloat(trailerLength),
+                                    width: parseFloat(trailerWidth),
+                                    height: parseFloat(trailerHeight)
+                                } : null,
                                 maxWeight: parseFloat(maxWeight),
                                 isTandem: isTandem === 'true',
                                 updatedAt: now
@@ -3819,7 +3954,7 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                state.carTypes = {  updatedCarTypes, sha: result.content.sha };
                 closeModal();
                 renderCarTypes();
                 addNotification('Car type saved successfully', 'success');
@@ -3882,7 +4017,7 @@
             }
 
             try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
                 const updatedDrivers = drivers.filter(driver => driver.id !== id);
 
                 const result = await updateFile(
@@ -3893,7 +4028,7 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                state.drivers = {  updatedDrivers, sha: result.content.sha };
                 renderDrivers();
                 addNotification('Driver deleted successfully', 'success');
             } catch (error) {
@@ -3908,7 +4043,7 @@
             }
 
             try {
-                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
                 const updatedCars = cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
@@ -3919,7 +4054,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: updatedCars, sha: result.content.sha };
+                state.cars = {  updatedCars, sha: result.content.sha };
                 renderCars();
                 addNotification('Car deleted successfully', 'success');
             } catch (error) {
@@ -3934,7 +4069,7 @@
             }
 
             try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -3945,7 +4080,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: updatedCards, sha: result.content.sha };
+                state.cards = {  updatedCards, sha: result.content.sha };
                 renderCards();
                 addNotification('Card deleted successfully', 'success');
             } catch (error) {
@@ -3960,7 +4095,7 @@
             }
 
             try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
                 const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
@@ -3971,7 +4106,7 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                state.tenders = {  updatedTenders, sha: result.content.sha };
                 renderTenders();
                 addNotification('Tender deleted successfully', 'success');
             } catch (error) {
@@ -3986,7 +4121,7 @@
             }
 
             try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
@@ -3997,7 +4132,7 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                state.invoices = {  updatedInvoices, sha: result.content.sha };
                 renderInvoices();
                 addNotification('Invoice deleted successfully', 'success');
             } catch (error) {
@@ -4012,7 +4147,7 @@
             }
 
             try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
@@ -4023,7 +4158,7 @@
                 );
 
                 // Update local state with new SHA
-                state.users = { data: updatedUsers, sha: result.content.sha };
+                state.users = {  updatedUsers, sha: result.content.sha };
                 renderAdmin();
                 addNotification('User deleted successfully', 'success');
             } catch (error) {
@@ -4038,7 +4173,7 @@
             }
 
             try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
                 const updatedStatuses = statuses.filter(status => status.id !== id);
 
                 const result = await updateFile(
@@ -4049,7 +4184,7 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                state.statuses = {  updatedStatuses, sha: result.content.sha };
                 renderStatuses();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
@@ -4064,7 +4199,7 @@
             }
 
             try {
-                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
                 const updatedCarTypes = carTypes.filter(carType => carType.id !== id);
 
                 const result = await updateFile(
@@ -4075,7 +4210,7 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                state.carTypes = {  updatedCarTypes, sha: result.content.sha };
                 renderCarTypes();
                 addNotification('Car type deleted successfully', 'success');
             } catch (error) {
@@ -4673,7 +4808,7 @@
             const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
             new Chart(revenueCtx, {
                 type: 'line',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
@@ -4697,7 +4832,7 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
@@ -4720,7 +4855,7 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
                         data: [45, 30, 15, 10],
@@ -4851,7 +4986,7 @@
             // FIXED: Check if data is null or undefined
             if (!state.carTypes.data || state.carTypes.data.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="6" class="text-center">No car types found</td>';
+                row.innerHTML = '<td colspan="8" class="text-center">No car types found</td>';
                 tableBody.appendChild(row);
                 return;
             }
@@ -4859,11 +4994,35 @@
             state.carTypes.data.forEach(carType => {
                 const row = document.createElement('tr');
                 
+                // Calculate main cubic capacity
+                const mainCubic = carType.mainDimensions.length * 
+                                 carType.mainDimensions.width * 
+                                 carType.mainDimensions.height;
+                
+                // Calculate trailer cubic capacity
+                let trailerCubic = 0;
+                if (carType.isTandem && carType.trailerDimensions) {
+                    trailerCubic = carType.trailerDimensions.length * 
+                                   carType.trailerDimensions.width * 
+                                   carType.trailerDimensions.height;
+                }
+                
+                // Total cubic capacity
+                const totalCubic = mainCubic + trailerCubic;
+                
                 row.innerHTML = `
                     <td>${carType.name}</td>
                     <td>${carType.description || 'No description'}</td>
-                    <td>${carType.length}m x ${carType.width}m x ${carType.height}m</td>
+                    <td>${carType.mainDimensions.length}m x ${carType.mainDimensions.width}m x ${carType.mainDimensions.height}m</td>
+                    <td>${carType.isTandem && carType.trailerDimensions ? 
+                        `${carType.trailerDimensions.length}m x ${carType.trailerDimensions.width}m x ${carType.trailerDimensions.height}m` : '-'}</td>
                     <td>${carType.maxWeight} kg</td>
+                    <td>
+                        Main: ${mainCubic.toFixed(2)} m³<br>
+                        ${carType.isTandem && carType.trailerDimensions ? 
+                            `Trailer: ${trailerCubic.toFixed(2)} m³<br>
+                             Total: ${totalCubic.toFixed(2)} m³` : ''}
+                    </td>
                     <td>${carType.isTandem ? 'Yes' : 'No'}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm edit-cartype" data-id="${carType.id}">Edit</button>
@@ -5141,11 +5300,27 @@
                     
                     document.getElementById('cartype-name').value = carType.name;
                     document.getElementById('cartype-description').value = carType.description || '';
-                    document.getElementById('cartype-length').value = carType.length;
-                    document.getElementById('cartype-width').value = carType.width;
-                    document.getElementById('cartype-height').value = carType.height;
+                    document.getElementById('cartype-length').value = carType.mainDimensions.length;
+                    document.getElementById('cartype-width').value = carType.mainDimensions.width;
+                    document.getElementById('cartype-height').value = carType.mainDimensions.height;
                     document.getElementById('cartype-max-weight').value = carType.maxWeight;
                     document.getElementById('cartype-is-tandem').value = carType.isTandem ? 'true' : 'false';
+                    
+                    // Show trailer dimensions if tandem
+                    const trailerDimensions = document.getElementById('trailer-dimensions');
+                    if (trailerDimensions) {
+                        trailerDimensions.classList.toggle('hidden', !carType.isTandem);
+                    }
+                    
+                    // Set trailer dimensions if available
+                    if (carType.isTandem && carType.trailerDimensions) {
+                        document.getElementById('cartype-trailer-length').value = carType.trailerDimensions.length;
+                        document.getElementById('cartype-trailer-width').value = carType.trailerDimensions.width;
+                        document.getElementById('cartype-trailer-height').value = carType.trailerDimensions.height;
+                    }
+                    
+                    // Calculate cubic capacity
+                    calculateCarTypeCubicCapacity();
                 }
             } else {
                 modalTitle.textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
@@ -5230,6 +5405,22 @@
                     document.getElementById('cartype-height').value = '';
                     document.getElementById('cartype-max-weight').value = '';
                     document.getElementById('cartype-is-tandem').value = 'false';
+                    
+                    // Hide trailer dimensions by default
+                    const trailerDimensions = document.getElementById('trailer-dimensions');
+                    if (trailerDimensions) {
+                        trailerDimensions.classList.add('hidden');
+                    }
+                    
+                    // Clear trailer dimensions
+                    document.getElementById('cartype-trailer-length').value = '';
+                    document.getElementById('cartype-trailer-width').value = '';
+                    document.getElementById('cartype-trailer-height').value = '';
+                    
+                    // Reset cubic capacity display
+                    document.getElementById('cartype-main-cubic').textContent = '0.00 m³';
+                    document.getElementById('cartype-trailer-cubic').textContent = '0.00 m³';
+                    document.getElementById('cartype-total-cubic').textContent = '0.00 m³';
                 }
             }
             
@@ -5340,6 +5531,30 @@
             document.getElementById('car-cubic').value = cubic.toFixed(2);
         }
 
+        function calculateCarTypeCubicCapacity() {
+            const length = parseFloat(document.getElementById('cartype-length').value) || 0;
+            const width = parseFloat(document.getElementById('cartype-width').value) || 0;
+            const height = parseFloat(document.getElementById('cartype-height').value) || 0;
+            
+            const isTandem = document.getElementById('cartype-is-tandem').value === 'true';
+            let trailerCubic = 0;
+            
+            if (isTandem) {
+                const trailerLength = parseFloat(document.getElementById('cartype-trailer-length').value) || 0;
+                const trailerWidth = parseFloat(document.getElementById('cartype-trailer-width').value) || 0;
+                const trailerHeight = parseFloat(document.getElementById('cartype-trailer-height').value) || 0;
+                
+                trailerCubic = trailerLength * trailerWidth * trailerHeight;
+            }
+            
+            const mainCubic = length * width * height;
+            const totalCubic = mainCubic + trailerCubic;
+            
+            document.getElementById('cartype-main-cubic').textContent = `${mainCubic.toFixed(2)} m³`;
+            document.getElementById('cartype-trailer-cubic').textContent = `${trailerCubic.toFixed(2)} m³`;
+            document.getElementById('cartype-total-cubic').textContent = `${totalCubic.toFixed(2)} m³`;
+        }
+
         function getTimeAgo(dateString) {
             const now = new Date();
             const past = new Date(dateString);
@@ -5371,7 +5586,7 @@
             if (!message) return;
             
             try {
-                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
+                const {  chat, sha } = await readFile(FILE_PATHS.CHAT) || {  [], sha: null };
                 const now = new Date().toISOString();
                 
                 const newMessage = {
@@ -5391,7 +5606,7 @@
                 );
                 
                 // Update local state with new SHA
-                state.chat = { data: updatedChat, sha: result.content.sha };
+                state.chat = {  updatedChat, sha: result.content.sha };
                 renderChatMessages();
                 input.value = '';
             } catch (error) {

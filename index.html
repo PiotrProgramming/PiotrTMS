@@ -3344,7 +3344,7 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                state.drivers = {  updatedDrivers, sha: result.content.sha };
                 closeModal();
                 renderDrivers();
                 addNotification('Driver saved successfully', 'success');
@@ -3853,7 +3853,7 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                state.statuses = {  updatedStatuses, sha: result.content.sha };
                 
                 // Re-render statuses
                 renderStatuses();
@@ -4069,7 +4069,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -4812,7 +4812,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -4858,7 +4858,7 @@
                  {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
-                        data: [45, 30, 15, 10],
+                         [45, 30, 15, 10],
                         backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
                     }]
                 },

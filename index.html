@@ -1877,15 +1877,15 @@
             notifications: [],
             unreadNotifications: 0,
             // Data stores with SHA
-            drivers: { data: [], sha: null },
-            cars: { data: [], sha: null },
-            cards: { data: [], sha: null },
-            tenders: { data: [], sha: null },
-            invoices: { data: [], sha: null },
-            users: { data: [], sha: null },
-            statuses: { data: [], sha: null },
-            carTypes: { data: [], sha: null },
-            chat: { data: [], sha: null }
+            drivers: {  [], sha: null },
+            cars: {  [], sha: null },
+            cards: {  [], sha: null },
+            tenders: {  [], sha: null },
+            invoices: {  [], sha: null },
+            users: {  [], sha: null },
+            statuses: {  [], sha: null },
+            carTypes: {  [], sha: null },
+            chat: {  [], sha: null }
         };
 
         // GitHub file paths
@@ -1936,153 +1936,318 @@
                 }
             }
 
-            // Setup event listeners
+            // Setup event listeners - only if elements exist
             setupEventListeners();
             setupDragAndDrop();
         });
 
-        // Setup all event listeners
+        // Setup all event listeners with null checks
         function setupEventListeners() {
-            // Auth - Fixed the event listeners for show/hide
-            document.getElementById('show-register').addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('login-form').classList.add('hidden');
-                document.getElementById('register-form').classList.remove('hidden');
-            });
+            // Auth - Fixed the event listeners for show/hide with null checks
+            const showRegisterBtn = document.getElementById('show-register');
+            if (showRegisterBtn) {
+                showRegisterBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('login-form').classList.add('hidden');
+                    document.getElementById('register-form').classList.remove('hidden');
+                });
+            }
             
-            document.getElementById('show-login').addEventListener('click', function(e) {
-                e.preventDefault();
-                document.getElementById('register-form').classList.add('hidden');
-                document.getElementById('login-form').classList.remove('hidden');
-            });
+            const showLoginBtn = document.getElementById('show-login');
+            if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.getElementById('register-form').classList.add('hidden');
+                    document.getElementById('login-form').classList.remove('hidden');
+                });
+            }
 
-            // Auth buttons
-            document.getElementById('login-btn').addEventListener('click', handleLogin);
-            document.getElementById('register-btn').addEventListener('click', handleRegister);
-            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            // Auth buttons with null checks
+            const loginBtn = document.getElementById('login-btn');
+            if (loginBtn) {
+                loginBtn.addEventListener('click', handleLogin);
+            }
+            
+            const registerBtn = document.getElementById('register-btn');
+            if (registerBtn) {
+                registerBtn.addEventListener('click', handleRegister);
+            }
+            
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', handleLogout);
+            }
 
-            // Navigation
-            document.querySelectorAll('.nav-item').forEach(item => {
+            // Navigation - only if nav items exist
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
                 item.addEventListener('click', function() {
                     const view = this.getAttribute('data-view');
                     navigateTo(view);
                 });
             });
 
-            // User menu
-            document.getElementById('user-menu-toggle').addEventListener('click', toggleUserDropdown);
-            document.getElementById('notification-icon').addEventListener('click', toggleNotificationPanel);
+            // User menu with null checks
+            const userMenuToggle = document.getElementById('user-menu-toggle');
+            if (userMenuToggle) {
+                userMenuToggle.addEventListener('click', toggleUserDropdown);
+            }
+            
+            const notificationIcon = document.getElementById('notification-icon');
+            if (notificationIcon) {
+                notificationIcon.addEventListener('click', toggleNotificationPanel);
+            }
 
-            // Quick actions
-            document.getElementById('quick-add-driver').addEventListener('click', () => openModal('driver'));
-            document.getElementById('quick-add-tender').addEventListener('click', () => openModal('tender'));
-            document.getElementById('quick-add-invoice').addEventListener('click', () => openModal('invoice'));
+            // Quick actions with null checks
+            const quickAddDriver = document.getElementById('quick-add-driver');
+            if (quickAddDriver) {
+                quickAddDriver.addEventListener('click', () => openModal('driver'));
+            }
+            
+            const quickAddTender = document.getElementById('quick-add-tender');
+            if (quickAddTender) {
+                quickAddTender.addEventListener('click', () => openModal('tender'));
+            }
+            
+            const quickAddInvoice = document.getElementById('quick-add-invoice');
+            if (quickAddInvoice) {
+                quickAddInvoice.addEventListener('click', () => openModal('invoice'));
+            }
 
             // Modals
             document.querySelectorAll('.close').forEach(btn => {
                 btn.addEventListener('click', closeModal);
             });
 
-            // Modal save buttons
-            document.getElementById('driver-save').addEventListener('click', saveDriver);
-            document.getElementById('driver-cancel').addEventListener('click', closeModal);
+            // Modal save buttons with null checks
+            const driverSaveBtn = document.getElementById('driver-save');
+            if (driverSaveBtn) {
+                driverSaveBtn.addEventListener('click', saveDriver);
+            }
             
-            document.getElementById('car-save').addEventListener('click', saveCar);
-            document.getElementById('car-cancel').addEventListener('click', closeModal);
+            const driverCancelBtn = document.getElementById('driver-cancel');
+            if (driverCancelBtn) {
+                driverCancelBtn.addEventListener('click', closeModal);
+            }
             
-            document.getElementById('card-save').addEventListener('click', saveCard);
-            document.getElementById('card-cancel').addEventListener('click', closeModal);
+            const carSaveBtn = document.getElementById('car-save');
+            if (carSaveBtn) {
+                carSaveBtn.addEventListener('click', saveCar);
+            }
             
-            document.getElementById('tender-save').addEventListener('click', saveTender);
-            document.getElementById('tender-cancel').addEventListener('click', closeModal);
+            const carCancelBtn = document.getElementById('car-cancel');
+            if (carCancelBtn) {
+                carCancelBtn.addEventListener('click', closeModal);
+            }
             
-            document.getElementById('invoice-save').addEventListener('click', saveInvoice);
-            document.getElementById('invoice-cancel').addEventListener('click', closeModal);
+            const cardSaveBtn = document.getElementById('card-save');
+            if (cardSaveBtn) {
+                cardSaveBtn.addEventListener('click', saveCard);
+            }
             
-            document.getElementById('user-save').addEventListener('click', saveUser);
-            document.getElementById('user-cancel').addEventListener('click', closeModal);
+            const cardCancelBtn = document.getElementById('card-cancel');
+            if (cardCancelBtn) {
+                cardCancelBtn.addEventListener('click', closeModal);
+            }
             
-            document.getElementById('status-save').addEventListener('click', saveStatus);
-            document.getElementById('status-cancel').addEventListener('click', closeModal);
+            const tenderSaveBtn = document.getElementById('tender-save');
+            if (tenderSaveBtn) {
+                tenderSaveBtn.addEventListener('click', saveTender);
+            }
             
-            document.getElementById('cartype-save').addEventListener('click', saveCarType);
-            document.getElementById('cartype-cancel').addEventListener('click', closeModal);
+            const tenderCancelBtn = document.getElementById('tender-cancel');
+            if (tenderCancelBtn) {
+                tenderCancelBtn.addEventListener('click', closeModal);
+            }
+            
+            const invoiceSaveBtn = document.getElementById('invoice-save');
+            if (invoiceSaveBtn) {
+                invoiceSaveBtn.addEventListener('click', saveInvoice);
+            }
+            
+            const invoiceCancelBtn = document.getElementById('invoice-cancel');
+            if (invoiceCancelBtn) {
+                invoiceCancelBtn.addEventListener('click', closeModal);
+            }
+            
+            const userSaveBtn = document.getElementById('user-save');
+            if (userSaveBtn) {
+                userSaveBtn.addEventListener('click', saveUser);
+            }
+            
+            const userCancelBtn = document.getElementById('user-cancel');
+            if (userCancelBtn) {
+                userCancelBtn.addEventListener('click', closeModal);
+            }
+            
+            const statusSaveBtn = document.getElementById('status-save');
+            if (statusSaveBtn) {
+                statusSaveBtn.addEventListener('click', saveStatus);
+            }
+            
+            const statusCancelBtn = document.getElementById('status-cancel');
+            if (statusCancelBtn) {
+                statusCancelBtn.addEventListener('click', closeModal);
+            }
+            
+            const cartypeSaveBtn = document.getElementById('cartype-save');
+            if (cartypeSaveBtn) {
+                cartypeSaveBtn.addEventListener('click', saveCarType);
+            }
+            
+            const cartypeCancelBtn = document.getElementById('cartype-cancel');
+            if (cartypeCancelBtn) {
+                cartypeCancelBtn.addEventListener('click', closeModal);
+            }
 
-            // Add buttons
-            document.getElementById('add-driver-btn').addEventListener('click', () => openModal('driver'));
-            document.getElementById('add-car-btn').addEventListener('click', () => openModal('car'));
-            document.getElementById('add-card-btn').addEventListener('click', () => openModal('card'));
-            document.getElementById('add-tender-btn').addEventListener('click', () => openModal('tender'));
-            document.getElementById('add-invoice-btn').addEventListener('click', () => openModal('invoice'));
-            document.getElementById('add-user-btn').addEventListener('click', () => openModal('user'));
-            document.getElementById('add-status-btn').addEventListener('click', () => openModal('status'));
-            document.getElementById('add-cartype-btn').addEventListener('click', () => openModal('cartype'));
-            document.getElementById('add-driver-status-btn').addEventListener('click', () => openModal('status', null, STATUS_TYPES.DRIVER));
-            document.getElementById('add-car-status-btn').addEventListener('click', () => openModal('status', null, STATUS_TYPES.CAR));
+            // Add buttons with null checks
+            const addDriverBtn = document.getElementById('add-driver-btn');
+            if (addDriverBtn) {
+                addDriverBtn.addEventListener('click', () => openModal('driver'));
+            }
+            
+            const addCarBtn = document.getElementById('add-car-btn');
+            if (addCarBtn) {
+                addCarBtn.addEventListener('click', () => openModal('car'));
+            }
+            
+            const addCardBtn = document.getElementById('add-card-btn');
+            if (addCardBtn) {
+                addCardBtn.addEventListener('click', () => openModal('card'));
+            }
+            
+            const addTenderBtn = document.getElementById('add-tender-btn');
+            if (addTenderBtn) {
+                addTenderBtn.addEventListener('click', () => openModal('tender'));
+            }
+            
+            const addInvoiceBtn = document.getElementById('add-invoice-btn');
+            if (addInvoiceBtn) {
+                addInvoiceBtn.addEventListener('click', () => openModal('invoice'));
+            }
+            
+            const addUserBtn = document.getElementById('add-user-btn');
+            if (addUserBtn) {
+                addUserBtn.addEventListener('click', () => openModal('user'));
+            }
+            
+            const addStatusBtn = document.getElementById('add-status-btn');
+            if (addStatusBtn) {
+                addStatusBtn.addEventListener('click', () => openModal('status'));
+            }
+            
+            const addCartypeBtn = document.getElementById('add-cartype-btn');
+            if (addCartypeBtn) {
+                addCartypeBtn.addEventListener('click', () => openModal('cartype'));
+            }
+            
+            const addDriverStatusBtn = document.getElementById('add-driver-status-btn');
+            if (addDriverStatusBtn) {
+                addDriverStatusBtn.addEventListener('click', () => openModal('status', null, STATUS_TYPES.DRIVER));
+            }
+            
+            const addCarStatusBtn = document.getElementById('add-car-status-btn');
+            if (addCarStatusBtn) {
+                addCarStatusBtn.addEventListener('click', () => openModal('status', null, STATUS_TYPES.CAR));
+            }
 
-            // Tabs
-            document.querySelectorAll('.tab').forEach(tab => {
+            // Tabs with null checks
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     const tabId = this.getAttribute('data-tab');
                     activateTab(tabId);
                 });
             });
 
-            // Status type filter
-            document.getElementById('status-type-filter').addEventListener('change', function() {
-                const type = this.value;
-                if (type === 'all') {
-                    renderStatuses();
-                } else {
-                    renderStatuses(type);
-                }
-            });
+            // Status type filter with null check
+            const statusTypeFilter = document.getElementById('status-type-filter');
+            if (statusTypeFilter) {
+                statusTypeFilter.addEventListener('change', function() {
+                    const type = this.value;
+                    if (type === 'all') {
+                        renderStatuses();
+                    } else {
+                        renderStatuses(type);
+                    }
+                });
+            }
 
-            // Status type change in status modal
-            document.getElementById('status-type').addEventListener('change', function() {
-                const type = this.value;
-                populateParentStatuses(type);
-            });
-
-            // Status level change in status modal
-            document.getElementById('status-is-primary').addEventListener('change', function() {
-                const isPrimary = this.value === 'true';
-                document.getElementById('status-parent-container').style.display = isPrimary ? 'none' : 'block';
-                
-                if (!isPrimary) {
-                    const type = document.getElementById('status-type').value;
+            // Status type change in status modal with null check
+            const statusType = document.getElementById('status-type');
+            if (statusType) {
+                statusType.addEventListener('change', function() {
+                    const type = this.value;
                     populateParentStatuses(type);
-                }
-            });
+                });
+            }
 
-            // Status change in tender modal
-            document.getElementById('tender-status').addEventListener('change', function() {
-                const statusId = this.value;
-                populateSubStatuses(statusId);
-            });
+            // Status level change in status modal with null check
+            const statusIsPrimary = document.getElementById('status-is-primary');
+            if (statusIsPrimary) {
+                statusIsPrimary.addEventListener('change', function() {
+                    const isPrimary = this.value === 'true';
+                    document.getElementById('status-parent-container').style.display = isPrimary ? 'none' : 'block';
+                    
+                    if (!isPrimary) {
+                        const type = document.getElementById('status-type').value;
+                        populateParentStatuses(type);
+                    }
+                });
+            }
 
-            // Chat
-            document.getElementById('chat-send').addEventListener('click', sendMessage);
-            document.getElementById('chat-input').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                }
-            });
+            // Status change in tender modal with null check
+            const tenderStatus = document.getElementById('tender-status');
+            if (tenderStatus) {
+                tenderStatus.addEventListener('change', function() {
+                    const statusId = this.value;
+                    populateSubStatuses(statusId);
+                });
+            }
 
-            // Calculate cubic capacity when dimensions change
-            document.getElementById('car-length').addEventListener('change', calculateCubicCapacity);
-            document.getElementById('car-width').addEventListener('change', calculateCubicCapacity);
-            document.getElementById('car-height').addEventListener('change', calculateCubicCapacity);
+            // Chat with null checks
+            const chatSendBtn = document.getElementById('chat-send');
+            if (chatSendBtn) {
+                chatSendBtn.addEventListener('click', sendMessage);
+            }
+            
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
 
-            // Tender status change
-            document.getElementById('tender-status').addEventListener('change', function() {
-                const saleFields = document.getElementById('tender-sale-fields');
-                if (this.value === 'sold') {
-                    saleFields.classList.remove('hidden');
-                } else {
-                    saleFields.classList.add('hidden');
-                }
-            });
+            // Calculate cubic capacity when dimensions change with null checks
+            const carLength = document.getElementById('car-length');
+            if (carLength) {
+                carLength.addEventListener('change', calculateCubicCapacity);
+            }
+            
+            const carWidth = document.getElementById('car-width');
+            if (carWidth) {
+                carWidth.addEventListener('change', calculateCubicCapacity);
+            }
+            
+            const carHeight = document.getElementById('car-height');
+            if (carHeight) {
+                carHeight.addEventListener('change', calculateCubicCapacity);
+            }
+
+            // Tender status change with null check
+            const tenderStatusField = document.getElementById('tender-status');
+            if (tenderStatusField) {
+                tenderStatusField.addEventListener('change', function() {
+                    const saleFields = document.getElementById('tender-sale-fields');
+                    if (this.value === 'sold') {
+                        saleFields.classList.remove('hidden');
+                    } else {
+                        saleFields.classList.add('hidden');
+                    }
+                });
+            }
         }
 
         // Setup drag and drop
@@ -2148,27 +2313,29 @@
 
             // Handle drop zones
             [availableCards, assignedCards].forEach(zone => {
-                zone.addEventListener('dragover', function(e) {
-                    e.preventDefault();
-                    this.classList.add('highlight');
-                });
+                if (zone) {
+                    zone.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.classList.add('highlight');
+                    });
 
-                zone.addEventListener('dragleave', function() {
-                    this.classList.remove('highlight');
-                });
+                    zone.addEventListener('dragleave', function() {
+                        this.classList.remove('highlight');
+                    });
 
-                zone.addEventListener('drop', function(e) {
-                    e.preventDefault();
-                    this.classList.remove('highlight');
-                    
-                    const cardId = e.dataTransfer.getData('text/plain');
-                    const card = state.cards.data.find(c => c.id === cardId);
-                    
-                    if (card) {
-                        // In a real app, we would update the card assignment
-                        addNotification('Card assignment updated', 'success');
-                    }
-                });
+                    zone.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('highlight');
+                        
+                        const cardId = e.dataTransfer.getData('text/plain');
+                        const card = state.cards.data.find(c => c.id === cardId);
+                        
+                        if (card) {
+                            // In a real app, we would update the card assignment
+                            addNotification('Card assignment updated', 'success');
+                        }
+                    });
+                }
             });
         }
 
@@ -2751,7 +2918,7 @@
                 if (!response.ok) {
                     if (response.status === 404) {
                         // Return empty array instead of null for data
-                        return { data: [], sha: null };
+                        return {  [], sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -2765,11 +2932,11 @@
                     };
                 }
                 // Return empty array instead of null for data
-                return { data: [], sha: null };
+                return {  [], sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
                     // Return empty array instead of null for data
-                    return { data: [], sha: null };
+                    return {  [], sha: null };
                 }
                 throw error;
             }
@@ -2793,7 +2960,7 @@
                 // FIXED: Always ensure data is an array, never null
                 const driversData = await readFile(FILE_PATHS.DRIVERS);
                 state.drivers = { 
-                    data: driversData.data || [], 
+                     driversData.data || [], 
                     sha: driversData.sha 
                 };
                 
@@ -2811,31 +2978,31 @@
                 
                 const tendersData = await readFile(FILE_PATHS.TENDERS);
                 state.tenders = { 
-                    data: tendersData.data || [], 
+                     tendersData.data || [], 
                     sha: tendersData.sha 
                 };
                 
                 const invoicesData = await readFile(FILE_PATHS.INVOICES);
                 state.invoices = { 
-                    data: invoicesData.data || [], 
+                     invoicesData.data || [], 
                     sha: invoicesData.sha 
                 };
                 
                 const usersData = await readFile(FILE_PATHS.USERS);
                 state.users = { 
-                    data: usersData.data || [], 
+                     usersData.data || [], 
                     sha: usersData.sha 
                 };
                 
                 const statusesData = await readFile(FILE_PATHS.STATUSES);
                 state.statuses = { 
-                    data: statusesData.data || [], 
+                     statusesData.data || [], 
                     sha: statusesData.sha 
                 };
                 
                 const carTypesData = await readFile(FILE_PATHS.CARTYPES);
                 state.carTypes = { 
-                    data: carTypesData.data || [], 
+                     carTypesData.data || [], 
                     sha: carTypesData.sha 
                 };
                 
@@ -3099,7 +3266,7 @@
             }
 
             try {
-                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCars;
@@ -3160,7 +3327,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: updatedCars, sha: result.content.sha };
+                state.cars = {  updatedCars, sha: result.content.sha };
                 closeModal();
                 renderCars();
                 addNotification('Car saved successfully', 'success');
@@ -3185,7 +3352,7 @@
             }
 
             try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCards;
@@ -3232,7 +3399,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: updatedCards, sha: result.content.sha };
+                state.cards = {  updatedCards, sha: result.content.sha };
                 closeModal();
                 renderCards();
                 addNotification('Card saved successfully', 'success');
@@ -3263,7 +3430,7 @@
             }
 
             try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedTenders;
@@ -3336,7 +3503,7 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                state.tenders = {  updatedTenders, sha: result.content.sha };
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
@@ -3367,7 +3534,7 @@
             }
 
             try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -3420,7 +3587,7 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                state.invoices = {  updatedInvoices, sha: result.content.sha };
                 closeModal();
                 renderInvoices();
                 addNotification('Invoice saved successfully', 'success');
@@ -3452,7 +3619,7 @@
             }
 
             try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedUsers;
@@ -3505,7 +3672,7 @@
                 );
 
                 // Update local state with new SHA
-                state.users = { data: updatedUsers, sha: result.content.sha };
+                state.users = {  updatedUsers, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('User saved successfully', 'success');
@@ -3529,7 +3696,7 @@
             }
 
             try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedStatuses;
@@ -3603,7 +3770,7 @@
             }
 
             try {
-                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
@@ -3652,7 +3819,7 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                state.carTypes = {  updatedCarTypes, sha: result.content.sha };
                 closeModal();
                 renderCarTypes();
                 addNotification('Car type saved successfully', 'success');
@@ -3715,7 +3882,7 @@
             }
 
             try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
                 const updatedDrivers = drivers.filter(driver => driver.id !== id);
 
                 const result = await updateFile(
@@ -3726,7 +3893,7 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                state.drivers = {  updatedDrivers, sha: result.content.sha };
                 renderDrivers();
                 addNotification('Driver deleted successfully', 'success');
             } catch (error) {
@@ -3741,7 +3908,7 @@
             }
 
             try {
-                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
                 const updatedCars = cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
@@ -3752,7 +3919,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: updatedCars, sha: result.content.sha };
+                state.cars = {  updatedCars, sha: result.content.sha };
                 renderCars();
                 addNotification('Car deleted successfully', 'success');
             } catch (error) {
@@ -3767,7 +3934,7 @@
             }
 
             try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -3778,7 +3945,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: updatedCards, sha: result.content.sha };
+                state.cards = {  updatedCards, sha: result.content.sha };
                 renderCards();
                 addNotification('Card deleted successfully', 'success');
             } catch (error) {
@@ -3793,7 +3960,7 @@
             }
 
             try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
                 const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
@@ -3804,7 +3971,7 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                state.tenders = {  updatedTenders, sha: result.content.sha };
                 renderTenders();
                 addNotification('Tender deleted successfully', 'success');
             } catch (error) {
@@ -3819,7 +3986,7 @@
             }
 
             try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
@@ -3830,7 +3997,7 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                state.invoices = {  updatedInvoices, sha: result.content.sha };
                 renderInvoices();
                 addNotification('Invoice deleted successfully', 'success');
             } catch (error) {
@@ -3845,7 +4012,7 @@
             }
 
             try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
@@ -3856,7 +4023,7 @@
                 );
 
                 // Update local state with new SHA
-                state.users = { data: updatedUsers, sha: result.content.sha };
+                state.users = {  updatedUsers, sha: result.content.sha };
                 renderAdmin();
                 addNotification('User deleted successfully', 'success');
             } catch (error) {
@@ -3871,7 +4038,7 @@
             }
 
             try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
                 const updatedStatuses = statuses.filter(status => status.id !== id);
 
                 const result = await updateFile(
@@ -3882,7 +4049,7 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                state.statuses = {  updatedStatuses, sha: result.content.sha };
                 renderStatuses();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
@@ -3897,7 +4064,7 @@
             }
 
             try {
-                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
                 const updatedCarTypes = carTypes.filter(carType => carType.id !== id);
 
                 const result = await updateFile(
@@ -3908,7 +4075,7 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                state.carTypes = {  updatedCarTypes, sha: result.content.sha };
                 renderCarTypes();
                 addNotification('Car type deleted successfully', 'success');
             } catch (error) {
@@ -4506,7 +4673,7 @@
             const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
             new Chart(revenueCtx, {
                 type: 'line',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
@@ -4530,7 +4697,7 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
@@ -4553,7 +4720,7 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
                         data: [45, 30, 15, 10],
@@ -4590,89 +4757,95 @@
         function renderStatuses(filterType = 'all') {
             // Render driver statuses
             const driverHierarchy = document.getElementById('driver-status-hierarchy');
-            driverHierarchy.innerHTML = '';
-            
-            const driverPrimaryStatuses = getDriverPrimaryStatuses();
-            driverPrimaryStatuses.forEach(primaryStatus => {
-                const item = document.createElement('div');
-                item.className = 'status-hierarchy-item';
-                item.dataset.statusId = primaryStatus.id;
-                item.draggable = true;
+            if (driverHierarchy) {
+                driverHierarchy.innerHTML = '';
                 
-                const subStatuses = getDriverSubStatuses(primaryStatus.id);
-                
-                item.innerHTML = `
-                    <div>
-                        <span class="status-badge ${getStatusColorClass(primaryStatus)}">${primaryStatus.name}</span>
-                        ${subStatuses.length > 0 ? 
-                            `<div class="status-hierarchy" style="margin-left: 20px; margin-top: 5px;">
-                                ${subStatuses.map(subStatus => `
-                                    <div class="status-hierarchy-item" data-status-id="${subStatus.id}" draggable="true">
-                                        <span class="status-badge ${getStatusColorClass(subStatus)}">${subStatus.name}</span>
-                                    </div>
-                                `).join('')}
-                            </div>` : ''}
-                    </div>
-                    <div class="actions">
-                        <button class="btn btn-secondary btn-sm edit-status" data-id="${primaryStatus.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-status" data-id="${primaryStatus.id}">Delete</button>
-                    </div>
-                `;
-                
-                driverHierarchy.appendChild(item);
-            });
-            
-            // Add event listeners for driver statuses
-            document.querySelectorAll('.edit-status').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editStatus(this.getAttribute('data-id'));
+                const driverPrimaryStatuses = getDriverPrimaryStatuses();
+                driverPrimaryStatuses.forEach(primaryStatus => {
+                    const item = document.createElement('div');
+                    item.className = 'status-hierarchy-item';
+                    item.dataset.statusId = primaryStatus.id;
+                    item.draggable = true;
+                    
+                    const subStatuses = getDriverSubStatuses(primaryStatus.id);
+                    
+                    item.innerHTML = `
+                        <div>
+                            <span class="status-badge ${getStatusColorClass(primaryStatus)}">${primaryStatus.name}</span>
+                            ${subStatuses.length > 0 ? 
+                                `<div class="status-hierarchy" style="margin-left: 20px; margin-top: 5px;">
+                                    ${subStatuses.map(subStatus => `
+                                        <div class="status-hierarchy-item" data-status-id="${subStatus.id}" draggable="true">
+                                            <span class="status-badge ${getStatusColorClass(subStatus)}">${subStatus.name}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>` : ''}
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-secondary btn-sm edit-status" data-id="${primaryStatus.id}">Edit</button>
+                            <button class="btn btn-danger btn-sm delete-status" data-id="${primaryStatus.id}">Delete</button>
+                        </div>
+                    `;
+                    
+                    driverHierarchy.appendChild(item);
                 });
-            });
+                
+                // Add event listeners for driver statuses
+                document.querySelectorAll('.edit-status').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        editStatus(this.getAttribute('data-id'));
+                    });
+                });
 
-            document.querySelectorAll('.delete-status').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteStatus(this.getAttribute('data-id'));
+                document.querySelectorAll('.delete-status').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        deleteStatus(this.getAttribute('data-id'));
+                    });
                 });
-            });
+            }
             
             // Render car statuses
             const carHierarchy = document.getElementById('car-status-hierarchy');
-            carHierarchy.innerHTML = '';
-            
-            const carStatuses = getCarStatuses();
-            carStatuses.forEach(status => {
-                const item = document.createElement('div');
-                item.className = 'status-hierarchy-item';
-                item.dataset.statusId = status.id;
-                item.draggable = true;
+            if (carHierarchy) {
+                carHierarchy.innerHTML = '';
                 
-                item.innerHTML = `
-                    <span class="status-badge ${getStatusColorClass(status)}">${status.name}</span>
-                    <div class="actions">
-                        <button class="btn btn-secondary btn-sm edit-status" data-id="${status.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-status" data-id="${status.id}">Delete</button>
-                    </div>
-                `;
-                
-                carHierarchy.appendChild(item);
-            });
-            
-            // Add event listeners for car statuses
-            document.querySelectorAll('.edit-status').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editStatus(this.getAttribute('data-id'));
+                const carStatuses = getCarStatuses();
+                carStatuses.forEach(status => {
+                    const item = document.createElement('div');
+                    item.className = 'status-hierarchy-item';
+                    item.dataset.statusId = status.id;
+                    item.draggable = true;
+                    
+                    item.innerHTML = `
+                        <span class="status-badge ${getStatusColorClass(status)}">${status.name}</span>
+                        <div class="actions">
+                            <button class="btn btn-secondary btn-sm edit-status" data-id="${status.id}">Edit</button>
+                            <button class="btn btn-danger btn-sm delete-status" data-id="${status.id}">Delete</button>
+                        </div>
+                    `;
+                    
+                    carHierarchy.appendChild(item);
                 });
-            });
+                
+                // Add event listeners for car statuses
+                document.querySelectorAll('.edit-status').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        editStatus(this.getAttribute('data-id'));
+                    });
+                });
 
-            document.querySelectorAll('.delete-status').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteStatus(this.getAttribute('data-id'));
+                document.querySelectorAll('.delete-status').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        deleteStatus(this.getAttribute('data-id'));
+                    });
                 });
-            });
+            }
         }
 
         function renderCarTypes() {
             const tableBody = document.getElementById('cartypes-table-body');
+            if (!tableBody) return;
+            
             tableBody.innerHTML = '';
 
             // FIXED: Check if data is null or undefined
@@ -4718,6 +4891,8 @@
         function renderAdmin() {
             // Users tab
             const usersTableBody = document.getElementById('users-table-body');
+            if (!usersTableBody) return;
+            
             usersTableBody.innerHTML = '';
 
             // FIXED: Check if data is null or undefined
@@ -4730,14 +4905,16 @@
 
             // Populate supervisor select
             const supervisorSelect = document.getElementById('user-supervisor');
-            supervisorSelect.innerHTML = '<option value="">None</option>';
-            
-            state.users.data.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.id;
-                option.textContent = `${user.name} ${user.lastname}`;
-                supervisorSelect.appendChild(option);
-            });
+            if (supervisorSelect) {
+                supervisorSelect.innerHTML = '<option value="">None</option>';
+                
+                state.users.data.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.name} ${user.lastname}`;
+                    supervisorSelect.appendChild(option);
+                });
+            }
 
             state.users.data.forEach(user => {
                 const row = document.createElement('tr');
@@ -4784,6 +4961,8 @@
 
         function buildOrgTree() {
             const orgTree = document.getElementById('org-tree');
+            if (!orgTree) return;
+            
             orgTree.innerHTML = '';
 
             // Find root users (those with no supervisor or supervisor not in list)
@@ -4816,6 +4995,8 @@
 
         function renderChat() {
             const chatUsersList = document.getElementById('chat-users-list');
+            if (!chatUsersList) return;
+            
             chatUsersList.innerHTML = '';
 
             state.users.data.forEach(user => {
@@ -4845,6 +5026,8 @@
         // Modal functions
         function openModal(type, id = null, statusType = null) {
             const modal = document.getElementById(`${type}-modal`);
+            if (!modal) return;
+            
             const modalTitle = document.getElementById(`${type}-modal-title`);
             
             if (id) {
@@ -4854,6 +5037,8 @@
                 // Populate form with existing data
                 if (type === 'driver') {
                     const driver = state.drivers.data.find(d => d.id === id);
+                    if (!driver) return;
+                    
                     document.getElementById('driver-name').value = driver.name;
                     document.getElementById('driver-lastname').value = driver.lastname;
                     document.getElementById('driver-car').value = driver.car || '';
@@ -4863,6 +5048,8 @@
                     document.getElementById('driver-work-hours').value = driver.workHours || '8:00-17:00';
                 } else if (type === 'car') {
                     const car = state.cars.data.find(c => c.id === id);
+                    if (!car) return;
+                    
                     document.getElementById('car-tractor').value = car.tractor;
                     document.getElementById('car-trailer').value = car.trailer;
                     document.getElementById('car-type').value = car.carType || '';
@@ -4878,6 +5065,8 @@
                     document.getElementById('car-status').value = car.status || '';
                 } else if (type === 'card') {
                     const card = state.cards.data.find(c => c.id === id);
+                    if (!card) return;
+                    
                     document.getElementById('card-number').value = card.number;
                     document.getElementById('card-pin').value = card.pin;
                     document.getElementById('card-expiry').value = card.expiry;
@@ -4886,6 +5075,8 @@
                     document.getElementById('card-status').value = card.status || '';
                 } else if (type === 'tender') {
                     const tender = state.tenders.data.find(t => t.id === id);
+                    if (!tender) return;
+                    
                     document.getElementById('tender-loading-date').value = tender.loading.date;
                     document.getElementById('tender-unloading-date').value = tender.unloading.date;
                     document.getElementById('tender-loading-city').value = tender.loading.city;
@@ -4909,6 +5100,8 @@
                     }
                 } else if (type === 'invoice') {
                     const invoice = state.invoices.data.find(i => i.id === id);
+                    if (!invoice) return;
+                    
                     document.getElementById('invoice-code').value = invoice.code;
                     document.getElementById('invoice-client').value = invoice.client;
                     document.getElementById('invoice-date').value = invoice.date;
@@ -4918,6 +5111,8 @@
                     document.getElementById('invoice-status').value = invoice.status || '';
                 } else if (type === 'user') {
                     const user = state.users.data.find(u => u.id === id);
+                    if (!user) return;
+                    
                     document.getElementById('user-name-input').value = user.name;
                     document.getElementById('user-lastname').value = user.lastname;
                     document.getElementById('user-email').value = user.email;
@@ -4926,6 +5121,8 @@
                     document.getElementById('user-supervisor').value = user.supervisor || '';
                 } else if (type === 'status') {
                     const status = state.statuses.data.find(s => s.id === id);
+                    if (!status) return;
+                    
                     document.getElementById('status-name').value = status.name;
                     document.getElementById('status-type').value = status.type;
                     document.getElementById('status-is-primary').value = status.isPrimary ? 'true' : 'false';
@@ -4940,6 +5137,8 @@
                     populateParentStatuses(status.type);
                 } else if (type === 'cartype') {
                     const carType = state.carTypes.data.find(c => c.id === id);
+                    if (!carType) return;
+                    
                     document.getElementById('cartype-name').value = carType.name;
                     document.getElementById('cartype-description').value = carType.description || '';
                     document.getElementById('cartype-length').value = carType.length;
@@ -5046,6 +5245,8 @@
         // Status helper functions
         function populateParentStatuses(type) {
             const parentSelect = document.getElementById('status-parent');
+            if (!parentSelect) return;
+            
             parentSelect.innerHTML = '';
             
             const primaryStatuses = getPrimaryStatuses(type);
@@ -5059,6 +5260,8 @@
 
         function populateSubStatuses(statusId) {
             const subStatusSelect = document.getElementById('tender-substatus');
+            if (!subStatusSelect) return;
+            
             subStatusSelect.innerHTML = '<option value="">Select Sub-Status</option>';
             
             const subStatuses = getSubStatuses(statusId);
@@ -5161,12 +5364,14 @@
         // Chat functions
         async function sendMessage() {
             const input = document.getElementById('chat-input');
+            if (!input) return;
+            
             const message = input.value.trim();
             
             if (!message) return;
             
             try {
-                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
+                const {  chat, sha } = await readFile(FILE_PATHS.CHAT) || {  [], sha: null };
                 const now = new Date().toISOString();
                 
                 const newMessage = {
@@ -5186,7 +5391,7 @@
                 );
                 
                 // Update local state with new SHA
-                state.chat = { data: updatedChat, sha: result.content.sha };
+                state.chat = {  updatedChat, sha: result.content.sha };
                 renderChatMessages();
                 input.value = '';
             } catch (error) {
@@ -5197,6 +5402,8 @@
 
         function renderChatMessages() {
             const messagesContainer = document.getElementById('chat-messages');
+            if (!messagesContainer) return;
+            
             messagesContainer.innerHTML = '';
             
             if (!state.chat.data || state.chat.data.length === 0) {
@@ -5250,9 +5457,12 @@
 
         function updateNotificationUI() {
             const countEl = document.getElementById('notification-count');
-            countEl.textContent = state.unreadNotifications;
+            if (countEl) {
+                countEl.textContent = state.unreadNotifications;
+            }
             
             const panel = document.getElementById('notification-panel');
+            if (!panel) return;
             
             if (state.notifications.length === 0) {
                 panel.innerHTML = '<div class="notification-item">No notifications</div>';
@@ -5322,17 +5532,29 @@
         }
 
         function showApp() {
-            document.getElementById('auth-container').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
+            const authContainer = document.getElementById('auth-container');
+            const appContainer = document.getElementById('app');
+            
+            if (authContainer) authContainer.classList.add('hidden');
+            if (appContainer) appContainer.classList.remove('hidden');
             
             // Update user info
             if (state.currentUser) {
-                document.getElementById('user-name').textContent = `${state.currentUser.name} ${state.currentUser.lastname}`;
-                document.getElementById('user-avatar').textContent = state.currentUser.name.charAt(0) + state.currentUser.lastname.charAt(0);
+                const userName = document.getElementById('user-name');
+                const userAvatar = document.getElementById('user-avatar');
+                
+                if (userName) {
+                    userName.textContent = `${state.currentUser.name} ${state.currentUser.lastname}`;
+                }
+                
+                if (userAvatar) {
+                    userAvatar.textContent = state.currentUser.name.charAt(0) + state.currentUser.lastname.charAt(0);
+                }
                 
                 // Show admin menu if user is admin
-                if (state.currentUser.status === 'admin') {
-                    document.getElementById('admin-menu').style.display = 'flex';
+                const adminMenu = document.getElementById('admin-menu');
+                if (adminMenu && state.currentUser.status === 'admin') {
+                    adminMenu.style.display = 'flex';
                 }
                 
                 // Navigate to dashboard
@@ -5349,27 +5571,41 @@
             state.githubToken = '';
             state.repoName = '';
             
-            document.getElementById('app').classList.add('hidden');
-            document.getElementById('auth-container').classList.remove('hidden');
+            const appContainer = document.getElementById('app');
+            const authContainer = document.getElementById('auth-container');
+            
+            if (appContainer) appContainer.classList.add('hidden');
+            if (authContainer) authContainer.classList.remove('hidden');
             
             // Reset forms
-            document.getElementById('login-email').value = '';
-            document.getElementById('login-password').value = '';
-            document.getElementById('login-token').value = '';
-            document.getElementById('login-repo').value = '';
+            const loginEmail = document.getElementById('login-email');
+            const loginPassword = document.getElementById('login-password');
+            const loginToken = document.getElementById('login-token');
+            const loginRepo = document.getElementById('login-repo');
+            
+            if (loginEmail) loginEmail.value = '';
+            if (loginPassword) loginPassword.value = '';
+            if (loginToken) loginToken.value = '';
+            if (loginRepo) loginRepo.value = '';
         }
 
         function toggleUserDropdown() {
-            document.getElementById('user-dropdown').classList.toggle('show');
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
         }
 
         function toggleNotificationPanel() {
-            document.getElementById('notification-panel').classList.toggle('show');
-            
-            // Mark all notifications as read
-            if (state.unreadNotifications > 0) {
-                state.unreadNotifications = 0;
-                updateNotificationUI();
+            const panel = document.getElementById('notification-panel');
+            if (panel) {
+                panel.classList.toggle('show');
+                
+                // Mark all notifications as read
+                if (state.unreadNotifications > 0) {
+                    state.unreadNotifications = 0;
+                    updateNotificationUI();
+                }
             }
         }
 
@@ -5409,11 +5645,16 @@
             });
             
             // Show current view
-            document.getElementById(`${view}-view`).classList.remove('hidden');
-            
-            // Update page title
-            document.getElementById('page-title').textContent = 
-                view.charAt(0).toUpperCase() + view.slice(1);
+            const currentView = document.getElementById(`${view}-view`);
+            if (currentView) {
+                currentView.classList.remove('hidden');
+                
+                // Update page title
+                const pageTitle = document.getElementById('page-title');
+                if (pageTitle) {
+                    pageTitle.textContent = view.charAt(0).toUpperCase() + view.slice(1);
+                }
+            }
                 
             // Special handling for admin view
             if (view === 'admin') {
@@ -5468,12 +5709,14 @@
             });
             
             // Close dropdowns when clicking outside
-            if (!event.target.closest('.user-info') && !event.target.closest('.dropdown-menu')) {
-                document.getElementById('user-dropdown').classList.remove('show');
+            const userDropdown = document.getElementById('user-dropdown');
+            if (userDropdown && !event.target.closest('.user-info') && !event.target.closest('.dropdown-menu')) {
+                userDropdown.classList.remove('show');
             }
             
-            if (!event.target.closest('.notification-icon') && !event.target.closest('.notification-panel')) {
-                document.getElementById('notification-panel').classList.remove('show');
+            const notificationPanel = document.getElementById('notification-panel');
+            if (notificationPanel && !event.target.closest('.notification-icon') && !event.target.closest('.notification-panel')) {
+                notificationPanel.classList.remove('show');
             }
         });
 
@@ -5481,8 +5724,16 @@
         window.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeModal();
-                document.getElementById('user-dropdown').classList.remove('show');
-                document.getElementById('notification-panel').classList.remove('show');
+                
+                const userDropdown = document.getElementById('user-dropdown');
+                if (userDropdown) {
+                    userDropdown.classList.remove('show');
+                }
+                
+                const notificationPanel = document.getElementById('notification-panel');
+                if (notificationPanel) {
+                    notificationPanel.classList.remove('show');
+                }
             }
         });
     </script>

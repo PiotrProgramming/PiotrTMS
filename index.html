@@ -1274,7 +1274,7 @@
                             <div class="card mt-3">
                                 <div class="card-header">Driver Status Hierarchy</div>
                                 <div class="card-body">
-                                    <div class="status-hierarchy" id="driver-status-hierarchy">
+                                    <div class="status-hierarchy" id="driver-status-hierarchy" data-type="driver">
                                         <!-- Driver statuses will be populated here -->
                                     </div>
                                     <button class="btn btn-primary mt-3" id="add-driver-status-btn">Add Driver Status</button>
@@ -1284,7 +1284,7 @@
                             <div class="card mt-3">
                                 <div class="card-header">Car Status Hierarchy</div>
                                 <div class="card-body">
-                                    <div class="status-hierarchy" id="car-status-hierarchy">
+                                    <div class="status-hierarchy" id="car-status-hierarchy" data-type="car">
                                         <!-- Car statuses will be populated here -->
                                     </div>
                                     <button class="btn btn-primary mt-3" id="add-car-status-btn">Add Car Status</button>
@@ -2180,7 +2180,7 @@
             const repo = document.getElementById('login-repo').value;
 
             if (!email || !password || !token || !repo) {
-                addNotification('Please fill in all fields', 'error');
+                addNotification('Please fill in all required fields', 'error');
                 return;
             }
 
@@ -2273,7 +2273,7 @@
             const repo = document.getElementById('register-repo').value;
 
             if (!email || !password || !token || !repo) {
-                addNotification('Please fill in all fields', 'error');
+                addNotification('Please fill in all required fields', 'error');
                 return;
             }
 
@@ -2750,7 +2750,8 @@
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        return { data: null, sha: null };
+                        // Return empty array instead of null for data
+                        return { data: [], sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -2763,10 +2764,12 @@
                         sha: data.sha
                     };
                 }
-                return { data: null, sha: null };
+                // Return empty array instead of null for data
+                return { data: [], sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
-                    return { data: null, sha: null };
+                    // Return empty array instead of null for data
+                    return { data: [], sha: null };
                 }
                 throw error;
             }
@@ -2787,15 +2790,60 @@
         async function loadAllData() {
             try {
                 // Load all data with SHA
-                state.drivers = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
-                state.cars = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
-                state.cards = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
-                state.tenders = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
-                state.invoices = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
-                state.users = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
-                state.statuses = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
-                state.carTypes = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
-                state.chat = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
+                // FIXED: Always ensure data is an array, never null
+                const driversData = await readFile(FILE_PATHS.DRIVERS);
+                state.drivers = { 
+                    data: driversData.data || [], 
+                    sha: driversData.sha 
+                };
+                
+                const carsData = await readFile(FILE_PATHS.CARS);
+                state.cars = { 
+                    data: carsData.data || [], 
+                    sha: carsData.sha 
+                };
+                
+                const cardsData = await readFile(FILE_PATHS.CARDS);
+                state.cards = { 
+                    data: cardsData.data || [], 
+                    sha: cardsData.sha 
+                };
+                
+                const tendersData = await readFile(FILE_PATHS.TENDERS);
+                state.tenders = { 
+                    data: tendersData.data || [], 
+                    sha: tendersData.sha 
+                };
+                
+                const invoicesData = await readFile(FILE_PATHS.INVOICES);
+                state.invoices = { 
+                    data: invoicesData.data || [], 
+                    sha: invoicesData.sha 
+                };
+                
+                const usersData = await readFile(FILE_PATHS.USERS);
+                state.users = { 
+                    data: usersData.data || [], 
+                    sha: usersData.sha 
+                };
+                
+                const statusesData = await readFile(FILE_PATHS.STATUSES);
+                state.statuses = { 
+                    data: statusesData.data || [], 
+                    sha: statusesData.sha 
+                };
+                
+                const carTypesData = await readFile(FILE_PATHS.CARTYPES);
+                state.carTypes = { 
+                    data: carTypesData.data || [], 
+                    sha: carTypesData.sha 
+                };
+                
+                const chatData = await readFile(FILE_PATHS.CHAT);
+                state.chat = { 
+                    data: chatData.data || [], 
+                    sha: chatData.sha 
+                };
 
                 // Update UI
                 updateDashboardStats();
@@ -3878,16 +3926,16 @@
 
         function updateDashboardStats() {
             // Active drivers (drivers with status Active)
-            const activeDrivers = state.drivers.data.filter(d => {
-                const activeStatus = getDriverPrimaryStatuses().find(s => s.name === 'Active');
-                return activeStatus && d.status === activeStatus.id;
-            }).length;
+            const activeStatus = getDriverPrimaryStatuses().find(s => s.name === 'Active');
+            const activeDrivers = activeStatus ? 
+                state.drivers.data.filter(d => d.status === activeStatus.id).length : 0;
             document.getElementById('active-drivers').textContent = activeDrivers;
 
             // Active tenders
+            const deliveredStatus = getTenderStatuses().find(s => s.name === 'Delivered');
+            const cancelledStatus = getTenderStatuses().find(s => s.name === 'Cancelled');
             const activeTenders = state.tenders.data.filter(t => 
-                t.status !== getTenderStatuses().find(s => s.name === 'Cancelled').id &&
-                t.status !== getTenderStatuses().find(s => s.name === 'Delivered').id
+                t.status !== deliveredStatus.id && t.status !== cancelledStatus.id
             ).length;
             document.getElementById('active-tenders').textContent = activeTenders;
 
@@ -3907,10 +3955,14 @@
             document.getElementById('monthly-revenue').textContent = '$' + monthlyRevenue.toLocaleString();
 
             // Pending invoices
+            const pendingStatus = getInvoiceStatuses().find(s => s.name === 'Pending');
+            const unpaidStatus = getInvoiceStatuses().find(s => s.name === 'Unpaid');
+            const overdueStatus = getInvoiceStatuses().find(s => s.name === 'Overdue');
+            
             const pendingInvoices = state.invoices.data.filter(i => 
-                i.status === getInvoiceStatuses().find(s => s.name === 'Pending').id ||
-                i.status === getInvoiceStatuses().find(s => s.name === 'Unpaid').id ||
-                i.status === getInvoiceStatuses().find(s => s.name === 'Overdue').id
+                i.status === pendingStatus.id || 
+                i.status === unpaidStatus.id || 
+                i.status === overdueStatus.id
             ).length;
             document.getElementById('pending-invoices').textContent = pendingInvoices;
         }
@@ -4007,33 +4059,19 @@
             });
 
             // Check invoice due dates
+            const nowStr = now.toISOString().split('T')[0];
             state.invoices.data.forEach(invoice => {
-                const status = getStatusById(invoice.status);
-                if (status && (status.name === 'Pending' || status.name === 'Unpaid')) {
-                    const dueDate = new Date(invoice.dueDate);
-                    const notifyDays = invoice.notify || 7;
-                    const diffTime = dueDate - now;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                    if (diffDays <= notifyDays && diffDays > 0) {
-                        const li = document.createElement('li');
-                        li.className = 'mb-2';
-                        li.innerHTML = `
-                            <strong>Invoice ${invoice.code}</strong> due in ${diffDays} days
-                            <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                        `;
-                        expirationsList.appendChild(li);
-                        hasExpirations = true;
-                    } else if (diffDays <= 0) {
-                        const li = document.createElement('li');
-                        li.className = 'mb-2';
-                        li.innerHTML = `
-                            <strong>Invoice ${invoice.code}</strong> is overdue by ${Math.abs(diffDays)} days
-                            <span class="badge status-danger" style="float: right;">Overdue</span>
-                        `;
-                        expirationsList.appendChild(li);
-                        hasExpirations = true;
-                    }
+                if (invoice.dueDate < nowStr) {
+                    const diffDays = Math.ceil((now - new Date(invoice.dueDate)) / (1000 * 60 * 60 * 24));
+                    
+                    const li = document.createElement('li');
+                    li.className = 'mb-2';
+                    li.innerHTML = `
+                        <strong>Invoice ${invoice.code}</strong> is overdue by ${diffDays} days
+                        <span class="badge status-danger" style="float: right;">Overdue</span>
+                    `;
+                    expirationsList.appendChild(li);
+                    hasExpirations = true;
                 }
             });
 
@@ -4637,7 +4675,8 @@
             const tableBody = document.getElementById('cartypes-table-body');
             tableBody.innerHTML = '';
 
-            if (state.carTypes.data.length === 0) {
+            // FIXED: Check if data is null or undefined
+            if (!state.carTypes.data || state.carTypes.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="6" class="text-center">No car types found</td>';
                 tableBody.appendChild(row);
@@ -4681,7 +4720,8 @@
             const usersTableBody = document.getElementById('users-table-body');
             usersTableBody.innerHTML = '';
 
-            if (state.users.data.length === 0) {
+            // FIXED: Check if data is null or undefined
+            if (!state.users.data || state.users.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No users found</td>';
                 usersTableBody.appendChild(row);

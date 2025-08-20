@@ -846,6 +846,29 @@
             padding-top: 15px;
             border-top: 1px solid #e9ecef;
         }
+        
+        /* Car details display */
+        .car-details {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        
+        .car-detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .car-detail-label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .car-detail-value {
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
@@ -1071,6 +1094,7 @@
                                         <th>Trailer Plate</th>
                                         <th>Type</th>
                                         <th>Capacity</th>
+                                        <th>Max Weight</th>
                                         <th>Insurance</th>
                                         <th>Inspection</th>
                                         <th>Status</th>
@@ -1341,7 +1365,6 @@
                                             <th>Dimensions (LxWxH)</th>
                                             <th>Trailer Dimensions (LxWxH)</th>
                                             <th>Max Weight</th>
-                                            <th>Cubic Capacity</th>
                                             <th>Tandem</th>
                                             <th>Actions</th>
                                         </tr>
@@ -1480,40 +1503,32 @@
                     <input type="text" class="form-control" id="car-trailer" required>
                 </div>
                 <div class="form-group">
-                    <label for="car-type">Car Type</label>
+                    <label for="car-type">Vehicle Type</label>
                     <select class="form-control" id="car-type">
                         <option value="">Select Type</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="car-max-weight">Max Weight (kg)</label>
-                    <input type="number" class="form-control" id="car-max-weight" required>
-                </div>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="car-length">Length (m)</label>
-                            <input type="number" step="0.1" class="form-control" id="car-length" required>
-                        </div>
+                
+                <div id="car-type-details" class="car-details hidden">
+                    <div class="car-detail-row">
+                        <span class="car-detail-label">Dimensions:</span>
+                        <span class="car-detail-value" id="car-type-dimensions">-</span>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="car-width">Width (m)</label>
-                            <input type="number" step="0.1" class="form-control" id="car-width" required>
-                        </div>
+                    <div class="car-detail-row">
+                        <span class="car-detail-label">Main Vehicle Weight:</span>
+                        <span class="car-detail-value" id="car-main-weight">-</span>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label for="car-height">Height (m)</label>
-                            <input type="number" step="0.1" class="form-control" id="car-height" required>
-                        </div>
+                    <div class="car-detail-row" id="trailer-weight-row" style="display: none;">
+                        <span class="car-detail-label">Trailer Weight:</span>
+                        <span class="car-detail-value" id="car-trailer-weight">-</span>
+                    </div>
+                    <div class="car-detail-row">
+                        <span class="car-detail-label">Total Weight:</span>
+                        <span class="car-detail-value" id="car-total-weight">-</span>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="car-cubic">Cubic Capacity (m³)</label>
-                    <input type="text" class="form-control" id="car-cubic" readonly>
-                </div>
-                <div class="row">
+                
+                <div class="row mt-3">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="car-insurance">Insurance Expiry</label>
@@ -1845,7 +1860,7 @@
     <div class="modal" id="cartype-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 id="cartype-modal-title">Add Car Type</h5>
+                <h5 id="cartype-modal-title">Add Vehicle Type</h5>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -1870,6 +1885,11 @@
                         <label for="cartype-height">Main Vehicle Height (m)</label>
                         <input type="number" step="0.1" class="form-control" id="cartype-height" required>
                     </div>
+                    <div class="form-group">
+                        <label for="cartype-main-weight">Main Vehicle Max Weight (tons)</label>
+                        <input type="number" step="0.1" class="form-control" id="cartype-main-weight" required>
+                    </div>
+                    
                     <div class="form-group mt-3">
                         <label for="cartype-is-tandem">Tandem Configuration</label>
                         <select class="form-control" id="cartype-is-tandem">
@@ -1900,11 +1920,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group mt-3">
-                        <label for="cartype-max-weight">Max Weight (kg)</label>
-                        <input type="number" class="form-control" id="cartype-max-weight" required>
+                        <div class="form-group">
+                            <label for="cartype-trailer-weight">Trailer Max Weight (tons)</label>
+                            <input type="number" step="0.1" class="form-control" id="cartype-trailer-weight" required>
+                        </div>
                     </div>
                     
                     <div class="cubic-display">
@@ -1914,7 +1933,7 @@
                                 <span class="cubic-label">Main Vehicle:</span>
                                 <span id="cartype-main-cubic">0.00 m³</span>
                             </div>
-                            <div class="cubic-row">
+                            <div class="cubic-row" id="trailer-cubic-row" style="display: none;">
                                 <span class="cubic-label">Trailer:</span>
                                 <span id="cartype-trailer-cubic">0.00 m³</span>
                             </div>
@@ -2295,35 +2314,6 @@
                 });
             }
 
-            // Calculate cubic capacity when dimensions change with null checks
-            const carLength = document.getElementById('car-length');
-            if (carLength) {
-                carLength.addEventListener('change', calculateCubicCapacity);
-            }
-            
-            const carWidth = document.getElementById('car-width');
-            if (carWidth) {
-                carWidth.addEventListener('change', calculateCubicCapacity);
-            }
-            
-            const carHeight = document.getElementById('car-height');
-            if (carHeight) {
-                carHeight.addEventListener('change', calculateCubicCapacity);
-            }
-
-            // Tender status change with null check
-            const tenderStatusField = document.getElementById('tender-status');
-            if (tenderStatusField) {
-                tenderStatusField.addEventListener('change', function() {
-                    const saleFields = document.getElementById('tender-sale-fields');
-                    if (this.value === 'sold') {
-                        saleFields.classList.remove('hidden');
-                    } else {
-                        saleFields.classList.add('hidden');
-                    }
-                });
-            }
-            
             // Car type tandem configuration
             const cartypeIsTandem = document.getElementById('cartype-is-tandem');
             if (cartypeIsTandem) {
@@ -2332,6 +2322,7 @@
                     if (trailerDimensions) {
                         trailerDimensions.classList.toggle('hidden', this.value === 'false');
                         calculateCarTypeCubicCapacity();
+                        calculateCarTypeWeight();
                     }
                 });
             }
@@ -2340,16 +2331,28 @@
             const cartypeLength = document.getElementById('cartype-length');
             const cartypeWidth = document.getElementById('cartype-width');
             const cartypeHeight = document.getElementById('cartype-height');
+            const cartypeMainWeight = document.getElementById('cartype-main-weight');
             const cartypeTrailerLength = document.getElementById('cartype-trailer-length');
             const cartypeTrailerWidth = document.getElementById('cartype-trailer-width');
             const cartypeTrailerHeight = document.getElementById('cartype-trailer-height');
+            const cartypeTrailerWeight = document.getElementById('cartype-trailer-weight');
             
             if (cartypeLength) cartypeLength.addEventListener('input', calculateCarTypeCubicCapacity);
             if (cartypeWidth) cartypeWidth.addEventListener('input', calculateCarTypeCubicCapacity);
             if (cartypeHeight) cartypeHeight.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeMainWeight) cartypeMainWeight.addEventListener('input', calculateCarTypeWeight);
             if (cartypeTrailerLength) cartypeTrailerLength.addEventListener('input', calculateCarTypeCubicCapacity);
             if (cartypeTrailerWidth) cartypeTrailerWidth.addEventListener('input', calculateCarTypeCubicCapacity);
             if (cartypeTrailerHeight) cartypeTrailerHeight.addEventListener('input', calculateCarTypeCubicCapacity);
+            if (cartypeTrailerWeight) cartypeTrailerWeight.addEventListener('input', calculateCarTypeWeight);
+            
+            // Car type selection in car modal
+            const carTypeSelect = document.getElementById('car-type');
+            if (carTypeSelect) {
+                carTypeSelect.addEventListener('change', function() {
+                    updateCarTypeDetails(this.value);
+                });
+            }
         }
 
         // Setup drag and drop
@@ -2899,7 +2902,8 @@
                                 height: 2.7
                             },
                             trailerDimensions: null,
-                            maxWeight: 24000,
+                            mainMaxWeight: 24,
+                            trailerMaxWeight: 0,
                             isTandem: false,
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString()
@@ -2918,7 +2922,8 @@
                                 width: 2.45,
                                 height: 2.7
                             },
-                            maxWeight: 40000,
+                            mainMaxWeight: 20,
+                            trailerMaxWeight: 20,
                             isTandem: true,
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString()
@@ -3361,10 +3366,6 @@
             const tractor = document.getElementById('car-tractor').value;
             const trailer = document.getElementById('car-trailer').value;
             const carType = document.getElementById('car-type').value;
-            const maxWeight = document.getElementById('car-max-weight').value;
-            const length = document.getElementById('car-length').value;
-            const width = document.getElementById('car-width').value;
-            const height = document.getElementById('car-height').value;
             const insurance = document.getElementById('car-insurance').value;
             const inspection = document.getElementById('car-inspection').value;
             const insuranceNotify = document.getElementById('car-insurance-notify').value;
@@ -3372,7 +3373,7 @@
             const status = document.getElementById('car-status').value;
             const modalTitle = document.getElementById('car-modal-title').textContent;
 
-            if (!tractor || !trailer || !maxWeight || !length || !width || !height || !insurance || !inspection) {
+            if (!tractor || !trailer || !insurance || !inspection) {
                 addNotification('Please fill in all required fields', 'error');
                 return;
             }
@@ -3389,11 +3390,6 @@
                         tractor: tractor,
                         trailer: trailer,
                         carType: carType,
-                        maxWeight: parseFloat(maxWeight),
-                        length: parseFloat(length),
-                        width: parseFloat(width),
-                        height: parseFloat(height),
-                        cubic: parseFloat(length) * parseFloat(width) * parseFloat(height),
                         insurance: insurance,
                         inspection: inspection,
                         insuranceNotify: parseInt(insuranceNotify),
@@ -3413,11 +3409,6 @@
                                 tractor: tractor,
                                 trailer: trailer,
                                 carType: carType,
-                                maxWeight: parseFloat(maxWeight),
-                                length: parseFloat(length),
-                                width: parseFloat(width),
-                                height: parseFloat(height),
-                                cubic: parseFloat(length) * parseFloat(width) * parseFloat(height),
                                 insurance: insurance,
                                 inspection: inspection,
                                 insuranceNotify: parseInt(insuranceNotify),
@@ -3872,21 +3863,22 @@
             const length = document.getElementById('cartype-length').value;
             const width = document.getElementById('cartype-width').value;
             const height = document.getElementById('cartype-height').value;
+            const mainWeight = document.getElementById('cartype-main-weight').value;
             const trailerLength = document.getElementById('cartype-trailer-length').value;
             const trailerWidth = document.getElementById('cartype-trailer-width').value;
             const trailerHeight = document.getElementById('cartype-trailer-height').value;
-            const maxWeight = document.getElementById('cartype-max-weight').value;
+            const trailerWeight = document.getElementById('cartype-trailer-weight').value;
             const isTandem = document.getElementById('cartype-is-tandem').value;
             const modalTitle = document.getElementById('cartype-modal-title').textContent;
 
-            if (!name || !length || !width || !height || !maxWeight) {
+            if (!name || !length || !width || !height || !mainWeight) {
                 addNotification('Please fill in all required fields', 'error');
                 return;
             }
 
-            // For tandem vehicles, ensure trailer dimensions are provided
-            if (isTandem === 'true' && (!trailerLength || !trailerWidth || !trailerHeight)) {
-                addNotification('Please provide trailer dimensions for tandem vehicles', 'error');
+            // For tandem vehicles, ensure trailer dimensions and weight are provided
+            if (isTandem === 'true' && (!trailerLength || !trailerWidth || !trailerHeight || !trailerWeight)) {
+                addNotification('Please provide trailer details for tandem vehicles', 'error');
                 return;
             }
 
@@ -3895,7 +3887,7 @@
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
-                if (modalTitle === 'Add Car Type') {
+                if (modalTitle === 'Add Vehicle Type') {
                     // Add new car type
                     const newCarType = {
                         id: generateId(),
@@ -3911,7 +3903,8 @@
                             width: parseFloat(trailerWidth),
                             height: parseFloat(trailerHeight)
                         } : null,
-                        maxWeight: parseFloat(maxWeight),
+                        mainMaxWeight: parseFloat(mainWeight),
+                        trailerMaxWeight: isTandem === 'true' ? parseFloat(trailerWeight) : 0,
                         isTandem: isTandem === 'true',
                         createdAt: now,
                         updatedAt: now
@@ -3936,7 +3929,8 @@
                                     width: parseFloat(trailerWidth),
                                     height: parseFloat(trailerHeight)
                                 } : null,
-                                maxWeight: parseFloat(maxWeight),
+                                mainMaxWeight: parseFloat(mainWeight),
+                                trailerMaxWeight: isTandem === 'true' ? parseFloat(trailerWeight) : 0,
                                 isTandem: isTandem === 'true',
                                 updatedAt: now
                             };
@@ -3948,7 +3942,7 @@
                 // Save to GitHub
                 const result = await updateFile(
                     FILE_PATHS.CARTYPES,
-                    modalTitle === 'Add Car Type' ? 'Add car type' : 'Update car type',
+                    modalTitle === 'Add Vehicle Type' ? 'Add vehicle type' : 'Update vehicle type',
                     utf8ToBase64(JSON.stringify(updatedCarTypes, null, 2)),
                     sha
                 );
@@ -3957,10 +3951,10 @@
                 state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
                 closeModal();
                 renderCarTypes();
-                addNotification('Car type saved successfully', 'success');
+                addNotification('Vehicle type saved successfully', 'success');
             } catch (error) {
-                addNotification('Failed to save car type: ' + error.message, 'error');
-                console.error('Save car type error:', error);
+                addNotification('Failed to save vehicle type: ' + error.message, 'error');
+                console.error('Save vehicle type error:', error);
             }
         }
 
@@ -4194,7 +4188,7 @@
         }
 
         async function deleteCarType(id) {
-            if (!confirm('Are you sure you want to delete this car type?')) {
+            if (!confirm('Are you sure you want to delete this vehicle type?')) {
                 return;
             }
 
@@ -4204,7 +4198,7 @@
 
                 const result = await updateFile(
                     FILE_PATHS.CARTYPES,
-                    'Delete car type',
+                    'Delete vehicle type',
                     utf8ToBase64(JSON.stringify(updatedCarTypes, null, 2)),
                     sha
                 );
@@ -4212,10 +4206,10 @@
                 // Update local state with new SHA
                 state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
                 renderCarTypes();
-                addNotification('Car type deleted successfully', 'success');
+                addNotification('Vehicle type deleted successfully', 'success');
             } catch (error) {
-                addNotification('Failed to delete car type: ' + error.message, 'error');
-                console.error('Delete car type error:', error);
+                addNotification('Failed to delete vehicle type: ' + error.message, 'error');
+                console.error('Delete vehicle type error:', error);
             }
         }
 
@@ -4519,7 +4513,7 @@
 
             if (state.cars.data.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="8" class="text-center">No cars found</td>';
+                row.innerHTML = '<td colspan="9" class="text-center">No cars found</td>';
                 tableBody.appendChild(row);
                 return;
             }
@@ -4562,15 +4556,41 @@
                 const inspectionStatus = inspectionDiff <= 0 ? 'danger' : 
                                        inspectionDiff <= (car.inspectionNotify || 30) ? 'warning' : 'active';
                 
-                // Get car type name
+                // Get car type details
                 const carType = car.carType ? getCarTypeById(car.carType) : null;
-                const carTypeName = carType ? carType.name : 'Custom';
+                
+                // Calculate total max weight
+                let totalMaxWeight = 0;
+                if (carType) {
+                    totalMaxWeight = carType.mainMaxWeight;
+                    if (carType.isTandem) {
+                        totalMaxWeight += carType.trailerMaxWeight;
+                    }
+                }
+                
+                // Calculate cubic capacity
+                let cubicCapacity = 0;
+                if (carType) {
+                    const mainCubic = carType.mainDimensions.length * 
+                                     carType.mainDimensions.width * 
+                                     carType.mainDimensions.height;
+                    
+                    let trailerCubic = 0;
+                    if (carType.isTandem && carType.trailerDimensions) {
+                        trailerCubic = carType.trailerDimensions.length * 
+                                      carType.trailerDimensions.width * 
+                                      carType.trailerDimensions.height;
+                    }
+                    
+                    cubicCapacity = mainCubic + trailerCubic;
+                }
 
                 row.innerHTML = `
                     <td>${car.tractor}</td>
                     <td>${car.trailer}</td>
-                    <td>${carTypeName}</td>
-                    <td>${car.cubic} m³ (${car.maxWeight} kg)</td>
+                    <td>${carType ? carType.name : 'Custom'}</td>
+                    <td>${cubicCapacity.toFixed(2)} m³</td>
+                    <td>${totalMaxWeight.toFixed(1)} tons</td>
                     <td>
                         ${car.insurance}
                         <span class="status-badge status-${insuranceStatus}">${insuranceDiff > 0 ? insuranceDiff + ' days' : 'Expired'}</span>
@@ -4986,7 +5006,7 @@
             // FIXED: Check if data is null or undefined
             if (!state.carTypes.data || state.carTypes.data.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="8" class="text-center">No car types found</td>';
+                row.innerHTML = '<td colspan="7" class="text-center">No vehicle types found</td>';
                 tableBody.appendChild(row);
                 return;
             }
@@ -5010,19 +5030,16 @@
                 // Total cubic capacity
                 const totalCubic = mainCubic + trailerCubic;
                 
+                // Total max weight
+                const totalMaxWeight = carType.mainMaxWeight + (carType.isTandem ? carType.trailerMaxWeight : 0);
+                
                 row.innerHTML = `
                     <td>${carType.name}</td>
                     <td>${carType.description || 'No description'}</td>
                     <td>${carType.mainDimensions.length}m x ${carType.mainDimensions.width}m x ${carType.mainDimensions.height}m</td>
                     <td>${carType.isTandem && carType.trailerDimensions ? 
                         `${carType.trailerDimensions.length}m x ${carType.trailerDimensions.width}m x ${carType.trailerDimensions.height}m` : '-'}</td>
-                    <td>${carType.maxWeight} kg</td>
-                    <td>
-                        Main: ${mainCubic.toFixed(2)} m³<br>
-                        ${carType.isTandem && carType.trailerDimensions ? 
-                            `Trailer: ${trailerCubic.toFixed(2)} m³<br>
-                             Total: ${totalCubic.toFixed(2)} m³` : ''}
-                    </td>
+                    <td>${totalMaxWeight.toFixed(1)} tons (${carType.mainMaxWeight.toFixed(1)} + ${carType.isTandem ? carType.trailerMaxWeight.toFixed(1) : '0'} tons)</td>
                     <td>${carType.isTandem ? 'Yes' : 'No'}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm edit-cartype" data-id="${carType.id}">Edit</button>
@@ -5212,16 +5229,14 @@
                     document.getElementById('car-tractor').value = car.tractor;
                     document.getElementById('car-trailer').value = car.trailer;
                     document.getElementById('car-type').value = car.carType || '';
-                    document.getElementById('car-max-weight').value = car.maxWeight;
-                    document.getElementById('car-length').value = car.length;
-                    document.getElementById('car-width').value = car.width;
-                    document.getElementById('car-height').value = car.height;
-                    document.getElementById('car-cubic').value = car.cubic;
                     document.getElementById('car-insurance').value = car.insurance;
                     document.getElementById('car-inspection').value = car.inspection;
                     document.getElementById('car-insurance-notify').value = car.insuranceNotify;
                     document.getElementById('car-inspection-notify').value = car.inspectionNotify;
                     document.getElementById('car-status').value = car.status || '';
+                    
+                    // Update car type details
+                    updateCarTypeDetails(car.carType);
                 } else if (type === 'card') {
                     const card = state.cards.data.find(c => c.id === id);
                     if (!card) return;
@@ -5303,7 +5318,7 @@
                     document.getElementById('cartype-length').value = carType.mainDimensions.length;
                     document.getElementById('cartype-width').value = carType.mainDimensions.width;
                     document.getElementById('cartype-height').value = carType.mainDimensions.height;
-                    document.getElementById('cartype-max-weight').value = carType.maxWeight;
+                    document.getElementById('cartype-main-weight').value = carType.mainMaxWeight;
                     document.getElementById('cartype-is-tandem').value = carType.isTandem ? 'true' : 'false';
                     
                     // Show trailer dimensions if tandem
@@ -5317,10 +5332,12 @@
                         document.getElementById('cartype-trailer-length').value = carType.trailerDimensions.length;
                         document.getElementById('cartype-trailer-width').value = carType.trailerDimensions.width;
                         document.getElementById('cartype-trailer-height').value = carType.trailerDimensions.height;
+                        document.getElementById('cartype-trailer-weight').value = carType.trailerMaxWeight;
                     }
                     
-                    // Calculate cubic capacity
+                    // Calculate cubic capacity and weight
                     calculateCarTypeCubicCapacity();
+                    calculateCarTypeWeight();
                 }
             } else {
                 modalTitle.textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
@@ -5339,16 +5356,15 @@
                     document.getElementById('car-tractor').value = '';
                     document.getElementById('car-trailer').value = '';
                     document.getElementById('car-type').value = '';
-                    document.getElementById('car-max-weight').value = '';
-                    document.getElementById('car-length').value = '';
-                    document.getElementById('car-width').value = '';
-                    document.getElementById('car-height').value = '';
-                    document.getElementById('car-cubic').value = '';
                     document.getElementById('car-insurance').value = '';
                     document.getElementById('car-inspection').value = '';
                     document.getElementById('car-insurance-notify').value = '30';
                     document.getElementById('car-inspection-notify').value = '30';
                     document.getElementById('car-status').value = '';
+                    
+                    // Hide car type details
+                    document.getElementById('car-type-details').classList.add('hidden');
+                    document.getElementById('trailer-weight-row').style.display = 'none';
                 } else if (type === 'card') {
                     document.getElementById('card-number').value = '';
                     document.getElementById('card-pin').value = '';
@@ -5403,7 +5419,7 @@
                     document.getElementById('cartype-length').value = '';
                     document.getElementById('cartype-width').value = '';
                     document.getElementById('cartype-height').value = '';
-                    document.getElementById('cartype-max-weight').value = '';
+                    document.getElementById('cartype-main-weight').value = '';
                     document.getElementById('cartype-is-tandem').value = 'false';
                     
                     // Hide trailer dimensions by default
@@ -5416,11 +5432,17 @@
                     document.getElementById('cartype-trailer-length').value = '';
                     document.getElementById('cartype-trailer-width').value = '';
                     document.getElementById('cartype-trailer-height').value = '';
+                    document.getElementById('cartype-trailer-weight').value = '';
                     
                     // Reset cubic capacity display
                     document.getElementById('cartype-main-cubic').textContent = '0.00 m³';
                     document.getElementById('cartype-trailer-cubic').textContent = '0.00 m³';
                     document.getElementById('cartype-total-cubic').textContent = '0.00 m³';
+                    
+                    // Reset weight display
+                    document.getElementById('cartype-main-weight-display').textContent = '0.0 tons';
+                    document.getElementById('cartype-trailer-weight-display').textContent = '0.0 tons';
+                    document.getElementById('cartype-total-weight-display').textContent = '0.0 tons';
                 }
             }
             
@@ -5522,15 +5544,6 @@
             return statusMap[status] || 'active';
         }
 
-        function calculateCubicCapacity() {
-            const length = parseFloat(document.getElementById('car-length').value) || 0;
-            const width = parseFloat(document.getElementById('car-width').value) || 0;
-            const height = parseFloat(document.getElementById('car-height').value) || 0;
-            
-            const cubic = length * width * height;
-            document.getElementById('car-cubic').value = cubic.toFixed(2);
-        }
-
         function calculateCarTypeCubicCapacity() {
             const length = parseFloat(document.getElementById('cartype-length').value) || 0;
             const width = parseFloat(document.getElementById('cartype-width').value) || 0;
@@ -5553,6 +5566,65 @@
             document.getElementById('cartype-main-cubic').textContent = `${mainCubic.toFixed(2)} m³`;
             document.getElementById('cartype-trailer-cubic').textContent = `${trailerCubic.toFixed(2)} m³`;
             document.getElementById('cartype-total-cubic').textContent = `${totalCubic.toFixed(2)} m³`;
+            
+            // Show/hide trailer cubic row
+            const trailerCubicRow = document.getElementById('trailer-cubic-row');
+            if (trailerCubicRow) {
+                trailerCubicRow.style.display = isTandem ? 'flex' : 'none';
+            }
+        }
+
+        function calculateCarTypeWeight() {
+            const mainWeight = parseFloat(document.getElementById('cartype-main-weight').value) || 0;
+            const isTandem = document.getElementById('cartype-is-tandem').value === 'true';
+            let trailerWeight = 0;
+            
+            if (isTandem) {
+                trailerWeight = parseFloat(document.getElementById('cartype-trailer-weight').value) || 0;
+            }
+            
+            const totalWeight = mainWeight + trailerWeight;
+            
+            document.getElementById('cartype-main-weight-display').textContent = `${mainWeight.toFixed(1)} tons`;
+            document.getElementById('cartype-trailer-weight-display').textContent = `${trailerWeight.toFixed(1)} tons`;
+            document.getElementById('cartype-total-weight-display').textContent = `${totalWeight.toFixed(1)} tons`;
+        }
+
+        function updateCarTypeDetails(carTypeId) {
+            const carTypeDetails = document.getElementById('car-type-details');
+            const trailerWeightRow = document.getElementById('trailer-weight-row');
+            
+            if (!carTypeId || carTypeId === '') {
+                carTypeDetails.classList.add('hidden');
+                trailerWeightRow.style.display = 'none';
+                return;
+            }
+            
+            const carType = getCarTypeById(carTypeId);
+            if (!carType) {
+                carTypeDetails.classList.add('hidden');
+                trailerWeightRow.style.display = 'none';
+                return;
+            }
+            
+            // Update dimensions
+            document.getElementById('car-type-dimensions').textContent = 
+                `${carType.mainDimensions.length}m x ${carType.mainDimensions.width}m x ${carType.mainDimensions.height}m`;
+            
+            // Update weights
+            document.getElementById('car-main-weight').textContent = `${carType.mainMaxWeight.toFixed(1)} tons`;
+            
+            if (carType.isTandem) {
+                trailerWeightRow.style.display = 'flex';
+                document.getElementById('car-trailer-weight').textContent = `${carType.trailerMaxWeight.toFixed(1)} tons`;
+            } else {
+                trailerWeightRow.style.display = 'none';
+            }
+            
+            document.getElementById('car-total-weight').textContent = 
+                `${(carType.mainMaxWeight + (carType.isTandem ? carType.trailerMaxWeight : 0)).toFixed(1)} tons`;
+            
+            carTypeDetails.classList.remove('hidden');
         }
 
         function getTimeAgo(dateString) {

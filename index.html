@@ -4043,7 +4043,7 @@
             }
 
             try {
-                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
                 const updatedCars = cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
@@ -4095,7 +4095,7 @@
             }
 
             try {
-                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
                 const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
@@ -4808,11 +4808,11 @@
             const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
             new Chart(revenueCtx, {
                 type: 'line',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -4832,11 +4832,11 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
-                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
+                         [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
                         backgroundColor: '#3498db'
                     }]
                 },
@@ -4855,10 +4855,10 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
-                        data: [45, 30, 15, 10],
+                         [45, 30, 15, 10],
                         backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
                     }]
                 },

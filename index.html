@@ -3101,7 +3101,7 @@
                 
                 const carsData = await readFile(FILE_PATHS.CARS);
                 state.cars = { 
-                    data: carsData.data || [], 
+                     carsData.data || [], 
                     sha: carsData.sha 
                 };
                 
@@ -3318,7 +3318,7 @@
             }
 
             try {
-                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedDrivers;
@@ -3397,7 +3397,7 @@
             }
 
             try {
-                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCars;
@@ -3473,7 +3473,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCards;
@@ -3551,7 +3551,7 @@
             }
 
             try {
-                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedTenders;
@@ -3655,7 +3655,7 @@
             }
 
             try {
-                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -3740,7 +3740,7 @@
             }
 
             try {
-                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedUsers;
@@ -3817,7 +3817,7 @@
             }
 
             try {
-                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedStatuses;
@@ -3901,7 +3901,7 @@
             }
 
             try {
-                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
@@ -4029,7 +4029,7 @@
             }
 
             try {
-                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
                 const updatedDrivers = drivers.filter(driver => driver.id !== id);
 
                 const result = await updateFile(
@@ -4055,7 +4055,7 @@
             }
 
             try {
-                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
                 const updatedCars = cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
@@ -4081,7 +4081,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -4107,7 +4107,7 @@
             }
 
             try {
-                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
                 const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
@@ -4133,7 +4133,7 @@
             }
 
             try {
-                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
@@ -4159,7 +4159,7 @@
             }
 
             try {
-                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || {  [], sha: null };
                 const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
@@ -4185,7 +4185,7 @@
             }
 
             try {
-                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
                 const updatedStatuses = statuses.filter(status => status.id !== id);
 
                 const result = await updateFile(
@@ -4211,7 +4211,7 @@
             }
 
             try {
-                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
                 const updatedCarTypes = carTypes.filter(carType => carType.id !== id);
 
                 const result = await updateFile(
@@ -4850,7 +4850,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -4874,7 +4874,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
-                         [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
+                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
                         backgroundColor: '#3498db'
                     }]
                 },
@@ -4893,7 +4893,7 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
                         data: [45, 30, 15, 10],

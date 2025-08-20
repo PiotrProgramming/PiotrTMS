@@ -1952,15 +1952,15 @@
             notifications: [],
             unreadNotifications: 0,
             // Data stores with SHA
-            drivers: {  [], sha: null },
-            cars: {  [], sha: null },
-            cards: {  [], sha: null },
-            tenders: {  [], sha: null },
-            invoices: {  [], sha: null },
-            users: {  [], sha: null },
-            statuses: {  [], sha: null },
-            carTypes: {  [], sha: null },
-            chat: {  [], sha: null }
+            drivers: { data: [], sha: null },
+            cars: { data: [], sha: null },
+            cards: { data: [], sha: null },
+            tenders: { data: [], sha: null },
+            invoices: { data: [], sha: null },
+            users: { data: [], sha: null },
+            statuses: { data: [], sha: null },
+            carTypes: { data: [], sha: null },
+            chat: { data: [], sha: null }
         };
 
         // GitHub file paths
@@ -3030,7 +3030,7 @@
                 if (!response.ok) {
                     if (response.status === 404) {
                         // Return empty array instead of null for data
-                        return {  [], sha: null };
+                        return { data: [], sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -3039,16 +3039,16 @@
                 
                 if (data.content) {
                     return {
-                         JSON.parse(base64ToUtf8(data.content)),
+                        data: JSON.parse(base64ToUtf8(data.content)),
                         sha: data.sha
                     };
                 }
                 // Return empty array instead of null for data
-                return {  [], sha: null };
+                return { data: [], sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
                     // Return empty array instead of null for data
-                    return {  [], sha: null };
+                    return { data: [], sha: null };
                 }
                 throw error;
             }
@@ -3072,55 +3072,55 @@
                 // FIXED: Always ensure data is an array, never null
                 const driversData = await readFile(FILE_PATHS.DRIVERS);
                 state.drivers = { 
-                     driversData.data || [], 
+                    data: driversData.data || [], 
                     sha: driversData.sha 
                 };
                 
                 const carsData = await readFile(FILE_PATHS.CARS);
                 state.cars = { 
-                     carsData.data || [], 
+                    data: carsData.data || [], 
                     sha: carsData.sha 
                 };
                 
                 const cardsData = await readFile(FILE_PATHS.CARDS);
                 state.cards = { 
-                     cardsData.data || [], 
+                    data: cardsData.data || [], 
                     sha: cardsData.sha 
                 };
                 
                 const tendersData = await readFile(FILE_PATHS.TENDERS);
                 state.tenders = { 
-                     tendersData.data || [], 
+                    data: tendersData.data || [], 
                     sha: tendersData.sha 
                 };
                 
                 const invoicesData = await readFile(FILE_PATHS.INVOICES);
                 state.invoices = { 
-                     invoicesData.data || [], 
+                    data: invoicesData.data || [], 
                     sha: invoicesData.sha 
                 };
                 
                 const usersData = await readFile(FILE_PATHS.USERS);
                 state.users = { 
-                     usersData.data || [], 
+                    data: usersData.data || [], 
                     sha: usersData.sha 
                 };
                 
                 const statusesData = await readFile(FILE_PATHS.STATUSES);
                 state.statuses = { 
-                     statusesData.data || [], 
+                    data: statusesData.data || [], 
                     sha: statusesData.sha 
                 };
                 
                 const carTypesData = await readFile(FILE_PATHS.CARTYPES);
                 state.carTypes = { 
-                     carTypesData.data || [], 
+                    data: carTypesData.data || [], 
                     sha: carTypesData.sha 
                 };
                 
                 const chatData = await readFile(FILE_PATHS.CHAT);
                 state.chat = { 
-                     chatData.data || [], 
+                    data: chatData.data || [], 
                     sha: chatData.sha 
                 };
 
@@ -3135,7 +3135,7 @@
                 // Update driver statuses based on tenders
                 updateAllDriverStatuses();
             } catch (error) {
-                addNotification('Failed to load  ' + error.message, 'error');
+                addNotification('Failed to load data: ' + error.message, 'error');
                 console.error('Load data error:', error);
             }
         }
@@ -3295,7 +3295,7 @@
             }
 
             try {
-                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
+                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedDrivers;
@@ -3344,7 +3344,7 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = {  updatedDrivers, sha: result.content.sha };
+                state.drivers = { data: updatedDrivers, sha: result.content.sha };
                 closeModal();
                 renderDrivers();
                 addNotification('Driver saved successfully', 'success');
@@ -3378,7 +3378,7 @@
             }
 
             try {
-                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
+                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCars;
@@ -3439,7 +3439,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = {  updatedCars, sha: result.content.sha };
+                state.cars = { data: updatedCars, sha: result.content.sha };
                 closeModal();
                 renderCars();
                 addNotification('Car saved successfully', 'success');
@@ -3464,7 +3464,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCards;
@@ -3511,7 +3511,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = {  updatedCards, sha: result.content.sha };
+                state.cards = { data: updatedCards, sha: result.content.sha };
                 closeModal();
                 renderCards();
                 addNotification('Card saved successfully', 'success');
@@ -3542,7 +3542,7 @@
             }
 
             try {
-                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
+                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedTenders;
@@ -3615,7 +3615,7 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = {  updatedTenders, sha: result.content.sha };
+                state.tenders = { data: updatedTenders, sha: result.content.sha };
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
@@ -3646,7 +3646,7 @@
             }
 
             try {
-                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
+                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -3699,7 +3699,7 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = {  updatedInvoices, sha: result.content.sha };
+                state.invoices = { data: updatedInvoices, sha: result.content.sha };
                 closeModal();
                 renderInvoices();
                 addNotification('Invoice saved successfully', 'success');
@@ -3731,7 +3731,7 @@
             }
 
             try {
-                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedUsers;
@@ -3784,7 +3784,7 @@
                 );
 
                 // Update local state with new SHA
-                state.users = {  updatedUsers, sha: result.content.sha };
+                state.users = { data: updatedUsers, sha: result.content.sha };
                 closeModal();
                 renderAdmin();
                 addNotification('User saved successfully', 'success');
@@ -3808,7 +3808,7 @@
             }
 
             try {
-                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
+                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedStatuses;
@@ -3853,7 +3853,7 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = {  updatedStatuses, sha: result.content.sha };
+                state.statuses = { data: updatedStatuses, sha: result.content.sha };
                 
                 // Re-render statuses
                 renderStatuses();
@@ -3891,7 +3891,7 @@
             }
 
             try {
-                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
+                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
@@ -3954,7 +3954,7 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = {  updatedCarTypes, sha: result.content.sha };
+                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
                 closeModal();
                 renderCarTypes();
                 addNotification('Car type saved successfully', 'success');
@@ -4017,7 +4017,7 @@
             }
 
             try {
-                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
+                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
                 const updatedDrivers = drivers.filter(driver => driver.id !== id);
 
                 const result = await updateFile(
@@ -4028,7 +4028,7 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = {  updatedDrivers, sha: result.content.sha };
+                state.drivers = { data: updatedDrivers, sha: result.content.sha };
                 renderDrivers();
                 addNotification('Driver deleted successfully', 'success');
             } catch (error) {
@@ -4043,7 +4043,7 @@
             }
 
             try {
-                const {  cars, sha } = await readFile(FILE_PATHS.CARS) || {  [], sha: null };
+                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
                 const updatedCars = cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
@@ -4054,7 +4054,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = {  updatedCars, sha: result.content.sha };
+                state.cars = { data: updatedCars, sha: result.content.sha };
                 renderCars();
                 addNotification('Car deleted successfully', 'success');
             } catch (error) {
@@ -4069,7 +4069,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
+                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -4080,7 +4080,7 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = {  updatedCards, sha: result.content.sha };
+                state.cards = { data: updatedCards, sha: result.content.sha };
                 renderCards();
                 addNotification('Card deleted successfully', 'success');
             } catch (error) {
@@ -4095,7 +4095,7 @@
             }
 
             try {
-                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS) || {  [], sha: null };
+                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
                 const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
@@ -4106,7 +4106,7 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = {  updatedTenders, sha: result.content.sha };
+                state.tenders = { data: updatedTenders, sha: result.content.sha };
                 renderTenders();
                 addNotification('Tender deleted successfully', 'success');
             } catch (error) {
@@ -4121,7 +4121,7 @@
             }
 
             try {
-                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
+                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
                 const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
@@ -4132,7 +4132,7 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = {  updatedInvoices, sha: result.content.sha };
+                state.invoices = { data: updatedInvoices, sha: result.content.sha };
                 renderInvoices();
                 addNotification('Invoice deleted successfully', 'success');
             } catch (error) {
@@ -4147,7 +4147,7 @@
             }
 
             try {
-                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
@@ -4158,7 +4158,7 @@
                 );
 
                 // Update local state with new SHA
-                state.users = {  updatedUsers, sha: result.content.sha };
+                state.users = { data: updatedUsers, sha: result.content.sha };
                 renderAdmin();
                 addNotification('User deleted successfully', 'success');
             } catch (error) {
@@ -4173,7 +4173,7 @@
             }
 
             try {
-                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES) || {  [], sha: null };
+                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
                 const updatedStatuses = statuses.filter(status => status.id !== id);
 
                 const result = await updateFile(
@@ -4184,7 +4184,7 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = {  updatedStatuses, sha: result.content.sha };
+                state.statuses = { data: updatedStatuses, sha: result.content.sha };
                 renderStatuses();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
@@ -4199,7 +4199,7 @@
             }
 
             try {
-                const {  carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || {  [], sha: null };
+                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
                 const updatedCarTypes = carTypes.filter(carType => carType.id !== id);
 
                 const result = await updateFile(
@@ -4210,7 +4210,7 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = {  updatedCarTypes, sha: result.content.sha };
+                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
                 renderCarTypes();
                 addNotification('Car type deleted successfully', 'success');
             } catch (error) {
@@ -4808,11 +4808,11 @@
             const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
             new Chart(revenueCtx, {
                 type: 'line',
-                 {
+                data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -4836,7 +4836,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
-                         [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
+                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
                         backgroundColor: '#3498db'
                     }]
                 },
@@ -4855,10 +4855,10 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                 {
+                data: {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
-                         [45, 30, 15, 10],
+                        data: [45, 30, 15, 10],
                         backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
                     }]
                 },
@@ -5586,7 +5586,7 @@
             if (!message) return;
             
             try {
-                const {  chat, sha } = await readFile(FILE_PATHS.CHAT) || {  [], sha: null };
+                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
                 const now = new Date().toISOString();
                 
                 const newMessage = {
@@ -5606,7 +5606,7 @@
                 );
                 
                 // Update local state with new SHA
-                state.chat = {  updatedChat, sha: result.content.sha };
+                state.chat = { data: updatedChat, sha: result.content.sha };
                 renderChatMessages();
                 input.value = '';
             } catch (error) {

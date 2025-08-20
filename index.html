@@ -3367,7 +3367,10 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                state.drivers = { 
+                    data: updatedDrivers, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderDrivers();
                 addNotification('Driver saved successfully', 'success');
@@ -3448,7 +3451,10 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: updatedCars, sha: result.content.sha };
+                state.cars = { 
+                    data: updatedCars, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderCars();
                 addNotification('Car saved successfully', 'success');
@@ -3520,7 +3526,10 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: updatedCards, sha: result.content.sha };
+                state.cards = { 
+                    data: updatedCards, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderCards();
                 addNotification('Card saved successfully', 'success');
@@ -3624,7 +3633,10 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                state.tenders = { 
+                    data: updatedTenders, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderTenders();
                 addNotification('Tender saved successfully', 'success');
@@ -3708,7 +3720,10 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                state.invoices = { 
+                    data: updatedInvoices, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderInvoices();
                 addNotification('Invoice saved successfully', 'success');
@@ -3793,7 +3808,10 @@
                 );
 
                 // Update local state with new SHA
-                state.users = { data: updatedUsers, sha: result.content.sha };
+                state.users = { 
+                    data: updatedUsers, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderAdmin();
                 addNotification('User saved successfully', 'success');
@@ -3862,7 +3880,10 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                state.statuses = { 
+                    data: updatedStatuses, 
+                    sha: result.content.sha 
+                };
                 
                 // Re-render statuses
                 renderStatuses();
@@ -3966,7 +3987,10 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                state.carTypes = { 
+                    data: updatedCarTypes, 
+                    sha: result.content.sha 
+                };
                 closeModal();
                 renderCarTypes();
                 addNotification('Vehicle type saved successfully', 'success');
@@ -4040,7 +4064,10 @@
                 );
 
                 // Update local state with new SHA
-                state.drivers = { data: updatedDrivers, sha: result.content.sha };
+                state.drivers = { 
+                    data: updatedDrivers, 
+                    sha: result.content.sha 
+                };
                 renderDrivers();
                 addNotification('Driver deleted successfully', 'success');
             } catch (error) {
@@ -4066,7 +4093,10 @@
                 );
 
                 // Update local state with new SHA
-                state.cars = { data: updatedCars, sha: result.content.sha };
+                state.cars = { 
+                    data: updatedCars, 
+                    sha: result.content.sha 
+                };
                 renderCars();
                 addNotification('Car deleted successfully', 'success');
             } catch (error) {
@@ -4092,7 +4122,10 @@
                 );
 
                 // Update local state with new SHA
-                state.cards = { data: updatedCards, sha: result.content.sha };
+                state.cards = { 
+                    data: updatedCards, 
+                    sha: result.content.sha 
+                };
                 renderCards();
                 addNotification('Card deleted successfully', 'success');
             } catch (error) {
@@ -4118,7 +4151,10 @@
                 );
 
                 // Update local state with new SHA
-                state.tenders = { data: updatedTenders, sha: result.content.sha };
+                state.tenders = { 
+                    data: updatedTenders, 
+                    sha: result.content.sha 
+                };
                 renderTenders();
                 addNotification('Tender deleted successfully', 'success');
             } catch (error) {
@@ -4144,7 +4180,10 @@
                 );
 
                 // Update local state with new SHA
-                state.invoices = { data: updatedInvoices, sha: result.content.sha };
+                state.invoices = { 
+                    data: updatedInvoices, 
+                    sha: result.content.sha 
+                };
                 renderInvoices();
                 addNotification('Invoice deleted successfully', 'success');
             } catch (error) {
@@ -4170,7 +4209,10 @@
                 );
 
                 // Update local state with new SHA
-                state.users = { data: updatedUsers, sha: result.content.sha };
+                state.users = { 
+                    data: updatedUsers, 
+                    sha: result.content.sha 
+                };
                 renderAdmin();
                 addNotification('User deleted successfully', 'success');
             } catch (error) {
@@ -4196,7 +4238,10 @@
                 );
 
                 // Update local state with new SHA
-                state.statuses = { data: updatedStatuses, sha: result.content.sha };
+                state.statuses = { 
+                    data: updatedStatuses, 
+                    sha: result.content.sha 
+                };
                 renderStatuses();
                 addNotification('Status deleted successfully', 'success');
             } catch (error) {
@@ -4222,7 +4267,10 @@
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { data: updatedCarTypes, sha: result.content.sha };
+                state.carTypes = { 
+                    data: updatedCarTypes, 
+                    sha: result.content.sha 
+                };
                 renderCarTypes();
                 addNotification('Vehicle type deleted successfully', 'success');
             } catch (error) {
@@ -5715,7 +5763,10 @@
                 );
                 
                 // Update local state with new SHA
-                state.chat = { data: updatedChat, sha: result.content.sha };
+                state.chat = { 
+                    data: updatedChat, 
+                    sha: result.content.sha 
+                };
                 renderChatMessages();
                 input.value = '';
             } catch (error) {

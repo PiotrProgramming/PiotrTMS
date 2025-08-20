@@ -1988,7 +1988,7 @@
             currentView: 'dashboard',
             notifications: [],
             unreadNotifications: 0,
-            // Data stores with SHA
+            // Data stores with SHA - FIXED: Consistent structure for all data stores
             drivers: { data: [], sha: null },
             cars: { data: [], sha: null },
             cards: { data: [], sha: null },
@@ -3092,7 +3092,7 @@
         async function loadAllData() {
             try {
                 // Load all data with SHA
-                // FIXED: Always ensure data is an array, never null
+                // FIXED: Consistent structure for all data stores
                 const driversData = await readFile(FILE_PATHS.DRIVERS);
                 state.drivers = { 
                     data: driversData.data || [], 
@@ -5069,7 +5069,7 @@
             
             tableBody.innerHTML = '';
 
-            // FIXED: Check if data is null or undefined
+            // Check if data is null or undefined
             if (!state.carTypes.data || state.carTypes.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="7" class="text-center">No vehicle types found</td>';
@@ -5137,7 +5137,7 @@
             
             usersTableBody.innerHTML = '';
 
-            // FIXED: Check if data is null or undefined
+            // Check if data is null or undefined
             if (!state.users.data || state.users.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No users found</td>';

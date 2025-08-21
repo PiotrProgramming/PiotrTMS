@@ -1989,27 +1989,25 @@
             notifications: [],
             unreadNotifications: 0,
             // Data stores with SHA - FIXED: Consistent structure for all data stores
-            drivers: { data: [], sha: null },
-            cars: { data: [], sha: null },
-            cards: { data: [], sha: null },
-            tenders: { data: [], sha: null },
-            invoices: { data: [], sha: null },
-            users: { data: [], sha: null },
-            statuses: { data: [], sha: null },
-            carTypes: { data: [], sha: null },
-            chat: { data: [], sha: null }
+            drivers: {  [], sha: null },
+            cars: {  { cars: [], carTypes: [] }, sha: null },  // Merged cars and car types
+            cards: {  [], sha: null },
+            tenders: {  [], sha: null },
+            invoices: {  [], sha: null },
+            users: {  [], sha: null },
+            statuses: {  [], sha: null },
+            chat: {  [], sha: null }
         };
 
         // GitHub file paths
         const FILE_PATHS = {
             DRIVERS: 'data/drivers.json',
-            CARS: 'data/cars.json',
+            CARS: 'data/cars.json',  // Now contains both cars and carTypes
             CARDS: 'data/cards.json',
             TENDERS: 'data/tenders.json',
             INVOICES: 'data/invoices.json',
             USERS: 'data/users.json',
             STATUSES: 'data/statuses.json',
-            CARTYPES: 'data/carTypes.json',
             CHAT: 'data/chat.json'
         };
 
@@ -2462,6 +2460,453 @@
             });
         }
 
+        // Database validation and initialization
+        async function validateDatabase() {
+            try {
+                const login = await getCurrentUserLogin();
+                const requiredFiles = [
+                    FILE_PATHS.DRIVERS,
+                    FILE_PATHS.CARS,
+                    FILE_PATHS.CARDS,
+                    FILE_PATHS.TENDERS,
+                    FILE_PATHS.INVOICES,
+                    FILE_PATHS.USERS,
+                    FILE_PATHS.STATUSES
+                ];
+                
+                for (const filePath of requiredFiles) {
+                    try {
+                        const response = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${filePath}`, {
+                            headers: {
+                                'Authorization': `token ${state.githubToken}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        });
+                        
+                        if (response.status === 404) {
+                            // File doesn't exist, create it with proper structure
+                            await initializeFile(filePath);
+                        } else if (response.ok) {
+                            // File exists, check if it has valid content
+                            const data = await response.json();
+                            const content = JSON.parse(base64ToUtf8(data.content));
+                            
+                            if (!isValidFileContent(filePath, content)) {
+                                // Content is invalid, reinitialize
+                                await initializeFile(filePath);
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error validating ${filePath}:`, error);
+                        await initializeFile(filePath);
+                    }
+                }
+                
+                addNotification('Database validated and initialized', 'success');
+                return true;
+            } catch (error) {
+                addNotification('Database validation failed: ' + error.message, 'error');
+                console.error('Database validation error:', error);
+                return false;
+            }
+        }
+
+        function isValidFileContent(filePath, content) {
+            try {
+                switch (filePath) {
+                    case FILE_PATHS.CARS:
+                        // Cars file should be an object with cars and carTypes arrays
+                        return content && Array.isArray(content.cars) && Array.isArray(content.carTypes);
+                    case FILE_PATHS.DRIVERS:
+                    case FILE_PATHS.CARDS:
+                    case FILE_PATHS.TENDERS:
+                    case FILE_PATHS.INVOICES:
+                    case FILE_PATHS.USERS:
+                    case FILE_PATHS.STATUSES:
+                        // Other files should be simple arrays
+                        return Array.isArray(content);
+                    default:
+                        return false;
+                }
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function initializeFile(filePath) {
+            try {
+                const login = await getCurrentUserLogin();
+                let initialContent;
+                
+                switch (filePath) {
+                    case FILE_PATHS.CARS:
+                        initialContent = {
+                            cars: [],
+                            carTypes: [
+                                { 
+                                    id: generateId(), 
+                                    name: 'Semi-Trailer', 
+                                    description: 'Standard semi-trailer with one long trailer',
+                                    mainDimensions: {
+                                        length: 13.6,
+                                        width: 2.45,
+                                        height: 2.7
+                                    },
+                                    trailerDimensions: null,
+                                    mainMaxWeight: 24,
+                                    trailerMaxWeight: 0,
+                                    isTandem: false,
+                                    createdAt: new Date().toISOString(),
+                                    updatedAt: new Date().toISOString()
+                                },
+                                { 
+                                    id: generateId(), 
+                                    name: 'Jumbo', 
+                                    description: 'Split into 2 cars in tandem',
+                                    mainDimensions: {
+                                        length: 13.6,
+                                        width: 2.45,
+                                        height: 2.7
+                                    },
+                                    trailerDimensions: {
+                                        length: 13.6,
+                                        width: 2.45,
+                                        height: 2.7
+                                    },
+                                    mainMaxWeight: 20,
+                                    trailerMaxWeight: 20,
+                                    isTandem: true,
+                                    createdAt: new Date().toISOString(),
+                                    updatedAt: new Date().toISOString()
+                                }
+                            ]
+                        };
+                        break;
+                    case FILE_PATHS.DRIVERS:
+                        initialContent = [];
+                        break;
+                    case FILE_PATHS.CARDS:
+                        initialContent = [];
+                        break;
+                    case FILE_PATHS.TENDERS:
+                        initialContent = [];
+                        break;
+                    case FILE_PATHS.INVOICES:
+                        initialContent = [];
+                        break;
+                    case FILE_PATHS.USERS:
+                        initialContent = [{
+                            id: generateId(),
+                            name: 'Admin',
+                            lastname: 'User',
+                            email: state.currentUser.email,
+                            password: state.currentUser.password,
+                            status: 'admin',
+                            supervisor: null,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        }];
+                        break;
+                    case FILE_PATHS.STATUSES:
+                        const activeStatusId = generateId();
+                        const unassignedStatusId = generateId();
+                        
+                        initialContent = [
+                            // Driver statuses
+                            { 
+                                id: unassignedStatusId, 
+                                name: 'Unassigned', 
+                                type: 'driver', 
+                                color: 'inactive', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: activeStatusId, 
+                                name: 'Active', 
+                                type: 'driver', 
+                                color: 'active', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'On Break', 
+                                type: 'driver', 
+                                color: 'warning', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'On Vacation', 
+                                type: 'driver', 
+                                color: 'warning', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'No Time', 
+                                type: 'driver', 
+                                color: 'inactive', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            // Sub-statuses for Active
+                            { 
+                                id: generateId(), 
+                                name: 'Awaiting Loading', 
+                                type: 'driver', 
+                                color: 'pending', 
+                                isPrimary: false, 
+                                parentStatusId: activeStatusId,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Loading', 
+                                type: 'driver', 
+                                color: 'warning', 
+                                isPrimary: false, 
+                                parentStatusId: activeStatusId,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'In Transit', 
+                                type: 'driver', 
+                                color: 'active', 
+                                isPrimary: false, 
+                                parentStatusId: activeStatusId,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Awaiting Unloading', 
+                                type: 'driver', 
+                                color: 'pending', 
+                                isPrimary: false, 
+                                parentStatusId: activeStatusId,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Unloading', 
+                                type: 'driver', 
+                                color: 'warning', 
+                                isPrimary: false, 
+                                parentStatusId: activeStatusId,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            // Car statuses
+                            { 
+                                id: generateId(), 
+                                name: 'Active', 
+                                type: 'car', 
+                                color: 'active', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Inactive', 
+                                type: 'car', 
+                                color: 'inactive', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Maintenance', 
+                                type: 'car', 
+                                color: 'warning', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Inspection Due', 
+                                type: 'car', 
+                                color: 'danger', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            // Card statuses
+                            { 
+                                id: generateId(), 
+                                name: 'Active', 
+                                type: 'card', 
+                                color: 'active', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Inactive', 
+                                type: 'card', 
+                                color: 'inactive', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Expired', 
+                                type: 'card', 
+                                color: 'danger', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Expiring Soon', 
+                                type: 'card', 
+                                color: 'warning', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            // Tender statuses
+                            { 
+                                id: generateId(), 
+                                name: 'Unassigned', 
+                                type: 'tender', 
+                                color: 'inactive', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Pending', 
+                                type: 'tender', 
+                                color: 'pending', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'On Route', 
+                                type: 'tender', 
+                                color: 'active', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Delivered', 
+                                type: 'tender', 
+                                color: 'completed', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Cancelled', 
+                                type: 'tender', 
+                                color: 'danger', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Sold', 
+                                type: 'tender', 
+                                color: 'success', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            // Invoice statuses
+                            { 
+                                id: generateId(), 
+                                name: 'Pending', 
+                                type: 'invoice', 
+                                color: 'pending', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Paid', 
+                                type: 'invoice', 
+                                color: 'completed', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Unpaid', 
+                                type: 'invoice', 
+                                color: 'warning', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            },
+                            { 
+                                id: generateId(), 
+                                name: 'Overdue', 
+                                type: 'invoice', 
+                                color: 'danger', 
+                                isPrimary: true,
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString()
+                            }
+                        ];
+                        break;
+                    default:
+                        return;
+                }
+                
+                const createFileResponse = await fetch(`https://api.github.com/repos/${login}/${state.repoName}/contents/${filePath}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${state.githubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Initialize database file',
+                        content: utf8ToBase64(JSON.stringify(initialContent, null, 2))
+                    })
+                });
+
+                if (!createFileResponse.ok) {
+                    const errorData = await createFileResponse.json();
+                    throw new Error(`Failed to initialize ${filePath}: ${errorData.message}`);
+                }
+                
+                addNotification(`Initialized ${filePath}`, 'success');
+            } catch (error) {
+                addNotification(`Failed to initialize ${filePath}: ${error.message}`, 'error');
+                console.error(`File initialization error for ${filePath}:`, error);
+                throw error;
+            }
+        }
+
         // Authentication handlers
         async function handleLogin() {
             const email = document.getElementById('login-email').value;
@@ -2538,9 +2983,16 @@
                         state.githubToken = token;
                         state.repoName = repo;
                         localStorage.setItem('transforward_user', JSON.stringify(user));
-                        showApp();
-                        loadAllData();
-                        addNotification('Login successful', 'success');
+                        
+                        // Validate and initialize database
+                        const isValid = await validateDatabase();
+                        if (isValid) {
+                            showApp();
+                            loadAllData();
+                            addNotification('Login successful', 'success');
+                        } else {
+                            addNotification('Database initialization failed', 'error');
+                        }
                     } else {
                         // More specific error message
                         addNotification('Invalid credentials or user not found in repository', 'error');
@@ -2623,356 +3075,24 @@
                     throw new Error(errorData.message || 'Failed to create data directory');
                 }
 
-                // Get active status ID for initialization
-                const activeStatusId = generateId();
-                const unassignedStatusId = generateId();
-
-                // Create initial data files
-                const initialData = {
-                    drivers: [],
-                    cars: [],
-                    cards: [],
-                    tenders: [],
-                    invoices: [],
-                    users: [{
-                        id: generateId(),
-                        name: 'Admin',
-                        lastname: 'User',
-                        email: email,
-                        password: password,
-                        status: 'admin',
-                        supervisor: null,
-                        createdAt: new Date().toISOString()
-                    }],
-                    statuses: [
-                        // Driver statuses
-                        { 
-                            id: unassignedStatusId, 
-                            name: 'Unassigned', 
-                            type: 'driver', 
-                            color: 'inactive', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: activeStatusId, 
-                            name: 'Active', 
-                            type: 'driver', 
-                            color: 'active', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'On Break', 
-                            type: 'driver', 
-                            color: 'warning', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'On Vacation', 
-                            type: 'driver', 
-                            color: 'warning', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'No Time', 
-                            type: 'driver', 
-                            color: 'inactive', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        // Sub-statuses for Active
-                        { 
-                            id: generateId(), 
-                            name: 'Awaiting Loading', 
-                            type: 'driver', 
-                            color: 'pending', 
-                            isPrimary: false, 
-                            parentStatusId: activeStatusId,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Loading', 
-                            type: 'driver', 
-                            color: 'warning', 
-                            isPrimary: false, 
-                            parentStatusId: activeStatusId,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'In Transit', 
-                            type: 'driver', 
-                            color: 'active', 
-                            isPrimary: false, 
-                            parentStatusId: activeStatusId,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Awaiting Unloading', 
-                            type: 'driver', 
-                            color: 'pending', 
-                            isPrimary: false, 
-                            parentStatusId: activeStatusId,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Unloading', 
-                            type: 'driver', 
-                            color: 'warning', 
-                            isPrimary: false, 
-                            parentStatusId: activeStatusId,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        // Car statuses
-                        { 
-                            id: generateId(), 
-                            name: 'Active', 
-                            type: 'car', 
-                            color: 'active', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Inactive', 
-                            type: 'car', 
-                            color: 'inactive', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Maintenance', 
-                            type: 'car', 
-                            color: 'warning', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Inspection Due', 
-                            type: 'car', 
-                            color: 'danger', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        // Card statuses
-                        { 
-                            id: generateId(), 
-                            name: 'Active', 
-                            type: 'card', 
-                            color: 'active', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Inactive', 
-                            type: 'card', 
-                            color: 'inactive', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Expired', 
-                            type: 'card', 
-                            color: 'danger', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Expiring Soon', 
-                            type: 'card', 
-                            color: 'warning', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        // Tender statuses
-                        { 
-                            id: generateId(), 
-                            name: 'Unassigned', 
-                            type: 'tender', 
-                            color: 'inactive', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Pending', 
-                            type: 'tender', 
-                            color: 'pending', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'On Route', 
-                            type: 'tender', 
-                            color: 'active', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Delivered', 
-                            type: 'tender', 
-                            color: 'completed', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Cancelled', 
-                            type: 'tender', 
-                            color: 'danger', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Sold', 
-                            type: 'tender', 
-                            color: 'success', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        // Invoice statuses
-                        { 
-                            id: generateId(), 
-                            name: 'Pending', 
-                            type: 'invoice', 
-                            color: 'pending', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Paid', 
-                            type: 'invoice', 
-                            color: 'completed', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Unpaid', 
-                            type: 'invoice', 
-                            color: 'warning', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Overdue', 
-                            type: 'invoice', 
-                            color: 'danger', 
-                            isPrimary: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        }
-                    ],
-                    carTypes: [
-                        { 
-                            id: generateId(), 
-                            name: 'Semi-Trailer', 
-                            description: 'Standard semi-trailer with one long trailer',
-                            mainDimensions: {
-                                length: 13.6,
-                                width: 2.45,
-                                height: 2.7
-                            },
-                            trailerDimensions: null,
-                            mainMaxWeight: 24,
-                            trailerMaxWeight: 0,
-                            isTandem: false,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        },
-                        { 
-                            id: generateId(), 
-                            name: 'Jumbo', 
-                            description: 'Split into 2 cars in tandem',
-                            mainDimensions: {
-                                length: 13.6,
-                                width: 2.45,
-                                height: 2.7
-                            },
-                            trailerDimensions: {
-                                length: 13.6,
-                                width: 2.45,
-                                height: 2.7
-                            },
-                            mainMaxWeight: 20,
-                            trailerMaxWeight: 20,
-                            isTandem: true,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString()
-                        }
-                    ],
-                    chat: []
-                };
-
-                // Create all data files
-                for (const [key, path] of Object.entries(FILE_PATHS)) {
-                    const createFileResponse = await fetch(`https://api.github.com/repos/${login}/${repo}/contents/${path}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: 'Initial data',
-                            content: utf8ToBase64(JSON.stringify(initialData[key.toLowerCase()], null, 2))
-                        })
-                    });
-
-                    if (!createFileResponse.ok) {
-                        const errorData = await createFileResponse.json();
-                        throw new Error(`Failed to create ${path}: ${errorData.message}`);
-                    }
+                // Initialize all database files
+                const requiredFiles = [
+                    FILE_PATHS.DRIVERS,
+                    FILE_PATHS.CARS,
+                    FILE_PATHS.CARDS,
+                    FILE_PATHS.TENDERS,
+                    FILE_PATHS.INVOICES,
+                    FILE_PATHS.USERS,
+                    FILE_PATHS.STATUSES
+                ];
+                
+                for (const filePath of requiredFiles) {
+                    await initializeFile(filePath);
                 }
 
                 // Set current user
-                state.currentUser = initialData.users[0];
+                const usersData = await readFile(FILE_PATHS.USERS);
+                state.currentUser = usersData.data[0];
                 state.currentUser.token = token;
                 state.currentUser.repo = repo;
                 state.githubToken = token;
@@ -3053,7 +3173,7 @@
                 if (!response.ok) {
                     if (response.status === 404) {
                         // Return empty array instead of null for data
-                        return { data: [], sha: null };
+                        return {  [], sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -3061,17 +3181,30 @@
                 const data = await response.json();
                 
                 if (data.content) {
+                    const content = JSON.parse(base64ToUtf8(data.content));
+                    
+                    // Special handling for cars file which contains both cars and carTypes
+                    if (path === FILE_PATHS.CARS) {
+                        return {
+                            data: {
+                                cars: content.cars || [],
+                                carTypes: content.carTypes || []
+                            },
+                            sha: data.sha
+                        };
+                    }
+                    
                     return {
-                        data: JSON.parse(base64ToUtf8(data.content)),
+                        data: content,
                         sha: data.sha
                     };
                 }
                 // Return empty array instead of null for data
-                return { data: [], sha: null };
+                return {  [], sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
                     // Return empty array instead of null for data
-                    return { data: [], sha: null };
+                    return {  [], sha: null };
                 }
                 throw error;
             }
@@ -3095,50 +3228,44 @@
                 // FIXED: Consistent structure for all data stores
                 const driversData = await readFile(FILE_PATHS.DRIVERS);
                 state.drivers = { 
-                    data: driversData.data || [], 
+                     driversData.data || [], 
                     sha: driversData.sha 
                 };
                 
                 const carsData = await readFile(FILE_PATHS.CARS);
                 state.cars = { 
-                    data: carsData.data || [], 
+                     carsData.data || { cars: [], carTypes: [] }, 
                     sha: carsData.sha 
                 };
                 
                 const cardsData = await readFile(FILE_PATHS.CARDS);
                 state.cards = { 
-                    data: cardsData.data || [], 
+                     cardsData.data || [], 
                     sha: cardsData.sha 
                 };
                 
                 const tendersData = await readFile(FILE_PATHS.TENDERS);
                 state.tenders = { 
-                    data: tendersData.data || [], 
+                     tendersData.data || [], 
                     sha: tendersData.sha 
                 };
                 
                 const invoicesData = await readFile(FILE_PATHS.INVOICES);
                 state.invoices = { 
-                    data: invoicesData.data || [], 
+                     invoicesData.data || [], 
                     sha: invoicesData.sha 
                 };
                 
                 const usersData = await readFile(FILE_PATHS.USERS);
                 state.users = { 
-                    data: usersData.data || [], 
+                     usersData.data || [], 
                     sha: usersData.sha 
                 };
                 
                 const statusesData = await readFile(FILE_PATHS.STATUSES);
                 state.statuses = { 
-                    data: statusesData.data || [], 
+                     statusesData.data || [], 
                     sha: statusesData.sha 
-                };
-                
-                const carTypesData = await readFile(FILE_PATHS.CARTYPES);
-                state.carTypes = { 
-                    data: carTypesData.data || [], 
-                    sha: carTypesData.sha 
                 };
                 
                 const chatData = await readFile(FILE_PATHS.CHAT);
@@ -3205,7 +3332,8 @@
         }
 
         function getCarTypeById(carTypeId) {
-            return state.carTypes.data.find(type => type.id === carTypeId);
+            // Car types are now stored in state.cars.data.carTypes
+            return state.cars.data.carTypes.find(type => type.id === carTypeId);
         }
 
         function getStatusColorClass(status) {
@@ -3318,7 +3446,7 @@
             }
 
             try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedDrivers;
@@ -3368,7 +3496,7 @@
 
                 // Update local state with new SHA
                 state.drivers = { 
-                    data: updatedDrivers, 
+                     updatedDrivers, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -3400,7 +3528,10 @@
             }
 
             try {
-                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
+                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS) || { 
+                    data: { cars: [], carTypes: [] }, 
+                    sha: null 
+                };
                 const now = new Date().toISOString();
 
                 let updatedCars;
@@ -3419,11 +3550,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    updatedCars = [...cars, newCar];
+                    updatedCars = [...carsData.cars, newCar];
                 } else {
                     // Update existing car
                     const carId = document.getElementById('car-modal').getAttribute('data-id');
-                    updatedCars = cars.map(car => {
+                    updatedCars = carsData.cars.map(car => {
                         if (car.id === carId) {
                             return {
                                 ...car,
@@ -3442,17 +3573,23 @@
                     });
                 }
 
-                // Save to GitHub
+                // Save to GitHub - update the entire cars object with both cars and carTypes
                 const result = await updateFile(
                     FILE_PATHS.CARS,
                     modalTitle === 'Add Car' ? 'Add car' : 'Update car',
-                    utf8ToBase64(JSON.stringify(updatedCars, null, 2)),
+                    utf8ToBase64(JSON.stringify({
+                        cars: updatedCars,
+                        carTypes: carsData.carTypes
+                    }, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
                 state.cars = { 
-                    data: updatedCars, 
+                    data: {
+                        cars: updatedCars,
+                        carTypes: carsData.carTypes
+                    },
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -3461,438 +3598,6 @@
             } catch (error) {
                 addNotification('Failed to save car: ' + error.message, 'error');
                 console.error('Save car error:', error);
-            }
-        }
-
-        async function saveCard() {
-            const number = document.getElementById('card-number').value;
-            const pin = document.getElementById('card-pin').value;
-            const expiry = document.getElementById('card-expiry').value;
-            const notify = document.getElementById('card-notify').value;
-            const reminder = document.getElementById('card-reminder').value;
-            const status = document.getElementById('card-status').value;
-            const modalTitle = document.getElementById('card-modal-title').textContent;
-
-            if (!number || !pin || !expiry) {
-                addNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
-                const now = new Date().toISOString();
-
-                let updatedCards;
-                if (modalTitle === 'Add Card') {
-                    // Add new card
-                    const newCard = {
-                        id: generateId(),
-                        number: number,
-                        pin: pin,
-                        expiry: expiry,
-                        notify: parseInt(notify),
-                        reminder: parseInt(reminder),
-                        status: status,
-                        createdAt: now,
-                        updatedAt: now
-                    };
-                    updatedCards = [...cards, newCard];
-                } else {
-                    // Update existing card
-                    const cardId = document.getElementById('card-modal').getAttribute('data-id');
-                    updatedCards = cards.map(card => {
-                        if (card.id === cardId) {
-                            return {
-                                ...card,
-                                number: number,
-                                pin: pin,
-                                expiry: expiry,
-                                notify: parseInt(notify),
-                                reminder: parseInt(reminder),
-                                status: status,
-                                updatedAt: now
-                            };
-                        }
-                        return card;
-                    });
-                }
-
-                // Save to GitHub
-                const result = await updateFile(
-                    FILE_PATHS.CARDS,
-                    modalTitle === 'Add Card' ? 'Add card' : 'Update card',
-                    utf8ToBase64(JSON.stringify(updatedCards, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.cards = { 
-                    data: updatedCards, 
-                    sha: result.content.sha 
-                };
-                closeModal();
-                renderCards();
-                addNotification('Card saved successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to save card: ' + error.message, 'error');
-                console.error('Save card error:', error);
-            }
-        }
-
-        async function saveTender() {
-            const loadingDate = document.getElementById('tender-loading-date').value;
-            const unloadingDate = document.getElementById('tender-unloading-date').value;
-            const loadingCity = document.getElementById('tender-loading-city').value;
-            const loadingZip = document.getElementById('tender-loading-zip').value;
-            const unloadingCity = document.getElementById('tender-unloading-city').value;
-            const unloadingZip = document.getElementById('tender-unloading-zip').value;
-            const price = document.getElementById('tender-price').value;
-            const driver = document.getElementById('tender-driver').value;
-            const status = document.getElementById('tender-status').value;
-            const subStatus = document.getElementById('tender-substatus').value || null;
-            const salePrice = document.getElementById('tender-sale-price').value;
-            const paymentDays = document.getElementById('tender-payment-days').value;
-            const modalTitle = document.getElementById('tender-modal-title').textContent;
-
-            if (!loadingDate || !unloadingDate || !loadingCity || !loadingZip || !unloadingCity || !unloadingZip || !price) {
-                addNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
-                const now = new Date().toISOString();
-
-                let updatedTenders;
-                if (modalTitle === 'Add Tender') {
-                    // Add new tender
-                    const newTender = {
-                        id: generateId(),
-                        loading: {
-                            date: loadingDate,
-                            city: loadingCity,
-                            zip: loadingZip
-                        },
-                        unloading: {
-                            date: unloadingDate,
-                            city: unloadingCity,
-                            zip: unloadingZip
-                        },
-                        price: parseFloat(price),
-                        driver: driver,
-                        status: status,
-                        subStatus: subStatus,
-                        sale: status === getTenderStatuses().find(s => s.name === 'Sold').id ? {
-                            price: salePrice ? parseFloat(salePrice) : 0,
-                            paymentDays: parseInt(paymentDays),
-                            soldAt: now
-                        } : null,
-                        createdAt: now,
-                        updatedAt: now
-                    };
-                    updatedTenders = [...tenders, newTender];
-                } else {
-                    // Update existing tender
-                    const tenderId = document.getElementById('tender-modal').getAttribute('data-id');
-                    updatedTenders = tenders.map(tender => {
-                        if (tender.id === tenderId) {
-                            return {
-                                ...tender,
-                                loading: {
-                                    date: loadingDate,
-                                    city: loadingCity,
-                                    zip: loadingZip
-                                },
-                                unloading: {
-                                    date: unloadingDate,
-                                    city: unloadingCity,
-                                    zip: unloadingZip
-                                },
-                                price: parseFloat(price),
-                                driver: driver,
-                                status: status,
-                                subStatus: subStatus,
-                                sale: status === getTenderStatuses().find(s => s.name === 'Sold').id ? {
-                                    price: salePrice ? parseFloat(salePrice) : 0,
-                                    paymentDays: parseInt(paymentDays),
-                                    soldAt: now
-                                } : null,
-                                updatedAt: now
-                            };
-                        }
-                        return tender;
-                    });
-                }
-
-                // Save to GitHub
-                const result = await updateFile(
-                    FILE_PATHS.TENDERS,
-                    modalTitle === 'Add Tender' ? 'Add tender' : 'Update tender',
-                    utf8ToBase64(JSON.stringify(updatedTenders, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.tenders = { 
-                    data: updatedTenders, 
-                    sha: result.content.sha 
-                };
-                closeModal();
-                renderTenders();
-                addNotification('Tender saved successfully', 'success');
-                
-                // Update driver status if driver changed
-                if (driver) {
-                    updateDriverStatus(driver);
-                }
-            } catch (error) {
-                addNotification('Failed to save tender: ' + error.message, 'error');
-                console.error('Save tender error:', error);
-            }
-        }
-
-        async function saveInvoice() {
-            const code = document.getElementById('invoice-code').value;
-            const client = document.getElementById('invoice-client').value;
-            const date = document.getElementById('invoice-date').value;
-            const dueDays = document.getElementById('invoice-due-days').value;
-            const notify = document.getElementById('invoice-notify').value;
-            const reminder = document.getElementById('invoice-reminder').value;
-            const status = document.getElementById('invoice-status').value;
-            const modalTitle = document.getElementById('invoice-modal-title').textContent;
-
-            if (!code || !client || !date || !dueDays) {
-                addNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
-                const now = new Date().toISOString();
-                const dueDate = new Date(date);
-                dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
-
-                let updatedInvoices;
-                if (modalTitle === 'Add Invoice') {
-                    // Add new invoice
-                    const newInvoice = {
-                        id: generateId(),
-                        code: code,
-                        client: client,
-                        date: date,
-                        dueDays: parseInt(dueDays),
-                        dueDate: dueDate.toISOString().split('T')[0],
-                        notify: parseInt(notify),
-                        reminder: parseInt(reminder),
-                        status: status,
-                        createdAt: now,
-                        updatedAt: now
-                    };
-                    updatedInvoices = [...invoices, newInvoice];
-                } else {
-                    // Update existing invoice
-                    const invoiceId = document.getElementById('invoice-modal').getAttribute('data-id');
-                    updatedInvoices = invoices.map(invoice => {
-                        if (invoice.id === invoiceId) {
-                            return {
-                                ...invoice,
-                                code: code,
-                                client: client,
-                                date: date,
-                                dueDays: parseInt(dueDays),
-                                dueDate: dueDate.toISOString().split('T')[0],
-                                notify: parseInt(notify),
-                                reminder: parseInt(reminder),
-                                status: status,
-                                updatedAt: now
-                            };
-                        }
-                        return invoice;
-                    });
-                }
-
-                // Save to GitHub
-                const result = await updateFile(
-                    FILE_PATHS.INVOICES,
-                    modalTitle === 'Add Invoice' ? 'Add invoice' : 'Update invoice',
-                    utf8ToBase64(JSON.stringify(updatedInvoices, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.invoices = { 
-                    data: updatedInvoices, 
-                    sha: result.content.sha 
-                };
-                closeModal();
-                renderInvoices();
-                addNotification('Invoice saved successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to save invoice: ' + error.message, 'error');
-                console.error('Save invoice error:', error);
-            }
-        }
-
-        async function saveUser() {
-            const name = document.getElementById('user-name-input').value;
-            const lastname = document.getElementById('user-lastname').value;
-            const email = document.getElementById('user-email').value;
-            const password = document.getElementById('user-password').value;
-            const status = document.getElementById('user-status').value;
-            const supervisor = document.getElementById('user-supervisor').value;
-            const modalTitle = document.getElementById('user-modal-title').textContent;
-
-            if (!name || !lastname || !email || !password) {
-                addNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            // Validate email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                addNotification('Please enter a valid email address', 'error');
-                return;
-            }
-
-            try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
-                const now = new Date().toISOString();
-
-                let updatedUsers;
-                if (modalTitle === 'Add User') {
-                    // Check if user already exists
-                    if (users.some(u => u.email === email)) {
-                        addNotification('User with this email already exists', 'error');
-                        return;
-                    }
-
-                    // Add new user
-                    const newUser = {
-                        id: generateId(),
-                        name: name,
-                        lastname: lastname,
-                        email: email,
-                        password: password,
-                        status: status,
-                        supervisor: supervisor || null,
-                        createdAt: now,
-                        updatedAt: now
-                    };
-                    updatedUsers = [...users, newUser];
-                } else {
-                    // Update existing user
-                    const userId = document.getElementById('user-modal').getAttribute('data-id');
-                    updatedUsers = users.map(user => {
-                        if (user.id === userId) {
-                            return {
-                                ...user,
-                                name: name,
-                                lastname: lastname,
-                                email: email,
-                                password: password,
-                                status: status,
-                                supervisor: supervisor || null,
-                                updatedAt: now
-                            };
-                        }
-                        return user;
-                    });
-                }
-
-                // Save to GitHub
-                const result = await updateFile(
-                    FILE_PATHS.USERS,
-                    modalTitle === 'Add User' ? 'Add user' : 'Update user',
-                    utf8ToBase64(JSON.stringify(updatedUsers, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.users = { 
-                    data: updatedUsers, 
-                    sha: result.content.sha 
-                };
-                closeModal();
-                renderAdmin();
-                addNotification('User saved successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to save user: ' + error.message, 'error');
-                console.error('Save user error:', error);
-            }
-        }
-
-        async function saveStatus() {
-            const name = document.getElementById('status-name').value;
-            const type = document.getElementById('status-type').value;
-            const isPrimary = document.getElementById('status-is-primary').value === 'true';
-            const parentStatusId = isPrimary ? null : document.getElementById('status-parent').value;
-            const color = document.getElementById('status-color').value;
-            const modalTitle = document.getElementById('status-modal-title').textContent;
-
-            if (!name || !type) {
-                addNotification('Please fill in all required fields', 'error');
-                return;
-            }
-
-            try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
-                const now = new Date().toISOString();
-
-                let updatedStatuses;
-                if (modalTitle === 'Add Status') {
-                    // Add new status
-                    const newStatus = {
-                        id: generateId(),
-                        name: name,
-                        type: type,
-                        color: color,
-                        isPrimary: isPrimary,
-                        parentStatusId: parentStatusId,
-                        createdAt: now,
-                        updatedAt: now
-                    };
-                    updatedStatuses = [...statuses, newStatus];
-                } else {
-                    // Update existing status
-                    const statusId = document.getElementById('status-modal').getAttribute('data-id');
-                    updatedStatuses = statuses.map(status => {
-                        if (status.id === statusId) {
-                            return {
-                                ...status,
-                                name: name,
-                                type: type,
-                                color: color,
-                                isPrimary: isPrimary,
-                                parentStatusId: parentStatusId,
-                                updatedAt: now
-                            };
-                        }
-                        return status;
-                    });
-                }
-
-                // Save to GitHub
-                const result = await updateFile(
-                    FILE_PATHS.STATUSES,
-                    modalTitle === 'Add Status' ? 'Add status' : 'Update status',
-                    utf8ToBase64(JSON.stringify(updatedStatuses, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.statuses = { 
-                    data: updatedStatuses, 
-                    sha: result.content.sha 
-                };
-                
-                // Re-render statuses
-                renderStatuses();
-                
-                closeModal();
-                addNotification('Status saved successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to save status: ' + error.message, 'error');
-                console.error('Save status error:', error);
             }
         }
 
@@ -3922,7 +3627,10 @@
             }
 
             try {
-                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
+                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS) || { 
+                    data: { cars: [], carTypes: [] }, 
+                    sha: null 
+                };
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
@@ -3948,11 +3656,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    updatedCarTypes = [...carTypes, newCarType];
+                    updatedCarTypes = [...carsData.carTypes, newCarType];
                 } else {
                     // Update existing car type
                     const carTypeId = document.getElementById('cartype-modal').getAttribute('data-id');
-                    updatedCarTypes = carTypes.map(carType => {
+                    updatedCarTypes = carsData.carTypes.map(carType => {
                         if (carType.id === carTypeId) {
                             return {
                                 ...carType,
@@ -3978,17 +3686,23 @@
                     });
                 }
 
-                // Save to GitHub
+                // Save to GitHub - update the entire cars object with both cars and carTypes
                 const result = await updateFile(
-                    FILE_PATHS.CARTYPES,
+                    FILE_PATHS.CARS,
                     modalTitle === 'Add Vehicle Type' ? 'Add vehicle type' : 'Update vehicle type',
-                    utf8ToBase64(JSON.stringify(updatedCarTypes, null, 2)),
+                    utf8ToBase64(JSON.stringify({
+                        cars: carsData.cars,
+                        carTypes: updatedCarTypes
+                    }, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { 
-                    data: updatedCarTypes, 
+                state.cars = { 
+                    data: {
+                        cars: carsData.cars,
+                        carTypes: updatedCarTypes
+                    },
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -4047,228 +3761,34 @@
         }
 
         // Delete operations
-        async function deleteDriver(id) {
-            if (!confirm('Are you sure you want to delete this driver?')) {
-                return;
-            }
-
-            try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS) || { data: [], sha: null };
-                const updatedDrivers = drivers.filter(driver => driver.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.DRIVERS,
-                    'Delete driver',
-                    utf8ToBase64(JSON.stringify(updatedDrivers, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.drivers = { 
-                    data: updatedDrivers, 
-                    sha: result.content.sha 
-                };
-                renderDrivers();
-                addNotification('Driver deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete driver: ' + error.message, 'error');
-                console.error('Delete driver error:', error);
-            }
-        }
-
-        async function deleteCar(id) {
-            if (!confirm('Are you sure you want to delete this car?')) {
-                return;
-            }
-
-            try {
-                const { data: cars, sha } = await readFile(FILE_PATHS.CARS) || { data: [], sha: null };
-                const updatedCars = cars.filter(car => car.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.CARS,
-                    'Delete car',
-                    utf8ToBase64(JSON.stringify(updatedCars, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.cars = { 
-                    data: updatedCars, 
-                    sha: result.content.sha 
-                };
-                renderCars();
-                addNotification('Car deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete car: ' + error.message, 'error');
-                console.error('Delete car error:', error);
-            }
-        }
-
-        async function deleteCard(id) {
-            if (!confirm('Are you sure you want to delete this card?')) {
-                return;
-            }
-
-            try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
-                const updatedCards = cards.filter(card => card.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.CARDS,
-                    'Delete card',
-                    utf8ToBase64(JSON.stringify(updatedCards, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.cards = { 
-                    data: updatedCards, 
-                    sha: result.content.sha 
-                };
-                renderCards();
-                addNotification('Card deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete card: ' + error.message, 'error');
-                console.error('Delete card error:', error);
-            }
-        }
-
-        async function deleteTender(id) {
-            if (!confirm('Are you sure you want to delete this tender?')) {
-                return;
-            }
-
-            try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS) || { data: [], sha: null };
-                const updatedTenders = tenders.filter(tender => tender.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.TENDERS,
-                    'Delete tender',
-                    utf8ToBase64(JSON.stringify(updatedTenders, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.tenders = { 
-                    data: updatedTenders, 
-                    sha: result.content.sha 
-                };
-                renderTenders();
-                addNotification('Tender deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete tender: ' + error.message, 'error');
-                console.error('Delete tender error:', error);
-            }
-        }
-
-        async function deleteInvoice(id) {
-            if (!confirm('Are you sure you want to delete this invoice?')) {
-                return;
-            }
-
-            try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
-                const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.INVOICES,
-                    'Delete invoice',
-                    utf8ToBase64(JSON.stringify(updatedInvoices, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.invoices = { 
-                    data: updatedInvoices, 
-                    sha: result.content.sha 
-                };
-                renderInvoices();
-                addNotification('Invoice deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete invoice: ' + error.message, 'error');
-                console.error('Delete invoice error:', error);
-            }
-        }
-
-        async function deleteUser(id) {
-            if (!confirm('Are you sure you want to delete this user?')) {
-                return;
-            }
-
-            try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
-                const updatedUsers = users.filter(user => user.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.USERS,
-                    'Delete user',
-                    utf8ToBase64(JSON.stringify(updatedUsers, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.users = { 
-                    data: updatedUsers, 
-                    sha: result.content.sha 
-                };
-                renderAdmin();
-                addNotification('User deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete user: ' + error.message, 'error');
-                console.error('Delete user error:', error);
-            }
-        }
-
-        async function deleteStatus(id) {
-            if (!confirm('Are you sure you want to delete this status?')) {
-                return;
-            }
-
-            try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES) || { data: [], sha: null };
-                const updatedStatuses = statuses.filter(status => status.id !== id);
-
-                const result = await updateFile(
-                    FILE_PATHS.STATUSES,
-                    'Delete status',
-                    utf8ToBase64(JSON.stringify(updatedStatuses, null, 2)),
-                    sha
-                );
-
-                // Update local state with new SHA
-                state.statuses = { 
-                    data: updatedStatuses, 
-                    sha: result.content.sha 
-                };
-                renderStatuses();
-                addNotification('Status deleted successfully', 'success');
-            } catch (error) {
-                addNotification('Failed to delete status: ' + error.message, 'error');
-                console.error('Delete status error:', error);
-            }
-        }
-
         async function deleteCarType(id) {
             if (!confirm('Are you sure you want to delete this vehicle type?')) {
                 return;
             }
 
             try {
-                const { data: carTypes, sha } = await readFile(FILE_PATHS.CARTYPES) || { data: [], sha: null };
-                const updatedCarTypes = carTypes.filter(carType => carType.id !== id);
+                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS) || { 
+                    data: { cars: [], carTypes: [] }, 
+                    sha: null 
+                };
+                const updatedCarTypes = carsData.carTypes.filter(carType => carType.id !== id);
 
                 const result = await updateFile(
-                    FILE_PATHS.CARTYPES,
+                    FILE_PATHS.CARS,
                     'Delete vehicle type',
-                    utf8ToBase64(JSON.stringify(updatedCarTypes, null, 2)),
+                    utf8ToBase64(JSON.stringify({
+                        cars: carsData.cars,
+                        carTypes: updatedCarTypes
+                    }, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
-                state.carTypes = { 
-                    data: updatedCarTypes, 
+                state.cars = { 
+                    data: {
+                        cars: carsData.cars,
+                        carTypes: updatedCarTypes
+                    },
                     sha: result.content.sha 
                 };
                 renderCarTypes();
@@ -4280,279 +3800,55 @@
         }
 
         // Render functions
-        function renderDashboard() {
-            updateDashboardStats();
-            checkExpirations();
-            loadRecentActivity();
-        }
-
-        function updateDashboardStats() {
-            // Active drivers (drivers with status Active)
-            const activeStatus = getDriverPrimaryStatuses().find(s => s.name === 'Active');
-            const activeDrivers = activeStatus ? 
-                state.drivers.data.filter(d => d.status === activeStatus.id).length : 0;
-            document.getElementById('active-drivers').textContent = activeDrivers;
-
-            // Active tenders
-            const deliveredStatus = getTenderStatuses().find(s => s.name === 'Delivered');
-            const cancelledStatus = getTenderStatuses().find(s => s.name === 'Cancelled');
-            const activeTenders = state.tenders.data.filter(t => 
-                t.status !== deliveredStatus.id && t.status !== cancelledStatus.id
-            ).length;
-            document.getElementById('active-tenders').textContent = activeTenders;
-
-            // Monthly revenue
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+        function renderCarTypes() {
+            const tableBody = document.getElementById('cartypes-table-body');
+            if (!tableBody) return;
             
-            const monthlyRevenue = state.tenders.data
-                .filter(t => {
-                    const tenderDate = new Date(t.loading.date);
-                    return tenderDate.getMonth() === currentMonth && 
-                           tenderDate.getFullYear() === currentYear;
-                })
-                .reduce((sum, t) => sum + t.price, 0);
-            
-            document.getElementById('monthly-revenue').textContent = '$' + monthlyRevenue.toLocaleString();
-
-            // Pending invoices
-            const pendingStatus = getInvoiceStatuses().find(s => s.name === 'Pending');
-            const unpaidStatus = getInvoiceStatuses().find(s => s.name === 'Unpaid');
-            const overdueStatus = getInvoiceStatuses().find(s => s.name === 'Overdue');
-            
-            const pendingInvoices = state.invoices.data.filter(i => 
-                i.status === pendingStatus.id || 
-                i.status === unpaidStatus.id || 
-                i.status === overdueStatus.id
-            ).length;
-            document.getElementById('pending-invoices').textContent = pendingInvoices;
-        }
-
-        function checkExpirations() {
-            const expirationsList = document.getElementById('expirations-list');
-            expirationsList.innerHTML = '';
-
-            const now = new Date();
-            let hasExpirations = false;
-
-            // Check car insurance
-            state.cars.data.forEach(car => {
-                const insuranceDate = new Date(car.insurance);
-                const notifyDays = car.insuranceNotify || 30;
-                const diffTime = insuranceDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                if (diffDays <= notifyDays && diffDays > 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> insurance expires in ${diffDays} days
-                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                } else if (diffDays <= 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> insurance has expired!
-                        <span class="badge status-danger" style="float: right;">Expired</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
-
-            // Check car inspection
-            state.cars.data.forEach(car => {
-                const inspectionDate = new Date(car.inspection);
-                const notifyDays = car.inspectionNotify || 30;
-                const diffTime = inspectionDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                if (diffDays <= notifyDays && diffDays > 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> inspection due in ${diffDays} days
-                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                } else if (diffDays <= 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> inspection has expired!
-                        <span class="badge status-danger" style="float: right;">Expired</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
-
-            // Check card expiry
-            state.cards.data.forEach(card => {
-                const expiryDate = new Date(card.expiry);
-                const notifyDays = card.notify || 30;
-                const diffTime = expiryDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                if (diffDays <= notifyDays && diffDays > 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>Card ${card.number}</strong> expires in ${diffDays} days
-                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                } else if (diffDays <= 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>Card ${card.number}</strong> has expired!
-                        <span class="badge status-danger" style="float: right;">Expired</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
-
-            // Check invoice due dates
-            const nowStr = now.toISOString().split('T')[0];
-            state.invoices.data.forEach(invoice => {
-                if (invoice.dueDate < nowStr) {
-                    const diffDays = Math.ceil((now - new Date(invoice.dueDate)) / (1000 * 60 * 60 * 24));
-                    
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>Invoice ${invoice.code}</strong> is overdue by ${diffDays} days
-                        <span class="badge status-danger" style="float: right;">Overdue</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
-
-            if (!hasExpirations) {
-                const li = document.createElement('li');
-                li.textContent = 'No upcoming expirations';
-                expirationsList.appendChild(li);
-            }
-        }
-
-        function loadRecentActivity() {
-            const activityList = document.getElementById('recent-activity');
-            activityList.innerHTML = '';
-
-            // Get latest activities from all data types
-            const activities = [];
-
-            // Add recent drivers
-            const recentDrivers = [...state.drivers.data]
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 3);
-            
-            recentDrivers.forEach(driver => {
-                activities.push({
-                    type: 'driver',
-                    action: driver.createdAt === driver.updatedAt ? 'created' : 'updated',
-                    name: `${driver.name} ${driver.lastname}`,
-                    time: driver.updatedAt
-                });
-            });
-
-            // Add recent tenders
-            const recentTenders = [...state.tenders.data]
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 3);
-            
-            recentTenders.forEach(tender => {
-                activities.push({
-                    type: 'tender',
-                    action: tender.createdAt === tender.updatedAt ? 'created' : 'updated',
-                    name: `${tender.loading.city} → ${tender.unloading.city}`,
-                    time: tender.updatedAt
-                });
-            });
-
-            // Sort by time and get latest 5
-            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-            const latestActivities = activities.slice(0, 5);
-
-            if (latestActivities.length === 0) {
-                const li = document.createElement('li');
-                li.textContent = 'No recent activity';
-                activityList.appendChild(li);
-            } else {
-                latestActivities.forEach(activity => {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    const timeAgo = getTimeAgo(activity.time);
-                    li.innerHTML = `
-                        <strong>${activity.name}</strong> ${activity.action} (${activity.type})
-                        <span class="text-muted" style="float: right;">${timeAgo}</span>
-                    `;
-                    activityList.appendChild(li);
-                });
-            }
-        }
-
-        function renderDrivers() {
-            const tableBody = document.getElementById('drivers-table-body');
             tableBody.innerHTML = '';
 
-            if (state.drivers.data.length === 0) {
+            // Access car types from state.cars.data.carTypes
+            const carTypes = state.cars.data.carTypes;
+            
+            if (!carTypes || carTypes.length === 0) {
                 const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="6" class="text-center">No drivers found</td>';
+                row.innerHTML = '<td colspan="7" class="text-center">No vehicle types found</td>';
                 tableBody.appendChild(row);
                 return;
             }
 
-            // Populate car and card select options
-            const carSelect = document.getElementById('driver-car');
-            const cardSelect = document.getElementById('driver-card');
-            
-            carSelect.innerHTML = '<option value="">Select Car</option>';
-            cardSelect.innerHTML = '<option value="">Select Card</option>';
-            
-            state.cars.data.forEach(car => {
-                const option = document.createElement('option');
-                option.value = car.id;
-                option.textContent = `${car.tractor} / ${car.trailer}`;
-                carSelect.appendChild(option);
-            });
-            
-            state.cards.data.forEach(card => {
-                const option = document.createElement('option');
-                option.value = card.id;
-                option.textContent = card.number;
-                cardSelect.appendChild(option);
-            });
-
-            state.drivers.data.forEach(driver => {
+            carTypes.forEach(carType => {
                 const row = document.createElement('tr');
                 
-                // Find car and card details
-                const car = state.cars.data.find(c => c.id === driver.car) || {};
-                const card = state.cards.data.find(c => c.id === driver.card) || {};
+                // Calculate main cubic capacity
+                const mainCubic = carType.mainDimensions.length * 
+                                 carType.mainDimensions.width * 
+                                 carType.mainDimensions.height;
                 
-                // Get status names
-                const primaryStatus = driver.status ? getStatusById(driver.status) : null;
-                const subStatus = driver.subStatus ? getStatusById(driver.subStatus) : null;
+                // Calculate trailer cubic capacity
+                let trailerCubic = 0;
+                if (carType.isTandem && carType.trailerDimensions) {
+                    trailerCubic = carType.trailerDimensions.length * 
+                                   carType.trailerDimensions.width * 
+                                   carType.trailerDimensions.height;
+                }
+                
+                // Total cubic capacity
+                const totalCubic = mainCubic + trailerCubic;
+                
+                // Total max weight
+                const totalMaxWeight = carType.mainMaxWeight + (carType.isTandem ? carType.trailerMaxWeight : 0);
                 
                 row.innerHTML = `
-                    <td>${driver.name} ${driver.lastname}</td>
-                    <td>${car.tractor || 'Not assigned'}</td>
-                    <td>${card.number || 'Not assigned'}</td>
-                    <td><span class="status-badge ${primaryStatus ? getStatusColorClass(primaryStatus) : 'status-inactive'}">${primaryStatus ? primaryStatus.name : 'Unknown'}</span></td>
-                    <td><span class="status-badge ${subStatus ? getStatusColorClass(subStatus) : ''}">${subStatus ? subStatus.name : ''}</span></td>
+                    <td>${carType.name}</td>
+                    <td>${carType.description || 'No description'}</td>
+                    <td>${carType.mainDimensions.length}m x ${carType.mainDimensions.width}m x ${carType.mainDimensions.height}m</td>
+                    <td>${carType.isTandem && carType.trailerDimensions ? 
+                        `${carType.trailerDimensions.length}m x ${carType.trailerDimensions.width}m x ${carType.trailerDimensions.height}m` : '-'}</td>
+                    <td>${totalMaxWeight.toFixed(1)} tons (${carType.mainMaxWeight.toFixed(1)} + ${carType.isTandem ? carType.trailerMaxWeight.toFixed(1) : '0'} tons)</td>
+                    <td>${carType.isTandem ? 'Yes' : 'No'}</td>
                     <td>
-                        <button class="btn btn-secondary btn-sm edit-driver" data-id="${driver.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-driver" data-id="${driver.id}">Delete</button>
+                        <button class="btn btn-secondary btn-sm edit-cartype" data-id="${carType.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-cartype" data-id="${carType.id}">Delete</button>
                     </td>
                 `;
                 
@@ -4560,15 +3856,15 @@
             });
 
             // Add event listeners
-            document.querySelectorAll('.edit-driver').forEach(btn => {
+            document.querySelectorAll('.edit-cartype').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    editDriver(this.getAttribute('data-id'));
+                    editCarType(this.getAttribute('data-id'));
                 });
             });
 
-            document.querySelectorAll('.delete-driver').forEach(btn => {
+            document.querySelectorAll('.delete-cartype').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    deleteDriver(this.getAttribute('data-id'));
+                    deleteCarType(this.getAttribute('data-id'));
                 });
             });
         }
@@ -4577,7 +3873,7 @@
             const tableBody = document.getElementById('cars-table-body');
             tableBody.innerHTML = '';
 
-            if (state.cars.data.length === 0) {
+            if (state.cars.data.cars.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="9" class="text-center">No cars found</td>';
                 tableBody.appendChild(row);
@@ -4588,7 +3884,7 @@
             const carTypeSelect = document.getElementById('car-type');
             carTypeSelect.innerHTML = '<option value="">Select Type</option>';
             
-            state.carTypes.data.forEach(carType => {
+            state.cars.data.carTypes.forEach(carType => {
                 const option = document.createElement('option');
                 option.value = carType.id;
                 option.textContent = carType.name;
@@ -4606,7 +3902,7 @@
                 carStatusSelect.appendChild(option);
             });
 
-            state.cars.data.forEach(car => {
+            state.cars.data.cars.forEach(car => {
                 const row = document.createElement('tr');
                 
                 const insuranceDate = new Date(car.insurance);
@@ -4689,447 +3985,6 @@
             });
         }
 
-        function renderCards() {
-            const tableBody = document.getElementById('cards-table-body');
-            tableBody.innerHTML = '';
-
-            if (state.cards.data.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="5" class="text-center">No cards found</td>';
-                tableBody.appendChild(row);
-                return;
-            }
-
-            // Populate status select options
-            const cardStatusSelect = document.getElementById('card-status');
-            cardStatusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getCardStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                cardStatusSelect.appendChild(option);
-            });
-
-            state.cards.data.forEach(card => {
-                const row = document.createElement('tr');
-                
-                const expiryDate = new Date(card.expiry);
-                const now = new Date();
-                const diff = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-                
-                const status = diff <= 0 ? 'danger' : 
-                             diff <= (card.notify || 30) ? 'warning' : 'active';
-
-                row.innerHTML = `
-                    <td>${card.number}</td>
-                    <td>${card.pin}</td>
-                    <td>${card.expiry}</td>
-                    <td><span class="status-badge status-${status}">${diff > 0 ? diff + ' days' : 'Expired'}</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm edit-card" data-id="${card.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-card" data-id="${card.id}">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-
-            // Add event listeners
-            document.querySelectorAll('.edit-card').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editCard(this.getAttribute('data-id'));
-                });
-            });
-
-            document.querySelectorAll('.delete-card').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteCard(this.getAttribute('data-id'));
-                });
-            });
-        }
-
-        function renderTenders() {
-            const tableBody = document.getElementById('tenders-table-body');
-            tableBody.innerHTML = '';
-
-            if (state.tenders.data.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="7" class="text-center">No tenders found</td>';
-                tableBody.appendChild(row);
-                return;
-            }
-
-            // Populate driver select options
-            const driverSelect = document.getElementById('tender-driver');
-            driverSelect.innerHTML = '<option value="">Select Driver</option>';
-            
-            state.drivers.data.forEach(driver => {
-                const option = document.createElement('option');
-                option.value = driver.id;
-                option.textContent = `${driver.name} ${driver.lastname}`;
-                driverSelect.appendChild(option);
-            });
-
-            // Populate status select options
-            const statusSelect = document.getElementById('tender-status');
-            statusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getTenderStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                statusSelect.appendChild(option);
-            });
-
-            state.tenders.data.forEach(tender => {
-                const row = document.createElement('tr');
-                
-                // Find driver details
-                const driver = state.drivers.data.find(d => d.id === tender.driver) || {};
-                
-                // Get status names
-                const status = getStatusById(tender.status);
-                const subStatus = tender.subStatus ? getStatusById(tender.subStatus) : null;
-                
-                row.innerHTML = `
-                    <td>
-                        ${tender.loading.city}<br>
-                        <small>${new Date(tender.loading.date).toLocaleString()}</small>
-                    </td>
-                    <td>
-                        ${tender.unloading.city}<br>
-                        <small>${new Date(tender.unloading.date).toLocaleString()}</small>
-                    </td>
-                    <td>$${tender.price.toLocaleString()}</td>
-                    <td>${driver.name ? `${driver.name} ${driver.lastname}` : 'Not assigned'}</td>
-                    <td><span class="status-badge ${status ? getStatusColorClass(status) : 'status-inactive'}">${status ? status.name : 'Unknown'}</span></td>
-                    <td><span class="status-badge ${subStatus ? getStatusColorClass(subStatus) : ''}">${subStatus ? subStatus.name : ''}</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm edit-tender" data-id="${tender.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-tender" data-id="${tender.id}">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-
-            // Add event listeners
-            document.querySelectorAll('.edit-tender').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editTender(this.getAttribute('data-id'));
-                });
-            });
-
-            document.querySelectorAll('.delete-tender').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteTender(this.getAttribute('data-id'));
-                });
-            });
-        }
-
-        function renderInvoices() {
-            const tableBody = document.getElementById('invoices-table-body');
-            tableBody.innerHTML = '';
-
-            if (state.invoices.data.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="6" class="text-center">No invoices found</td>';
-                tableBody.appendChild(row);
-                return;
-            }
-
-            // Populate status select options
-            const invoiceStatusSelect = document.getElementById('invoice-status');
-            invoiceStatusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getInvoiceStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                invoiceStatusSelect.appendChild(option);
-            });
-
-            state.invoices.data.forEach(invoice => {
-                const row = document.createElement('tr');
-                
-                const dueDate = new Date(invoice.dueDate);
-                const now = new Date();
-                const diff = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-                
-                const status = getStatusById(invoice.status);
-                const statusClass = status ? getStatusColorClass(status) : 'status-inactive';
-
-                row.innerHTML = `
-                    <td>${invoice.code}</td>
-                    <td>${invoice.client}</td>
-                    <td>${invoice.date}</td>
-                    <td>${invoice.dueDate} (${diff} days)</td>
-                    <td><span class="status-badge ${statusClass}">${status ? status.name : 'Unknown'}</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm edit-invoice" data-id="${invoice.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-invoice" data-id="${invoice.id}">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-
-            // Add event listeners
-            document.querySelectorAll('.edit-invoice').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editInvoice(this.getAttribute('data-id'));
-                });
-            });
-
-            document.querySelectorAll('.delete-invoice').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteInvoice(this.getAttribute('data-id'));
-                });
-            });
-        }
-
-        function renderReports() {
-            // Revenue chart
-            const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
-            new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
-                        borderColor: '#e74c3c',
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Loading chart
-            const loadingCtx = document.getElementById('loading-chart').getContext('2d');
-            new Chart(loadingCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                    datasets: [{
-                        label: '% Loading',
-                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
-                        backgroundColor: '#3498db'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-
-            // Revenue breakdown chart
-            const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
-            new Chart(breakdownCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Domestic', 'International', 'Express', 'Special'],
-                    datasets: [{
-                        data: [45, 30, 15, 10],
-                        backgroundColor: ['#e74c3c', '#3498db', '#2ecc71', '#f39c12']
-                    }]
-                },
-                options: {
-                    responsive: true
-                }
-            });
-
-            // Top drivers
-            const topDrivers = document.getElementById('top-drivers');
-            topDrivers.innerHTML = '';
-            
-            const sortedDrivers = [...state.drivers.data]
-                .sort(() => Math.random() - 0.5) // Random sorting for demo
-                .slice(0, 5);
-            
-            sortedDrivers.forEach((driver, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `
-                    <div>
-                        <strong>#${index + 1} ${driver.name} ${driver.lastname}</strong><br>
-                        <small>$${Math.floor(Math.random() * 10000) + 5000} revenue</small>
-                    </div>
-                    <span class="badge bg-primary rounded-pill">${Math.floor(Math.random() * 20) + 10} trips</span>
-                `;
-                topDrivers.appendChild(li);
-            });
-        }
-
-        function renderStatuses(filterType = 'all') {
-            // Render driver statuses
-            const driverHierarchy = document.getElementById('driver-status-hierarchy');
-            if (driverHierarchy) {
-                driverHierarchy.innerHTML = '';
-                
-                const driverPrimaryStatuses = getDriverPrimaryStatuses();
-                driverPrimaryStatuses.forEach(primaryStatus => {
-                    const item = document.createElement('div');
-                    item.className = 'status-hierarchy-item';
-                    item.dataset.statusId = primaryStatus.id;
-                    item.draggable = true;
-                    
-                    const subStatuses = getDriverSubStatuses(primaryStatus.id);
-                    
-                    item.innerHTML = `
-                        <div>
-                            <span class="status-badge ${getStatusColorClass(primaryStatus)}">${primaryStatus.name}</span>
-                            ${subStatuses.length > 0 ? 
-                                `<div class="status-hierarchy" style="margin-left: 20px; margin-top: 5px;">
-                                    ${subStatuses.map(subStatus => `
-                                        <div class="status-hierarchy-item" data-status-id="${subStatus.id}" draggable="true">
-                                            <span class="status-badge ${getStatusColorClass(subStatus)}">${subStatus.name}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>` : ''}
-                        </div>
-                        <div class="actions">
-                            <button class="btn btn-secondary btn-sm edit-status" data-id="${primaryStatus.id}">Edit</button>
-                            <button class="btn btn-danger btn-sm delete-status" data-id="${primaryStatus.id}">Delete</button>
-                        </div>
-                    `;
-                    
-                    driverHierarchy.appendChild(item);
-                });
-                
-                // Add event listeners for driver statuses
-                document.querySelectorAll('.edit-status').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        editStatus(this.getAttribute('data-id'));
-                    });
-                });
-
-                document.querySelectorAll('.delete-status').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        deleteStatus(this.getAttribute('data-id'));
-                    });
-                });
-            }
-            
-            // Render car statuses
-            const carHierarchy = document.getElementById('car-status-hierarchy');
-            if (carHierarchy) {
-                carHierarchy.innerHTML = '';
-                
-                const carStatuses = getCarStatuses();
-                carStatuses.forEach(status => {
-                    const item = document.createElement('div');
-                    item.className = 'status-hierarchy-item';
-                    item.dataset.statusId = status.id;
-                    item.draggable = true;
-                    
-                    item.innerHTML = `
-                        <span class="status-badge ${getStatusColorClass(status)}">${status.name}</span>
-                        <div class="actions">
-                            <button class="btn btn-secondary btn-sm edit-status" data-id="${status.id}">Edit</button>
-                            <button class="btn btn-danger btn-sm delete-status" data-id="${status.id}">Delete</button>
-                        </div>
-                    `;
-                    
-                    carHierarchy.appendChild(item);
-                });
-                
-                // Add event listeners for car statuses
-                document.querySelectorAll('.edit-status').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        editStatus(this.getAttribute('data-id'));
-                    });
-                });
-
-                document.querySelectorAll('.delete-status').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        deleteStatus(this.getAttribute('data-id'));
-                    });
-                });
-            }
-        }
-
-        function renderCarTypes() {
-            const tableBody = document.getElementById('cartypes-table-body');
-            if (!tableBody) return;
-            
-            tableBody.innerHTML = '';
-
-            // Check if data is null or undefined
-            if (!state.carTypes.data || state.carTypes.data.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = '<td colspan="7" class="text-center">No vehicle types found</td>';
-                tableBody.appendChild(row);
-                return;
-            }
-
-            state.carTypes.data.forEach(carType => {
-                const row = document.createElement('tr');
-                
-                // Calculate main cubic capacity
-                const mainCubic = carType.mainDimensions.length * 
-                                 carType.mainDimensions.width * 
-                                 carType.mainDimensions.height;
-                
-                // Calculate trailer cubic capacity
-                let trailerCubic = 0;
-                if (carType.isTandem && carType.trailerDimensions) {
-                    trailerCubic = carType.trailerDimensions.length * 
-                                   carType.trailerDimensions.width * 
-                                   carType.trailerDimensions.height;
-                }
-                
-                // Total cubic capacity
-                const totalCubic = mainCubic + trailerCubic;
-                
-                // Total max weight
-                const totalMaxWeight = carType.mainMaxWeight + (carType.isTandem ? carType.trailerMaxWeight : 0);
-                
-                row.innerHTML = `
-                    <td>${carType.name}</td>
-                    <td>${carType.description || 'No description'}</td>
-                    <td>${carType.mainDimensions.length}m x ${carType.mainDimensions.width}m x ${carType.mainDimensions.height}m</td>
-                    <td>${carType.isTandem && carType.trailerDimensions ? 
-                        `${carType.trailerDimensions.length}m x ${carType.trailerDimensions.width}m x ${carType.trailerDimensions.height}m` : '-'}</td>
-                    <td>${totalMaxWeight.toFixed(1)} tons (${carType.mainMaxWeight.toFixed(1)} + ${carType.isTandem ? carType.trailerMaxWeight.toFixed(1) : '0'} tons)</td>
-                    <td>${carType.isTandem ? 'Yes' : 'No'}</td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm edit-cartype" data-id="${carType.id}">Edit</button>
-                        <button class="btn btn-danger btn-sm delete-cartype" data-id="${carType.id}">Delete</button>
-                    </td>
-                `;
-                
-                tableBody.appendChild(row);
-            });
-
-            // Add event listeners
-            document.querySelectorAll('.edit-cartype').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    editCarType(this.getAttribute('data-id'));
-                });
-            });
-
-            document.querySelectorAll('.delete-cartype').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    deleteCarType(this.getAttribute('data-id'));
-                });
-            });
-        }
-
         function renderAdmin() {
             // Users tab
             const usersTableBody = document.getElementById('users-table-body');
@@ -5201,70 +4056,6 @@
             renderCarTypes();
         }
 
-        function buildOrgTree() {
-            const orgTree = document.getElementById('org-tree');
-            if (!orgTree) return;
-            
-            orgTree.innerHTML = '';
-
-            // Find root users (those with no supervisor or supervisor not in list)
-            const rootUsers = state.users.data.filter(user => 
-                !user.supervisor || !state.users.data.some(u => u.id === user.supervisor)
-            );
-
-            rootUsers.forEach(user => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <strong>${user.name} ${user.lastname}</strong> (${user.status})
-                `;
-                orgTree.appendChild(li);
-                
-                // Add subordinates
-                const subordinates = state.users.data.filter(u => u.supervisor === user.id);
-                if (subordinates.length > 0) {
-                    const ul = document.createElement('ul');
-                    subordinates.forEach(sub => {
-                        const subLi = document.createElement('li');
-                        subLi.innerHTML = `
-                            ${sub.name} ${sub.lastname} (${sub.status})
-                        `;
-                        ul.appendChild(subLi);
-                    });
-                    li.appendChild(ul);
-                }
-            });
-        }
-
-        function renderChat() {
-            const chatUsersList = document.getElementById('chat-users-list');
-            if (!chatUsersList) return;
-            
-            chatUsersList.innerHTML = '';
-
-            state.users.data.forEach(user => {
-                if (user.id !== state.currentUser.id) {
-                    const div = document.createElement('div');
-                    div.className = 'chat-user';
-                    div.setAttribute('data-user', user.id);
-                    div.innerHTML = `
-                        <strong>${user.name} ${user.lastname}</strong><br>
-                        <small>${user.status}</small>
-                    `;
-                    chatUsersList.appendChild(div);
-                }
-            });
-
-            // Add event listeners
-            document.querySelectorAll('.chat-user').forEach(user => {
-                user.addEventListener('click', function() {
-                    document.querySelectorAll('.chat-user').forEach(u => {
-                        u.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                });
-            });
-        }
-
         // Modal functions
         function openModal(type, id = null, statusType = null) {
             const modal = document.getElementById(`${type}-modal`);
@@ -5277,19 +4068,8 @@
                 modal.setAttribute('data-id', id);
                 
                 // Populate form with existing data
-                if (type === 'driver') {
-                    const driver = state.drivers.data.find(d => d.id === id);
-                    if (!driver) return;
-                    
-                    document.getElementById('driver-name').value = driver.name;
-                    document.getElementById('driver-lastname').value = driver.lastname;
-                    document.getElementById('driver-car').value = driver.car || '';
-                    document.getElementById('driver-card').value = driver.card || '';
-                    document.getElementById('driver-on-break').value = driver.onBreak || 'false';
-                    document.getElementById('driver-on-vacation').value = driver.onVacation || 'false';
-                    document.getElementById('driver-work-hours').value = driver.workHours || '8:00-17:00';
-                } else if (type === 'car') {
-                    const car = state.cars.data.find(c => c.id === id);
+                if (type === 'car') {
+                    const car = state.cars.data.cars.find(c => c.id === id);
                     if (!car) return;
                     
                     document.getElementById('car-tractor').value = car.tractor;
@@ -5303,80 +4083,8 @@
                     
                     // Update car type details
                     updateCarTypeDetails(car.carType);
-                } else if (type === 'card') {
-                    const card = state.cards.data.find(c => c.id === id);
-                    if (!card) return;
-                    
-                    document.getElementById('card-number').value = card.number;
-                    document.getElementById('card-pin').value = card.pin;
-                    document.getElementById('card-expiry').value = card.expiry;
-                    document.getElementById('card-notify').value = card.notify;
-                    document.getElementById('card-reminder').value = card.reminder;
-                    document.getElementById('card-status').value = card.status || '';
-                } else if (type === 'tender') {
-                    const tender = state.tenders.data.find(t => t.id === id);
-                    if (!tender) return;
-                    
-                    document.getElementById('tender-loading-date').value = tender.loading.date;
-                    document.getElementById('tender-unloading-date').value = tender.unloading.date;
-                    document.getElementById('tender-loading-city').value = tender.loading.city;
-                    document.getElementById('tender-loading-zip').value = tender.loading.zip;
-                    document.getElementById('tender-unloading-city').value = tender.unloading.city;
-                    document.getElementById('tender-unloading-zip').value = tender.unloading.zip;
-                    document.getElementById('tender-price').value = tender.price;
-                    document.getElementById('tender-driver').value = tender.driver || '';
-                    document.getElementById('tender-status').value = tender.status || '';
-                    
-                    // Populate sub-statuses based on selected status
-                    populateSubStatuses(tender.status);
-                    document.getElementById('tender-substatus').value = tender.subStatus || '';
-                    
-                    if (tender.status === getTenderStatuses().find(s => s.name === 'Sold').id) {
-                        document.getElementById('tender-sale-fields').classList.remove('hidden');
-                        document.getElementById('tender-sale-price').value = tender.sale.price;
-                        document.getElementById('tender-payment-days').value = tender.sale.paymentDays;
-                    } else {
-                        document.getElementById('tender-sale-fields').classList.add('hidden');
-                    }
-                } else if (type === 'invoice') {
-                    const invoice = state.invoices.data.find(i => i.id === id);
-                    if (!invoice) return;
-                    
-                    document.getElementById('invoice-code').value = invoice.code;
-                    document.getElementById('invoice-client').value = invoice.client;
-                    document.getElementById('invoice-date').value = invoice.date;
-                    document.getElementById('invoice-due-days').value = invoice.dueDays;
-                    document.getElementById('invoice-notify').value = invoice.notify;
-                    document.getElementById('invoice-reminder').value = invoice.reminder;
-                    document.getElementById('invoice-status').value = invoice.status || '';
-                } else if (type === 'user') {
-                    const user = state.users.data.find(u => u.id === id);
-                    if (!user) return;
-                    
-                    document.getElementById('user-name-input').value = user.name;
-                    document.getElementById('user-lastname').value = user.lastname;
-                    document.getElementById('user-email').value = user.email;
-                    document.getElementById('user-password').value = user.password;
-                    document.getElementById('user-status').value = user.status;
-                    document.getElementById('user-supervisor').value = user.supervisor || '';
-                } else if (type === 'status') {
-                    const status = state.statuses.data.find(s => s.id === id);
-                    if (!status) return;
-                    
-                    document.getElementById('status-name').value = status.name;
-                    document.getElementById('status-type').value = status.type;
-                    document.getElementById('status-is-primary').value = status.isPrimary ? 'true' : 'false';
-                    document.getElementById('status-parent').value = status.parentStatusId || '';
-                    document.getElementById('status-color').value = status.color;
-                    
-                    // Show/hide parent status field
-                    document.getElementById('status-parent-container').style.display = 
-                        status.isPrimary ? 'none' : 'block';
-                    
-                    // Populate parent statuses
-                    populateParentStatuses(status.type);
                 } else if (type === 'cartype') {
-                    const carType = state.carTypes.data.find(c => c.id === id);
+                    const carType = getCarTypeById(id);
                     if (!carType) return;
                     
                     document.getElementById('cartype-name').value = carType.name;
@@ -5410,15 +4118,7 @@
                 modal.removeAttribute('data-id');
                 
                 // Clear form
-                if (type === 'driver') {
-                    document.getElementById('driver-name').value = '';
-                    document.getElementById('driver-lastname').value = '';
-                    document.getElementById('driver-car').value = '';
-                    document.getElementById('driver-card').value = '';
-                    document.getElementById('driver-on-break').value = 'false';
-                    document.getElementById('driver-on-vacation').value = 'false';
-                    document.getElementById('driver-work-hours').value = '8:00-17:00';
-                } else if (type === 'car') {
+                if (type === 'car') {
                     document.getElementById('car-tractor').value = '';
                     document.getElementById('car-trailer').value = '';
                     document.getElementById('car-type').value = '';
@@ -5431,54 +4131,6 @@
                     // Hide car type details
                     document.getElementById('car-type-details').classList.add('hidden');
                     document.getElementById('trailer-weight-row').style.display = 'none';
-                } else if (type === 'card') {
-                    document.getElementById('card-number').value = '';
-                    document.getElementById('card-pin').value = '';
-                    document.getElementById('card-expiry').value = '';
-                    document.getElementById('card-notify').value = '30';
-                    document.getElementById('card-reminder').value = '7';
-                    document.getElementById('card-status').value = '';
-                } else if (type === 'tender') {
-                    document.getElementById('tender-loading-date').value = '';
-                    document.getElementById('tender-unloading-date').value = '';
-                    document.getElementById('tender-loading-city').value = '';
-                    document.getElementById('tender-loading-zip').value = '';
-                    document.getElementById('tender-unloading-city').value = '';
-                    document.getElementById('tender-unloading-zip').value = '';
-                    document.getElementById('tender-price').value = '';
-                    document.getElementById('tender-driver').value = '';
-                    document.getElementById('tender-status').value = '';
-                    document.getElementById('tender-substatus').value = '';
-                    document.getElementById('tender-sale-fields').classList.add('hidden');
-                    document.getElementById('tender-sale-price').value = '';
-                    document.getElementById('tender-payment-days').value = '30';
-                } else if (type === 'invoice') {
-                    document.getElementById('invoice-code').value = '';
-                    document.getElementById('invoice-client').value = '';
-                    document.getElementById('invoice-date').value = '';
-                    document.getElementById('invoice-due-days').value = '30';
-                    document.getElementById('invoice-notify').value = '7';
-                    document.getElementById('invoice-reminder').value = '3';
-                    document.getElementById('invoice-status').value = '';
-                } else if (type === 'user') {
-                    document.getElementById('user-name-input').value = '';
-                    document.getElementById('user-lastname').value = '';
-                    document.getElementById('user-email').value = '';
-                    document.getElementById('user-password').value = '';
-                    document.getElementById('user-status').value = 'user';
-                    document.getElementById('user-supervisor').value = '';
-                } else if (type === 'status') {
-                    document.getElementById('status-name').value = '';
-                    document.getElementById('status-type').value = statusType || 'driver';
-                    document.getElementById('status-is-primary').value = 'true';
-                    document.getElementById('status-parent').value = '';
-                    document.getElementById('status-color').value = 'active';
-                    
-                    // Show/hide parent status field
-                    document.getElementById('status-parent-container').style.display = 'none';
-                    
-                    // Populate parent statuses
-                    populateParentStatuses(statusType || 'driver');
                 } else if (type === 'cartype') {
                     document.getElementById('cartype-name').value = '';
                     document.getElementById('cartype-description').value = '';
@@ -5521,76 +4173,6 @@
             }
             
             modal.classList.add('show');
-        }
-
-        function closeModal() {
-            document.querySelectorAll('.modal').forEach(modal => {
-                modal.classList.remove('show');
-            });
-        }
-
-        // Status helper functions
-        function populateParentStatuses(type) {
-            const parentSelect = document.getElementById('status-parent');
-            if (!parentSelect) return;
-            
-            parentSelect.innerHTML = '';
-            
-            const primaryStatuses = getPrimaryStatuses(type);
-            primaryStatuses.forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                parentSelect.appendChild(option);
-            });
-        }
-
-        function populateSubStatuses(statusId) {
-            const subStatusSelect = document.getElementById('tender-substatus');
-            if (!subStatusSelect) return;
-            
-            subStatusSelect.innerHTML = '<option value="">Select Sub-Status</option>';
-            
-            const subStatuses = getSubStatuses(statusId);
-            subStatuses.forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                subStatusSelect.appendChild(option);
-            });
-        }
-
-        // Edit functions
-        function editDriver(id) {
-            openModal('driver', id);
-        }
-
-        function editCar(id) {
-            openModal('car', id);
-        }
-
-        function editCard(id) {
-            openModal('card', id);
-        }
-
-        function editTender(id) {
-            openModal('tender', id);
-        }
-
-        function editInvoice(id) {
-            openModal('invoice', id);
-        }
-
-        function editUser(id) {
-            openModal('user', id);
-        }
-
-        function editStatus(id) {
-            openModal('status', id);
-        }
-
-        function editCarType(id) {
-            openModal('cartype', id);
         }
 
         // Helper functions
@@ -5712,200 +4294,7 @@
             carTypeDetails.classList.remove('hidden');
         }
 
-        function getTimeAgo(dateString) {
-            const now = new Date();
-            const past = new Date(dateString);
-            const diff = now - past;
-            
-            const seconds = Math.floor(diff / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const hours = Math.floor(minutes / 60);
-            const days = Math.floor(hours / 24);
-            
-            if (days > 0) {
-                return days + ' days ago';
-            } else if (hours > 0) {
-                return hours + ' hours ago';
-            } else if (minutes > 0) {
-                return minutes + ' minutes ago';
-            } else {
-                return seconds + ' seconds ago';
-            }
-        }
-
-        // Chat functions
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            if (!input) return;
-            
-            const message = input.value.trim();
-            
-            if (!message) return;
-            
-            try {
-                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT) || { data: [], sha: null };
-                const now = new Date().toISOString();
-                
-                const newMessage = {
-                    id: generateId(),
-                    userId: state.currentUser.id,
-                    message: message,
-                    timestamp: now
-                };
-                
-                const updatedChat = [...chat, newMessage];
-                
-                const result = await updateFile(
-                    FILE_PATHS.CHAT,
-                    'New chat message',
-                    utf8ToBase64(JSON.stringify(updatedChat, null, 2)),
-                    sha
-                );
-                
-                // Update local state with new SHA
-                state.chat = { 
-                    data: updatedChat, 
-                    sha: result.content.sha 
-                };
-                renderChatMessages();
-                input.value = '';
-            } catch (error) {
-                addNotification('Failed to send message: ' + error.message, 'error');
-                console.error('Send message error:', error);
-            }
-        }
-
-        function renderChatMessages() {
-            const messagesContainer = document.getElementById('chat-messages');
-            if (!messagesContainer) return;
-            
-            messagesContainer.innerHTML = '';
-            
-            if (!state.chat.data || state.chat.data.length === 0) {
-                const div = document.createElement('div');
-                div.className = 'message other';
-                div.innerHTML = `
-                    <div class="message-content">No messages yet</div>
-                    <div class="message-meta">System - just now</div>
-                `;
-                messagesContainer.appendChild(div);
-                return;
-            }
-            
-            state.chat.data.forEach(msg => {
-                const user = state.users.data.find(u => u.id === msg.userId);
-                const isOwn = msg.userId === state.currentUser.id;
-                
-                const div = document.createElement('div');
-                div.className = `message ${isOwn ? 'own' : 'other'}`;
-                
-                const timeAgo = getTimeAgo(msg.timestamp);
-                
-                div.innerHTML = `
-                    <div class="message-content">${msg.message}</div>
-                    <div class="message-meta">${user ? `${user.name} ${user.lastname}` : 'Unknown'} - ${timeAgo}</div>
-                `;
-                
-                messagesContainer.appendChild(div);
-            });
-            
-            // Scroll to bottom
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        // Notification functions
-        function addNotification(message, type = 'info') {
-            const notification = {
-                id: generateId(),
-                message: message,
-                type: type,
-                timestamp: new Date().toISOString(),
-                read: false
-            };
-            
-            state.notifications.unshift(notification);
-            state.unreadNotifications++;
-            
-            updateNotificationUI();
-            showTemporaryNotification(message, type);
-        }
-
-        function updateNotificationUI() {
-            const countEl = document.getElementById('notification-count');
-            if (countEl) {
-                countEl.textContent = state.unreadNotifications;
-            }
-            
-            const panel = document.getElementById('notification-panel');
-            if (!panel) return;
-            
-            if (state.notifications.length === 0) {
-                panel.innerHTML = '<div class="notification-item">No notifications</div>';
-            } else {
-                panel.innerHTML = '';
-                state.notifications.forEach(notif => {
-                    const item = document.createElement('div');
-                    item.className = `notification-item ${!notif.read ? 'unread' : ''}`;
-                    
-                    const typeClass = {
-                        'success': 'text-success',
-                        'error': 'text-danger',
-                        'warning': 'text-warning',
-                        'info': 'text-info'
-                    }[notif.type] || '';
-                    
-                    item.innerHTML = `
-                        <div class="notification-title ${typeClass}">${notif.message}</div>
-                        <div class="notification-time">${getTimeAgo(notif.timestamp)}</div>
-                    `;
-                    
-                    panel.appendChild(item);
-                });
-            }
-        }
-
-        function showTemporaryNotification(message, type) {
-            // Create temporary notification element
-            const tempNotification = document.createElement('div');
-            tempNotification.style.position = 'fixed';
-            tempNotification.style.top = '20px';
-            tempNotification.style.right = '20px';
-            tempNotification.style.backgroundColor = type === 'error' ? '#e74c3c' : 
-                                                 type === 'success' ? '#2ecc71' : '#3498db';
-            tempNotification.style.color = 'white';
-            tempNotification.style.padding = '15px 20px';
-            tempNotification.style.borderRadius = '5px';
-            tempNotification.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
-            tempNotification.style.zIndex = '3000';
-            tempNotification.style.transition = 'opacity 0.3s';
-            tempNotification.textContent = message;
-            
-            document.body.appendChild(tempNotification);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                tempNotification.style.opacity = '0';
-                setTimeout(() => {
-                    if (tempNotification.parentNode) {
-                        document.body.removeChild(tempNotification);
-                    }
-                }, 300);
-            }, 3000);
-        }
-
         // UI functions
-        function showRegister(e) {
-            e.preventDefault();
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('register-form').classList.remove('hidden');
-        }
-
-        function showLogin(e) {
-            e.preventDefault();
-            document.getElementById('register-form').classList.add('hidden');
-            document.getElementById('login-form').classList.remove('hidden');
-        }
-
         function showApp() {
             const authContainer = document.getElementById('auth-container');
             const appContainer = document.getElementById('app');
@@ -6111,6 +4500,107 @@
                 }
             }
         });
+
+        // Notification functions
+        function addNotification(message, type = 'info') {
+            const notification = {
+                id: generateId(),
+                message: message,
+                type: type,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            state.notifications.unshift(notification);
+            state.unreadNotifications++;
+            
+            updateNotificationUI();
+            showTemporaryNotification(message, type);
+        }
+
+        function updateNotificationUI() {
+            const countEl = document.getElementById('notification-count');
+            if (countEl) {
+                countEl.textContent = state.unreadNotifications;
+            }
+            
+            const panel = document.getElementById('notification-panel');
+            if (!panel) return;
+            
+            if (state.notifications.length === 0) {
+                panel.innerHTML = '<div class="notification-item">No notifications</div>';
+            } else {
+                panel.innerHTML = '';
+                state.notifications.forEach(notif => {
+                    const item = document.createElement('div');
+                    item.className = `notification-item ${!notif.read ? 'unread' : ''}`;
+                    
+                    const typeClass = {
+                        'success': 'text-success',
+                        'error': 'text-danger',
+                        'warning': 'text-warning',
+                        'info': 'text-info'
+                    }[notif.type] || '';
+                    
+                    item.innerHTML = `
+                        <div class="notification-title ${typeClass}">${notif.message}</div>
+                        <div class="notification-time">${getTimeAgo(notif.timestamp)}</div>
+                    `;
+                    
+                    panel.appendChild(item);
+                });
+            }
+        }
+
+        function showTemporaryNotification(message, type) {
+            // Create temporary notification element
+            const tempNotification = document.createElement('div');
+            tempNotification.style.position = 'fixed';
+            tempNotification.style.top = '20px';
+            tempNotification.style.right = '20px';
+            tempNotification.style.backgroundColor = type === 'error' ? '#e74c3c' : 
+                                                 type === 'success' ? '#2ecc71' : '#3498db';
+            tempNotification.style.color = 'white';
+            tempNotification.style.padding = '15px 20px';
+            tempNotification.style.borderRadius = '5px';
+            tempNotification.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+            tempNotification.style.zIndex = '3000';
+            tempNotification.style.transition = 'opacity 0.3s';
+            tempNotification.textContent = message;
+            
+            document.body.appendChild(tempNotification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                tempNotification.style.opacity = '0';
+                setTimeout(() => {
+                    if (tempNotification.parentNode) {
+                        document.body.removeChild(tempNotification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function getTimeAgo(dateString) {
+            const now = new Date();
+            const past = new Date(dateString);
+            const diff = now - past;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) {
+                return days + ' days ago';
+            } else if (hours > 0) {
+                return hours + ' hours ago';
+            } else if (minutes > 0) {
+                return minutes + ' minutes ago';
+            } else {
+                return seconds + ' seconds ago';
+            }
+        }
     </script>
 </body>
 </html>

@@ -1990,7 +1990,7 @@
             unreadNotifications: 0,
             // Data stores with SHA
             drivers: { data: [], sha: null },
-            cars: { data: [], carTypes: [], sha: null },
+            cars: { data: { data: [], carTypes: [] }, sha: null },
             cards: { data: [], sha: null },
             tenders: { data: [], sha: null },
             invoices: { data: [], sha: null },
@@ -4889,105 +4889,113 @@
             let hasExpirations = false;
 
             // Check car insurance
-            state.cars.data.data.forEach(car => {
-                const insuranceDate = new Date(car.insurance);
-                const notifyDays = car.insuranceNotify || 30;
-                const diffTime = insuranceDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (state.cars.data && state.cars.data.data) {
+                state.cars.data.data.forEach(car => {
+                    const insuranceDate = new Date(car.insurance);
+                    const notifyDays = car.insuranceNotify || 30;
+                    const diffTime = insuranceDate - now;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                if (diffDays <= notifyDays && diffDays > 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> insurance expires in ${diffDays} days
-                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                } else if (diffDays <= 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> insurance has expired!
-                        <span class="badge status-danger" style="float: right;">Expired</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
+                    if (diffDays <= notifyDays && diffDays > 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>${car.tractor}</strong> insurance expires in ${diffDays} days
+                            <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    } else if (diffDays <= 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>${car.tractor}</strong> insurance has expired!
+                            <span class="badge status-danger" style="float: right;">Expired</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    }
+                });
+            }
 
             // Check car inspection
-            state.cars.data.data.forEach(car => {
-                const inspectionDate = new Date(car.inspection);
-                const notifyDays = car.inspectionNotify || 30;
-                const diffTime = inspectionDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (state.cars.data && state.cars.data.data) {
+                state.cars.data.data.forEach(car => {
+                    const inspectionDate = new Date(car.inspection);
+                    const notifyDays = car.inspectionNotify || 30;
+                    const diffTime = inspectionDate - now;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                if (diffDays <= notifyDays && diffDays > 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> inspection due in ${diffDays} days
-                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                } else if (diffDays <= 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>${car.tractor}</strong> inspection has expired!
-                        <span class="badge status-danger" style="float: right;">Expired</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
+                    if (diffDays <= notifyDays && diffDays > 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>${car.tractor}</strong> inspection due in ${diffDays} days
+                            <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    } else if (diffDays <= 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>${car.tractor}</strong> inspection has expired!
+                            <span class="badge status-danger" style="float: right;">Expired</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    }
+                });
+            }
 
             // Check card expiry
-            state.cards.data.forEach(card => {
-                const expiryDate = new Date(card.expiry);
-                const notifyDays = card.notify || 30;
-                const diffTime = expiryDate - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (state.cards.data) {
+                state.cards.data.forEach(card => {
+                    const expiryDate = new Date(card.expiry);
+                    const notifyDays = card.notify || 30;
+                    const diffTime = expiryDate - now;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                if (diffDays <= notifyDays && diffDays > 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>Card ${card.number}</strong> expires in ${diffDays} days
-                        <span class="badge status-pending" style="float: right;">${diffDays} days</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                } else if (diffDays <= 0) {
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>Card ${card.number}</strong> has expired!
-                        <span class="badge status-danger" style="float: right;">Expired</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
+                    if (diffDays <= notifyDays && diffDays > 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>Card ${card.number}</strong> expires in ${diffDays} days
+                            <span class="badge status-pending" style="float: right;">${diffDays} days</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    } else if (diffDays <= 0) {
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>Card ${card.number}</strong> has expired!
+                            <span class="badge status-danger" style="float: right;">Expired</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    }
+                });
+            }
 
             // Check invoice due dates
             const nowStr = now.toISOString().split('T')[0];
-            state.invoices.data.forEach(invoice => {
-                if (invoice.dueDate < nowStr) {
-                    const diffDays = Math.ceil((now - new Date(invoice.dueDate)) / (1000 * 60 * 60 * 24));
-                    
-                    const li = document.createElement('li');
-                    li.className = 'mb-2';
-                    li.innerHTML = `
-                        <strong>Invoice ${invoice.code}</strong> is overdue by ${diffDays} days
-                        <span class="badge status-danger" style="float: right;">Overdue</span>
-                    `;
-                    expirationsList.appendChild(li);
-                    hasExpirations = true;
-                }
-            });
+            if (state.invoices.data) {
+                state.invoices.data.forEach(invoice => {
+                    if (invoice.dueDate < nowStr) {
+                        const diffDays = Math.ceil((now - new Date(invoice.dueDate)) / (1000 * 60 * 60 * 24));
+                        
+                        const li = document.createElement('li');
+                        li.className = 'mb-2';
+                        li.innerHTML = `
+                            <strong>Invoice ${invoice.code}</strong> is overdue by ${diffDays} days
+                            <span class="badge status-danger" style="float: right;">Overdue</span>
+                        `;
+                        expirationsList.appendChild(li);
+                        hasExpirations = true;
+                    }
+                });
+            }
 
             if (!hasExpirations) {
                 const li = document.createElement('li');
@@ -5004,32 +5012,36 @@
             const activities = [];
 
             // Add recent drivers
-            const recentDrivers = [...state.drivers.data]
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 3);
-            
-            recentDrivers.forEach(driver => {
-                activities.push({
-                    type: 'driver',
-                    action: driver.createdAt === driver.updatedAt ? 'created' : 'updated',
-                    name: `${driver.name} ${driver.lastname}`,
-                    time: driver.updatedAt
+            if (state.drivers.data) {
+                const recentDrivers = [...state.drivers.data]
+                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                    .slice(0, 3);
+                
+                recentDrivers.forEach(driver => {
+                    activities.push({
+                        type: 'driver',
+                        action: driver.createdAt === driver.updatedAt ? 'created' : 'updated',
+                        name: `${driver.name} ${driver.lastname}`,
+                        time: driver.updatedAt
+                    });
                 });
-            });
+            }
 
             // Add recent tenders
-            const recentTenders = [...state.tenders.data]
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 3);
-            
-            recentTenders.forEach(tender => {
-                activities.push({
-                    type: 'tender',
-                    action: tender.createdAt === tender.updatedAt ? 'created' : 'updated',
-                    name: `${tender.loading.city} → ${tender.unloading.city}`,
-                    time: tender.updatedAt
+            if (state.tenders.data) {
+                const recentTenders = [...state.tenders.data]
+                    .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                    .slice(0, 3);
+                
+                recentTenders.forEach(tender => {
+                    activities.push({
+                        type: 'tender',
+                        action: tender.createdAt === tender.updatedAt ? 'created' : 'updated',
+                        name: `${tender.loading.city} → ${tender.unloading.city}`,
+                        time: tender.updatedAt
+                    });
                 });
-            });
+            }
 
             // Sort by time and get latest 5
             activities.sort((a, b) => new Date(b.time) - new Date(a.time));
@@ -5055,9 +5067,11 @@
 
         function renderDrivers() {
             const tableBody = document.getElementById('drivers-table-body');
+            if (!tableBody) return;
+            
             tableBody.innerHTML = '';
 
-            if (state.drivers.data.length === 0) {
+            if (!state.drivers.data || state.drivers.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="6" class="text-center">No drivers found</td>';
                 tableBody.appendChild(row);
@@ -5068,29 +5082,44 @@
             const carSelect = document.getElementById('driver-car');
             const cardSelect = document.getElementById('driver-card');
             
-            carSelect.innerHTML = '<option value="">Select Car</option>';
-            cardSelect.innerHTML = '<option value="">Select Card</option>';
+            if (carSelect) {
+                carSelect.innerHTML = '<option value="">Select Car</option>';
+                if (state.cars.data && state.cars.data.data) {
+                    state.cars.data.data.forEach(car => {
+                        const option = document.createElement('option');
+                        option.value = car.id;
+                        option.textContent = `${car.tractor} / ${car.trailer}`;
+                        carSelect.appendChild(option);
+                    });
+                }
+            }
             
-            state.cars.data.data.forEach(car => {
-                const option = document.createElement('option');
-                option.value = car.id;
-                option.textContent = `${car.tractor} / ${car.trailer}`;
-                carSelect.appendChild(option);
-            });
-            
-            state.cards.data.forEach(card => {
-                const option = document.createElement('option');
-                option.value = card.id;
-                option.textContent = card.number;
-                cardSelect.appendChild(option);
-            });
+            if (cardSelect) {
+                cardSelect.innerHTML = '<option value="">Select Card</option>';
+                if (state.cards.data) {
+                    state.cards.data.forEach(card => {
+                        const option = document.createElement('option');
+                        option.value = card.id;
+                        option.textContent = card.number;
+                        cardSelect.appendChild(option);
+                    });
+                }
+            }
 
             state.drivers.data.forEach(driver => {
                 const row = document.createElement('tr');
                 
                 // Find car and card details
-                const car = state.cars.data.data.find(c => c.id === driver.car) || {};
-                const card = state.cards.data.find(c => c.id === driver.card) || {};
+                let car = {};
+                let card = {};
+                
+                if (state.cars.data && state.cars.data.data) {
+                    car = state.cars.data.data.find(c => c.id === driver.car) || {};
+                }
+                
+                if (state.cards.data) {
+                    card = state.cards.data.find(c => c.id === driver.card) || {};
+                }
                 
                 // Get status names
                 const primaryStatus = driver.status ? getStatusById(driver.status) : null;
@@ -5127,9 +5156,11 @@
 
         function renderCars() {
             const tableBody = document.getElementById('cars-table-body');
+            if (!tableBody) return;
+            
             tableBody.innerHTML = '';
 
-            if (state.cars.data.data.length === 0) {
+            if (!state.cars.data || !state.cars.data.data || state.cars.data.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="9" class="text-center">No cars found</td>';
                 tableBody.appendChild(row);
@@ -5138,25 +5169,31 @@
 
             // Populate car type select options
             const carTypeSelect = document.getElementById('car-type');
-            carTypeSelect.innerHTML = '<option value="">Select Type</option>';
-            
-            state.cars.data.carTypes.forEach(carType => {
-                const option = document.createElement('option');
-                option.value = carType.id;
-                option.textContent = carType.name;
-                carTypeSelect.appendChild(option);
-            });
+            if (carTypeSelect) {
+                carTypeSelect.innerHTML = '<option value="">Select Type</option>';
+                
+                if (state.cars.data && state.cars.data.carTypes) {
+                    state.cars.data.carTypes.forEach(carType => {
+                        const option = document.createElement('option');
+                        option.value = carType.id;
+                        option.textContent = carType.name;
+                        carTypeSelect.appendChild(option);
+                    });
+                }
+            }
 
             // Populate status select options
             const carStatusSelect = document.getElementById('car-status');
-            carStatusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getCarStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                carStatusSelect.appendChild(option);
-            });
+            if (carStatusSelect) {
+                carStatusSelect.innerHTML = '<option value="">Select Status</option>';
+                
+                getCarStatuses().forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status.id;
+                    option.textContent = status.name;
+                    carStatusSelect.appendChild(option);
+                });
+            }
 
             state.cars.data.data.forEach(car => {
                 const row = document.createElement('tr');
@@ -5243,9 +5280,11 @@
 
         function renderCards() {
             const tableBody = document.getElementById('cards-table-body');
+            if (!tableBody) return;
+            
             tableBody.innerHTML = '';
 
-            if (state.cards.data.length === 0) {
+            if (!state.cards.data || state.cards.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="5" class="text-center">No cards found</td>';
                 tableBody.appendChild(row);
@@ -5254,14 +5293,16 @@
 
             // Populate status select options
             const cardStatusSelect = document.getElementById('card-status');
-            cardStatusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getCardStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                cardStatusSelect.appendChild(option);
-            });
+            if (cardStatusSelect) {
+                cardStatusSelect.innerHTML = '<option value="">Select Status</option>';
+                
+                getCardStatuses().forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status.id;
+                    option.textContent = status.name;
+                    cardStatusSelect.appendChild(option);
+                });
+            }
 
             state.cards.data.forEach(card => {
                 const row = document.createElement('tr');
@@ -5303,9 +5344,11 @@
 
         function renderTenders() {
             const tableBody = document.getElementById('tenders-table-body');
+            if (!tableBody) return;
+            
             tableBody.innerHTML = '';
 
-            if (state.tenders.data.length === 0) {
+            if (!state.tenders.data || state.tenders.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="7" class="text-center">No tenders found</td>';
                 tableBody.appendChild(row);
@@ -5314,31 +5357,40 @@
 
             // Populate driver select options
             const driverSelect = document.getElementById('tender-driver');
-            driverSelect.innerHTML = '<option value="">Select Driver</option>';
-            
-            state.drivers.data.forEach(driver => {
-                const option = document.createElement('option');
-                option.value = driver.id;
-                option.textContent = `${driver.name} ${driver.lastname}`;
-                driverSelect.appendChild(option);
-            });
+            if (driverSelect) {
+                driverSelect.innerHTML = '<option value="">Select Driver</option>';
+                
+                if (state.drivers.data) {
+                    state.drivers.data.forEach(driver => {
+                        const option = document.createElement('option');
+                        option.value = driver.id;
+                        option.textContent = `${driver.name} ${driver.lastname}`;
+                        driverSelect.appendChild(option);
+                    });
+                }
+            }
 
             // Populate status select options
             const statusSelect = document.getElementById('tender-status');
-            statusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getTenderStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                statusSelect.appendChild(option);
-            });
+            if (statusSelect) {
+                statusSelect.innerHTML = '<option value="">Select Status</option>';
+                
+                getTenderStatuses().forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status.id;
+                    option.textContent = status.name;
+                    statusSelect.appendChild(option);
+                });
+            }
 
             state.tenders.data.forEach(tender => {
                 const row = document.createElement('tr');
                 
                 // Find driver details
-                const driver = state.drivers.data.find(d => d.id === tender.driver) || {};
+                let driver = {};
+                if (state.drivers.data) {
+                    driver = state.drivers.data.find(d => d.id === tender.driver) || {};
+                }
                 
                 // Get status names
                 const status = getStatusById(tender.status);
@@ -5382,9 +5434,11 @@
 
         function renderInvoices() {
             const tableBody = document.getElementById('invoices-table-body');
+            if (!tableBody) return;
+            
             tableBody.innerHTML = '';
 
-            if (state.invoices.data.length === 0) {
+            if (!state.invoices.data || state.invoices.data.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="6" class="text-center">No invoices found</td>';
                 tableBody.appendChild(row);
@@ -5393,14 +5447,16 @@
 
             // Populate status select options
             const invoiceStatusSelect = document.getElementById('invoice-status');
-            invoiceStatusSelect.innerHTML = '<option value="">Select Status</option>';
-            
-            getInvoiceStatuses().forEach(status => {
-                const option = document.createElement('option');
-                option.value = status.id;
-                option.textContent = status.name;
-                invoiceStatusSelect.appendChild(option);
-            });
+            if (invoiceStatusSelect) {
+                invoiceStatusSelect.innerHTML = '<option value="">Select Status</option>';
+                
+                getInvoiceStatuses().forEach(status => {
+                    const option = document.createElement('option');
+                    option.value = status.id;
+                    option.textContent = status.name;
+                    invoiceStatusSelect.appendChild(option);
+                });
+            }
 
             state.invoices.data.forEach(invoice => {
                 const row = document.createElement('tr');
@@ -5450,7 +5506,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -5470,7 +5526,7 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
@@ -5493,7 +5549,7 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
                         data: [45, 30, 15, 10],
@@ -5507,24 +5563,26 @@
 
             // Top drivers
             const topDrivers = document.getElementById('top-drivers');
-            topDrivers.innerHTML = '';
-            
-            const sortedDrivers = [...state.drivers.data]
-                .sort(() => Math.random() - 0.5) // Random sorting for demo
-                .slice(0, 5);
-            
-            sortedDrivers.forEach((driver, index) => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.innerHTML = `
-                    <div>
-                        <strong>#${index + 1} ${driver.name} ${driver.lastname}</strong><br>
-                        <small>$${Math.floor(Math.random() * 10000) + 5000} revenue</small>
-                    </div>
-                    <span class="badge bg-primary rounded-pill">${Math.floor(Math.random() * 20) + 10} trips</span>
-                `;
-                topDrivers.appendChild(li);
-            });
+            if (topDrivers) {
+                topDrivers.innerHTML = '';
+                
+                const sortedDrivers = [...(state.drivers.data || [])]
+                    .sort(() => Math.random() - 0.5) // Random sorting for demo
+                    .slice(0, 5);
+                
+                sortedDrivers.forEach((driver, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `
+                        <div>
+                            <strong>#${index + 1} ${driver.name} ${driver.lastname}</strong><br>
+                            <small>$${Math.floor(Math.random() * 10000) + 5000} revenue</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">${Math.floor(Math.random() * 20) + 10} trips</span>
+                    `;
+                    topDrivers.appendChild(li);
+                });
+            }
         }
 
         function renderStatuses(filterType = 'all') {
@@ -5622,7 +5680,7 @@
             tableBody.innerHTML = '';
 
             // Get car types from the merged structure
-            const carTypes = state.cars.data.carTypes || [];
+            const carTypes = state.cars.data && state.cars.data.carTypes ? state.cars.data.carTypes : [];
             
             if (carTypes.length === 0) {
                 const row = document.createElement('tr');

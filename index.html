@@ -1989,11 +1989,11 @@
             notifications: [],
             unreadNotifications: 0,
             // Data stores with SHA
-            drivers: {  [], sha: null },
-            cars: {  {  [], carTypes: [] }, sha: null },
+            drivers: { data: [], sha: null },
+            cars: {  { data: [], carTypes: [] }, sha: null },
             cards: {  [], sha: null },
-            tenders: { data: [], sha: null },
-            invoices: { data: [], sha: null },
+            tenders: {  [], sha: null },
+            invoices: {  [], sha: null },
             users: {  [], sha: null },
             statuses: {  [], sha: null },
             chat: {  [], sha: null }
@@ -3128,7 +3128,7 @@
                     // Special handling for cars.json to ensure it has the correct structure
                     if (path === FILE_PATHS.CARS) {
                         return {
-                            data: {
+                             {
                                  parsedData.data || [],
                                 carTypes: parsedData.carTypes || []
                             },
@@ -3137,14 +3137,14 @@
                     }
                     
                     return {
-                        data: parsedData,
+                         parsedData,
                         sha: data.sha
                     };
                 }
                 // Return empty structure based on file path
                 if (path === FILE_PATHS.CARS) {
                     return { 
-                        data: { 
+                         { 
                              [], 
                             carTypes: [] 
                         }, 
@@ -3247,7 +3247,7 @@
                 // Update driver statuses based on tenders
                 updateAllDriverStatuses();
             } catch (error) {
-                addNotification('Failed to load data: ' + error.message, 'error');
+                addNotification('Failed to load  ' + error.message, 'error');
                 console.error('Load data error:', error);
             }
         }
@@ -3922,7 +3922,7 @@
             }
 
             try {
-                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS) || { 
+                const {  carsData, sha } = await readFile(FILE_PATHS.CARS) || { 
                      { 
                          [], 
                         carTypes: [] 
@@ -3985,7 +3985,7 @@
                 state.cars = { 
                      {
                         ...carsData,
-                        data: updatedCars
+                         updatedCars
                     }, 
                     sha: result.content.sha 
                 };
@@ -4129,7 +4129,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedCards;
@@ -4284,7 +4284,7 @@
 
                 // Update local state with new SHA
                 state.tenders = { 
-                     updatedTenders, 
+                    data: updatedTenders, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -4405,7 +4405,7 @@
             }
 
             try {
-                const {  users, sha } = await readFile(FILE_PATHS.USERS) || {  [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
                 const now = new Date().toISOString();
 
                 let updatedUsers;
@@ -4642,7 +4642,7 @@
                     'Delete car',
                     utf8ToBase64(JSON.stringify({
                         ...carsData,
-                        data: updatedCars
+                         updatedCars
                     }, null, 2)),
                     sha
                 );
@@ -4711,7 +4711,7 @@
             }
 
             try {
-                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || { data: [], sha: null };
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS) || {  [], sha: null };
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -4769,7 +4769,7 @@
             }
 
             try {
-                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || { data: [], sha: null };
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES) || {  [], sha: null };
                 const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
@@ -4798,7 +4798,7 @@
             }
 
             try {
-                const {  users, sha } = await readFile(FILE_PATHS.USERS) || { data: [], sha: null };
+                const {  users, sha } = await readFile(FILE_PATHS.USERS) || {  [], sha: null };
                 const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
@@ -5525,7 +5525,7 @@
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -5545,11 +5545,11 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                 {
+                data: {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
-                         [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
+                        data: [75, 80, 70, 85, 90, 88, 92, 95, 87, 83, 80, 93],
                         backgroundColor: '#3498db'
                     }]
                 },
@@ -6395,7 +6395,7 @@
                 
                 // Update local state with new SHA
                 state.chat = { 
-                     updatedChat, 
+                    data: updatedChat, 
                     sha: result.content.sha 
                 };
                 renderChatMessages();

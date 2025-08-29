@@ -1989,14 +1989,14 @@
             notifications: [],
             unreadNotifications: 0,
             // Data stores with SHA
-            drivers: { data: [], sha: null },
-            cars: { data: { data: [], carTypes: [] }, sha: null },
-            cards: { data: [], sha: null },
-            tenders: { data: [], sha: null },
+            drivers: {  [], sha: null },
+            cars: {  { cars: [], carTypes: [] }, sha: null },
+            cards: {  [], sha: null },
+            tenders: {  [], sha: null },
             invoices: { data: [], sha: null },
-            users: { data: [], sha: null },
-            statuses: { data: [], sha: null },
-            chat: { data: [], sha: null }
+            users: {  [], sha: null },
+            statuses: {  [], sha: null },
+            chat: {  [], sha: null }
         };
 
         // GitHub file paths
@@ -2952,7 +2952,7 @@
 
                 // Initialize cars file (with car types)
                 const carsData = {
-                    data: [],
+                    cars: [],
                     carTypes: [
                         { 
                             id: generateId(), 
@@ -3108,14 +3108,14 @@
                         // Return empty structure based on file path
                         if (path === FILE_PATHS.CARS) {
                             return { 
-                                data: { 
-                                    data: [], 
+                                 { 
+                                    cars: [], 
                                     carTypes: [] 
                                 }, 
                                 sha: null 
                             };
                         }
-                        return { data: [], sha: null };
+                        return {  [], sha: null };
                     }
                     throw new Error(`HTTP ${response.status}`);
                 }
@@ -3128,8 +3128,8 @@
                     // Special handling for cars.json to ensure it has the correct structure
                     if (path === FILE_PATHS.CARS) {
                         return {
-                            data: {
-                                data: parsedData.data || [],
+                             {
+                                cars: parsedData.cars || [],
                                 carTypes: parsedData.carTypes || []
                             },
                             sha: data.sha
@@ -3144,27 +3144,27 @@
                 // Return empty structure based on file path
                 if (path === FILE_PATHS.CARS) {
                     return { 
-                        data: { 
-                            data: [], 
+                         { 
+                            cars: [], 
                             carTypes: [] 
                         }, 
                         sha: null 
                     };
                 }
-                return { data: [], sha: null };
+                return {  [], sha: null };
             } catch (error) {
                 if (error.message.includes('404')) {
                     // Return empty structure based on file path
                     if (path === FILE_PATHS.CARS) {
                         return { 
-                            data: { 
-                                data: [], 
+                             { 
+                                cars: [], 
                                 carTypes: [] 
                             }, 
                             sha: null 
                         };
                     }
-                    return { data: [], sha: null };
+                    return {  [], sha: null };
                 }
                 throw error;
             }
@@ -3187,14 +3187,14 @@
                 // Load all data with SHA
                 const driversData = await readFile(FILE_PATHS.DRIVERS);
                 state.drivers = { 
-                    data: driversData.data || [], 
+                     driversData.data || [], 
                     sha: driversData.sha 
                 };
                 
                 const carsData = await readFile(FILE_PATHS.CARS);
                 state.cars = { 
-                    data: carsData.data || { 
-                        data: [], 
+                     carsData.data || { 
+                        cars: [], 
                         carTypes: [] 
                     }, 
                     sha: carsData.sha 
@@ -3202,31 +3202,31 @@
                 
                 const cardsData = await readFile(FILE_PATHS.CARDS);
                 state.cards = { 
-                    data: cardsData.data || [], 
+                     cardsData.data || [], 
                     sha: cardsData.sha 
                 };
                 
                 const tendersData = await readFile(FILE_PATHS.TENDERS);
                 state.tenders = { 
-                    data: tendersData.data || [], 
+                     tendersData.data || [], 
                     sha: tendersData.sha 
                 };
                 
                 const invoicesData = await readFile(FILE_PATHS.INVOICES);
                 state.invoices = { 
-                    data: invoicesData.data || [], 
+                     invoicesData.data || [], 
                     sha: invoicesData.sha 
                 };
                 
                 const usersData = await readFile(FILE_PATHS.USERS);
                 state.users = { 
-                    data: usersData.data || [], 
+                     usersData.data || [], 
                     sha: usersData.sha 
                 };
                 
                 const statusesData = await readFile(FILE_PATHS.STATUSES);
                 state.statuses = { 
-                    data: statusesData.data || [], 
+                     statusesData.data || [], 
                     sha: statusesData.sha 
                 };
                 
@@ -3247,7 +3247,7 @@
                 // Update driver statuses based on tenders
                 updateAllDriverStatuses();
             } catch (error) {
-                addNotification('Failed to load data: ' + error.message, 'error');
+                addNotification('Failed to load  ' + error.message, 'error');
                 console.error('Load data error:', error);
             }
         }
@@ -3283,7 +3283,7 @@
                             
                             // Special check for cars.json
                             if (filePath === FILE_PATHS.CARS) {
-                                if (!content.data || !content.carTypes) {
+                                if (!content.cars || !content.carTypes) {
                                     // File exists but has incorrect structure
                                     await initializeFile(filePath);
                                 }
@@ -3336,7 +3336,7 @@
                     initialData = [];
                 } else if (filePath === FILE_PATHS.CARS) {
                     initialData = {
-                        data: [],
+                        cars: [],
                         carTypes: [
                             { 
                                 id: generateId(), 
@@ -3840,7 +3840,7 @@
             }
 
             try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS);
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS);
                 const now = new Date().toISOString();
 
                 let updatedDrivers;
@@ -3890,7 +3890,7 @@
 
                 // Update local state with new SHA
                 state.drivers = { 
-                    data: updatedDrivers, 
+                     updatedDrivers, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -3922,7 +3922,7 @@
             }
 
             try {
-                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS);
+                const {  carsData, sha } = await readFile(FILE_PATHS.CARS);
                 const now = new Date().toISOString();
 
                 let updatedCars;
@@ -3941,11 +3941,11 @@
                         createdAt: now,
                         updatedAt: now
                     };
-                    updatedCars = [...carsData.data, newCar];
+                    updatedCars = [...carsData.cars, newCar];
                 } else {
                     // Update existing car
                     const carId = document.getElementById('car-modal').getAttribute('data-id');
-                    updatedCars = carsData.data.map(car => {
+                    updatedCars = carsData.cars.map(car => {
                         if (car.id === carId) {
                             return {
                                 ...car,
@@ -3970,7 +3970,7 @@
                     modalTitle === 'Add Car' ? 'Add car' : 'Update car',
                     utf8ToBase64(JSON.stringify({
                         ...carsData,
-                        data: updatedCars
+                        cars: updatedCars
                     }, null, 2)),
                     sha
                 );
@@ -3979,7 +3979,7 @@
                 state.cars = { 
                     data: {
                         ...carsData,
-                        data: updatedCars
+                        cars: updatedCars
                     }, 
                     sha: result.content.sha 
                 };
@@ -4018,7 +4018,7 @@
             }
 
             try {
-                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS);
+                const {  carsData, sha } = await readFile(FILE_PATHS.CARS);
                 const now = new Date().toISOString();
 
                 let updatedCarTypes;
@@ -4087,7 +4087,7 @@
 
                 // Update local state with new SHA
                 state.cars = { 
-                    data: {
+                     {
                         ...carsData,
                         carTypes: updatedCarTypes
                     }, 
@@ -4117,7 +4117,7 @@
             }
 
             try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS);
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS);
                 const now = new Date().toISOString();
 
                 let updatedCards;
@@ -4165,7 +4165,7 @@
 
                 // Update local state with new SHA
                 state.cards = { 
-                    data: updatedCards, 
+                     updatedCards, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -4198,7 +4198,7 @@
             }
 
             try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS);
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS);
                 const now = new Date().toISOString();
 
                 let updatedTenders;
@@ -4272,7 +4272,7 @@
 
                 // Update local state with new SHA
                 state.tenders = { 
-                    data: updatedTenders, 
+                     updatedTenders, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -4305,7 +4305,7 @@
             }
 
             try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES);
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES);
                 const now = new Date().toISOString();
                 const dueDate = new Date(date);
                 dueDate.setDate(dueDate.getDate() + parseInt(dueDays));
@@ -4359,7 +4359,7 @@
 
                 // Update local state with new SHA
                 state.invoices = { 
-                    data: updatedInvoices, 
+                     updatedInvoices, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -4393,7 +4393,7 @@
             }
 
             try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS);
+                const {  users, sha } = await readFile(FILE_PATHS.USERS);
                 const now = new Date().toISOString();
 
                 let updatedUsers;
@@ -4447,7 +4447,7 @@
 
                 // Update local state with new SHA
                 state.users = { 
-                    data: updatedUsers, 
+                     updatedUsers, 
                     sha: result.content.sha 
                 };
                 closeModal();
@@ -4473,7 +4473,7 @@
             }
 
             try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES);
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES);
                 const now = new Date().toISOString();
 
                 let updatedStatuses;
@@ -4519,7 +4519,7 @@
 
                 // Update local state with new SHA
                 state.statuses = { 
-                    data: updatedStatuses, 
+                     updatedStatuses, 
                     sha: result.content.sha 
                 };
                 
@@ -4587,7 +4587,7 @@
             }
 
             try {
-                const { data: drivers, sha } = await readFile(FILE_PATHS.DRIVERS);
+                const {  drivers, sha } = await readFile(FILE_PATHS.DRIVERS);
                 const updatedDrivers = drivers.filter(driver => driver.id !== id);
 
                 const result = await updateFile(
@@ -4599,7 +4599,7 @@
 
                 // Update local state with new SHA
                 state.drivers = { 
-                    data: updatedDrivers, 
+                     updatedDrivers, 
                     sha: result.content.sha 
                 };
                 renderDrivers();
@@ -4616,24 +4616,24 @@
             }
 
             try {
-                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS);
-                const updatedCars = carsData.data.filter(car => car.id !== id);
+                const {  carsData, sha } = await readFile(FILE_PATHS.CARS);
+                const updatedCars = carsData.cars.filter(car => car.id !== id);
 
                 const result = await updateFile(
                     FILE_PATHS.CARS,
                     'Delete car',
                     utf8ToBase64(JSON.stringify({
                         ...carsData,
-                        data: updatedCars
+                        cars: updatedCars
                     }, null, 2)),
                     sha
                 );
 
                 // Update local state with new SHA
                 state.cars = { 
-                    data: {
+                     {
                         ...carsData,
-                        data: updatedCars
+                        cars: updatedCars
                     }, 
                     sha: result.content.sha 
                 };
@@ -4651,7 +4651,7 @@
             }
 
             try {
-                const { data: carsData, sha } = await readFile(FILE_PATHS.CARS);
+                const {  carsData, sha } = await readFile(FILE_PATHS.CARS);
                 
                 const updatedCarTypes = carsData.carTypes.filter(carType => carType.id !== id);
 
@@ -4667,7 +4667,7 @@
 
                 // Update local state with new SHA
                 state.cars = { 
-                    data: {
+                     {
                         ...carsData,
                         carTypes: updatedCarTypes
                     }, 
@@ -4687,7 +4687,7 @@
             }
 
             try {
-                const { data: cards, sha } = await readFile(FILE_PATHS.CARDS);
+                const {  cards, sha } = await readFile(FILE_PATHS.CARDS);
                 const updatedCards = cards.filter(card => card.id !== id);
 
                 const result = await updateFile(
@@ -4699,7 +4699,7 @@
 
                 // Update local state with new SHA
                 state.cards = { 
-                    data: updatedCards, 
+                     updatedCards, 
                     sha: result.content.sha 
                 };
                 renderCards();
@@ -4716,7 +4716,7 @@
             }
 
             try {
-                const { data: tenders, sha } = await readFile(FILE_PATHS.TENDERS);
+                const {  tenders, sha } = await readFile(FILE_PATHS.TENDERS);
                 const updatedTenders = tenders.filter(tender => tender.id !== id);
 
                 const result = await updateFile(
@@ -4728,7 +4728,7 @@
 
                 // Update local state with new SHA
                 state.tenders = { 
-                    data: updatedTenders, 
+                     updatedTenders, 
                     sha: result.content.sha 
                 };
                 renderTenders();
@@ -4745,7 +4745,7 @@
             }
 
             try {
-                const { data: invoices, sha } = await readFile(FILE_PATHS.INVOICES);
+                const {  invoices, sha } = await readFile(FILE_PATHS.INVOICES);
                 const updatedInvoices = invoices.filter(invoice => invoice.id !== id);
 
                 const result = await updateFile(
@@ -4757,7 +4757,7 @@
 
                 // Update local state with new SHA
                 state.invoices = { 
-                    data: updatedInvoices, 
+                     updatedInvoices, 
                     sha: result.content.sha 
                 };
                 renderInvoices();
@@ -4774,7 +4774,7 @@
             }
 
             try {
-                const { data: users, sha } = await readFile(FILE_PATHS.USERS);
+                const {  users, sha } = await readFile(FILE_PATHS.USERS);
                 const updatedUsers = users.filter(user => user.id !== id);
 
                 const result = await updateFile(
@@ -4786,7 +4786,7 @@
 
                 // Update local state with new SHA
                 state.users = { 
-                    data: updatedUsers, 
+                     updatedUsers, 
                     sha: result.content.sha 
                 };
                 renderAdmin();
@@ -4803,7 +4803,7 @@
             }
 
             try {
-                const { data: statuses, sha } = await readFile(FILE_PATHS.STATUSES);
+                const {  statuses, sha } = await readFile(FILE_PATHS.STATUSES);
                 const updatedStatuses = statuses.filter(status => status.id !== id);
 
                 const result = await updateFile(
@@ -4815,7 +4815,7 @@
 
                 // Update local state with new SHA
                 state.statuses = { 
-                    data: updatedStatuses, 
+                     updatedStatuses, 
                     sha: result.content.sha 
                 };
                 renderStatuses();
@@ -4884,8 +4884,8 @@
             let hasExpirations = false;
 
             // Check car insurance
-            if (state.cars.data && state.cars.data.data) {
-                state.cars.data.data.forEach(car => {
+            if (state.cars.data && state.cars.data.cars) {
+                state.cars.data.cars.forEach(car => {
                     const insuranceDate = new Date(car.insurance);
                     const notifyDays = car.insuranceNotify || 30;
                     const diffTime = insuranceDate - now;
@@ -4914,8 +4914,8 @@
             }
 
             // Check car inspection
-            if (state.cars.data && state.cars.data.data) {
-                state.cars.data.data.forEach(car => {
+            if (state.cars.data && state.cars.data.cars) {
+                state.cars.data.cars.forEach(car => {
                     const inspectionDate = new Date(car.inspection);
                     const notifyDays = car.inspectionNotify || 30;
                     const diffTime = inspectionDate - now;
@@ -5079,8 +5079,8 @@
             
             if (carSelect) {
                 carSelect.innerHTML = '<option value="">Select Car</option>';
-                if (state.cars.data && state.cars.data.data) {
-                    state.cars.data.data.forEach(car => {
+                if (state.cars.data && state.cars.data.cars) {
+                    state.cars.data.cars.forEach(car => {
                         const option = document.createElement('option');
                         option.value = car.id;
                         option.textContent = `${car.tractor} / ${car.trailer}`;
@@ -5108,8 +5108,8 @@
                 let car = {};
                 let card = {};
                 
-                if (state.cars.data && state.cars.data.data) {
-                    car = state.cars.data.data.find(c => c.id === driver.car) || {};
+                if (state.cars.data && state.cars.data.cars) {
+                    car = state.cars.data.cars.find(c => c.id === driver.car) || {};
                 }
                 
                 if (state.cards.data) {
@@ -5155,7 +5155,7 @@
             
             tableBody.innerHTML = '';
 
-            if (!state.cars.data || !state.cars.data.data || state.cars.data.data.length === 0) {
+            if (!state.cars.data || !state.cars.data.cars || state.cars.data.cars.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = '<td colspan="9" class="text-center">No cars found</td>';
                 tableBody.appendChild(row);
@@ -5190,7 +5190,7 @@
                 });
             }
 
-            state.cars.data.data.forEach(car => {
+            state.cars.data.cars.forEach(car => {
                 const row = document.createElement('tr');
                 
                 const insuranceDate = new Date(car.insurance);
@@ -5497,11 +5497,11 @@
             const revenueCtx = document.getElementById('revenue-chart').getContext('2d');
             new Chart(revenueCtx, {
                 type: 'line',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: 'Revenue',
-                        data: [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
+                         [12000, 19000, 15000, 20000, 25000, 30000, 35000, 40000, 38000, 36000, 32000, 45000],
                         borderColor: '#e74c3c',
                         backgroundColor: 'rgba(231, 76, 60, 0.1)',
                         tension: 0.3
@@ -5521,7 +5521,7 @@
             const loadingCtx = document.getElementById('loading-chart').getContext('2d');
             new Chart(loadingCtx, {
                 type: 'bar',
-                data: {
+                 {
                     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
                     datasets: [{
                         label: '% Loading',
@@ -5544,7 +5544,7 @@
             const breakdownCtx = document.getElementById('revenue-breakdown-chart').getContext('2d');
             new Chart(breakdownCtx, {
                 type: 'pie',
-                data: {
+                 {
                     labels: ['Domestic', 'International', 'Express', 'Special'],
                     datasets: [{
                         data: [45, 30, 15, 10],
@@ -5896,7 +5896,7 @@
                     document.getElementById('driver-on-vacation').value = driver.onVacation || 'false';
                     document.getElementById('driver-work-hours').value = driver.workHours || '8:00-17:00';
                 } else if (type === 'car') {
-                    const car = state.cars.data.data.find(c => c.id === id);
+                    const car = state.cars.data.cars.find(c => c.id === id);
                     if (!car) return;
                     
                     document.getElementById('car-tractor').value = car.tractor;
@@ -6350,7 +6350,7 @@
             if (!message) return;
             
             try {
-                const { data: chat, sha } = await readFile(FILE_PATHS.CHAT);
+                const {  chat, sha } = await readFile(FILE_PATHS.CHAT);
                 const now = new Date().toISOString();
                 
                 const newMessage = {
@@ -6371,7 +6371,7 @@
                 
                 // Update local state with new SHA
                 state.chat = { 
-                    data: updatedChat, 
+                     updatedChat, 
                     sha: result.content.sha 
                 };
                 renderChatMessages();
